@@ -95,23 +95,25 @@ const TreeNode = ({ member, depth = 0 }: { member: FamilyMember; depth?: number 
         transition={{ delay: depth * 0.1 }}
         className="relative group"
       >
-        {/* Node card */}
         <div
-          className="relative px-5 py-4 rounded-2xl bg-background border-2 border-border hover:border-primary/40 transition-all cursor-pointer shadow-soft min-w-[180px] text-center"
+          className="relative px-5 py-4 rounded-2xl bg-background border-2 border-border hover:border-saffron/40 transition-all cursor-pointer shadow-soft min-w-[180px] text-center"
           onClick={() => hasChildren && setExpanded(!expanded)}
         >
-          <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-primary/10 flex items-center justify-center">
-            <User className="w-5 h-5 text-primary" />
+          {/* Saffron top accent line */}
+          <div className="absolute top-0 left-4 right-4 h-0.5 rounded-full bg-gradient-saffron opacity-40" />
+
+          <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-saffron/10 flex items-center justify-center">
+            <User className="w-5 h-5 text-saffron" />
           </div>
           <h4 className="font-display text-sm font-semibold text-foreground">
             {t(member.name, member.nameHi)}
           </h4>
           {member.spouse && (
-            <p className="font-body text-xs text-gold mt-0.5">
+            <p className="font-body text-xs text-gold-dark mt-0.5">
               & {t(member.spouse.name, member.spouse.nameHi)}
             </p>
           )}
-          <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium font-body">
+          <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-saffron/10 text-saffron-deep text-[10px] font-medium font-body">
             {t(member.relation, member.relationHi)}
           </span>
           <p className="font-body text-[10px] text-muted-foreground mt-1">{member.id}</p>
@@ -126,14 +128,13 @@ const TreeNode = ({ member, depth = 0 }: { member: FamilyMember; depth?: number 
         </div>
       </motion.div>
 
-      {/* Children */}
       {hasChildren && expanded && (
         <div className="flex flex-col items-center mt-2">
-          <div className="w-px h-6 bg-border" />
+          <div className="w-px h-6 bg-saffron/20" />
           <div className="flex gap-4">
-            {member.children!.map((child, i) => (
+            {member.children!.map((child) => (
               <div key={child.id} className="flex flex-col items-center">
-                <div className="w-px h-4 bg-border" />
+                <div className="w-px h-4 bg-saffron/20" />
                 <TreeNode member={child} depth={depth + 1} />
               </div>
             ))}
@@ -153,24 +154,23 @@ const FamilyTree = () => {
       <div className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
+            <span className="text-saffron/40 text-2xl block mb-2">🕉</span>
             <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-3">
               {t('Family Tree', 'वंशवृक्ष')}
             </h1>
             <p className="font-body text-muted-foreground text-lg">
-              {t('Sharma Family — Demo Tree', 'शर्मा परिवार — डेमो वंशवृक्ष')}
+              {t('Sharma Family — Demo Kulvriksha', 'शर्मा परिवार — डेमो कुलवृक्ष')}
             </p>
           </div>
 
-          {/* Tree visualization */}
           <div className="overflow-x-auto pb-8">
             <div className="flex justify-center min-w-[700px]">
               <TreeNode member={sampleTree} />
             </div>
           </div>
 
-          {/* Add member button */}
           <div className="flex justify-center mt-8">
-            <button className="flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-dashed border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors font-body">
+            <button className="flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-dashed border-saffron/20 text-muted-foreground hover:border-saffron hover:text-saffron transition-colors font-body">
               <Plus className="w-5 h-5" />
               {t('Add Family Member', 'परिवार का सदस्य जोड़ें')}
             </button>
