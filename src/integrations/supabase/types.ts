@@ -14,16 +14,358 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      family_members: {
+        Row: {
+          added_by: string | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          date_of_birth: string | null
+          date_of_death: string | null
+          full_name: string
+          full_name_hi: string | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          generation_level: number | null
+          gotra: string | null
+          id: string
+          is_alive: boolean | null
+          phone: string | null
+          tree_id: string
+          updated_at: string
+          user_id: string | null
+          vanshmala_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          date_of_death?: string | null
+          full_name: string
+          full_name_hi?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          generation_level?: number | null
+          gotra?: string | null
+          id?: string
+          is_alive?: boolean | null
+          phone?: string | null
+          tree_id: string
+          updated_at?: string
+          user_id?: string | null
+          vanshmala_id?: string
+        }
+        Update: {
+          added_by?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          date_of_death?: string | null
+          full_name?: string
+          full_name_hi?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          generation_level?: number | null
+          gotra?: string | null
+          id?: string
+          is_alive?: boolean | null
+          phone?: string | null
+          tree_id?: string
+          updated_at?: string
+          user_id?: string | null
+          vanshmala_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_members_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      family_relationships: {
+        Row: {
+          created_at: string
+          from_member_id: string
+          id: string
+          relationship: Database["public"]["Enums"]["relationship_type"]
+          to_member_id: string
+          tree_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_member_id: string
+          id?: string
+          relationship: Database["public"]["Enums"]["relationship_type"]
+          to_member_id: string
+          tree_id: string
+        }
+        Update: {
+          created_at?: string
+          from_member_id?: string
+          id?: string
+          relationship?: Database["public"]["Enums"]["relationship_type"]
+          to_member_id?: string
+          tree_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_relationships_from_member_id_fkey"
+            columns: ["from_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_relationships_to_member_id_fkey"
+            columns: ["to_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_relationships_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      family_trees: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          family_id: string
+          family_name: string
+          family_name_hi: string | null
+          gotra: string | null
+          id: string
+          kuldevi: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          family_id?: string
+          family_name: string
+          family_name_hi?: string | null
+          gotra?: string | null
+          id?: string
+          kuldevi?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          family_id?: string
+          family_name?: string
+          family_name_hi?: string | null
+          gotra?: string | null
+          id?: string
+          kuldevi?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      merge_requests: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          requested_by: string | null
+          resolved_at: string | null
+          source_member_id: string
+          status: Database["public"]["Enums"]["merge_status"] | null
+          target_member_id: string
+          tree_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          requested_by?: string | null
+          resolved_at?: string | null
+          source_member_id: string
+          status?: Database["public"]["Enums"]["merge_status"] | null
+          target_member_id: string
+          tree_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          requested_by?: string | null
+          resolved_at?: string | null
+          source_member_id?: string
+          status?: Database["public"]["Enums"]["merge_status"] | null
+          target_member_id?: string
+          tree_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merge_requests_source_member_id_fkey"
+            columns: ["source_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merge_requests_target_member_id_fkey"
+            columns: ["target_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "merge_requests_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          date_of_birth: string | null
+          full_name: string
+          full_name_hi: string | null
+          gender: Database["public"]["Enums"]["gender_type"] | null
+          gotra: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+          vanshmala_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          full_name: string
+          full_name_hi?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          gotra?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+          vanshmala_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          full_name?: string
+          full_name_hi?: string | null
+          gender?: Database["public"]["Enums"]["gender_type"] | null
+          gotra?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+          vanshmala_id?: string
+        }
+        Relationships: []
+      }
+      tree_memberships: {
+        Row: {
+          id: string
+          joined_at: string
+          member_id: string | null
+          role: string | null
+          tree_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          member_id?: string | null
+          role?: string | null
+          tree_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          member_id?: string | null
+          role?: string | null
+          tree_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_memberships_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_memberships_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_vanshmala_id: { Args: never; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_tree_admin: {
+        Args: { _tree_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_tree_member: {
+        Args: { _tree_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      gender_type: "male" | "female" | "other"
+      merge_status: "pending" | "approved" | "rejected"
+      relationship_type: "parent" | "child" | "spouse" | "sibling"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +492,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      gender_type: ["male", "female", "other"],
+      merge_status: ["pending", "approved", "rejected"],
+      relationship_type: ["parent", "child", "spouse", "sibling"],
+    },
   },
 } as const
