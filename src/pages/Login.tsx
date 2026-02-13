@@ -2,45 +2,44 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, LogIn } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-const Register = () => {
+const Login = () => {
   const { t } = useLanguage();
-  const { signUp, user } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
-  const [fullName, setFullName] = useState('');
-  const [gotra, setGotra] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Redirect if already logged in
   if (user) {
     navigate('/dashboard', { replace: true });
     return null;
   }
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !email || !password) {
-      toast.error(t('Please fill all required fields', 'कृपया सभी आवश्यक फ़ील्ड भरें'));
+    if (!email || !password) {
+      toast.error(t('Please fill all fields', 'कृपया सभी फ़ील्ड भरें'));
       return;
     }
-    if (password.length < 6) {
-      toast.error(t('Password must be at least 6 characters', 'पासवर्ड कम से कम 6 अक्षर का होना चाहिए'));
-      return;
-    }
-
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, gotra);
+    const { error } = await signIn(email, password);
     setLoading(false);
 
     if (error) {
-      toast.error(error.message || t('Registration failed', 'पंजीकरण विफल'));
+      if (error.message?.includes('Email not confirmed')) {
+        toast.error(t('Please verify your email first. Check your inbox.', 'कृपया पहले अपना ईमेल सत्यापित करें। अपना इनबॉक्स जांचें।'));
+      } else {
+        toast.error(error.message || t('Login failed', 'लॉगिन विफल'));
+      }
     } else {
-      navigate('/verify-email');
+      toast.success(t('Welcome back!', 'वापसी पर स्वागत!'));
+      navigate('/dashboard');
     }
   };
 
@@ -56,48 +55,23 @@ const Register = () => {
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md mx-4"
         >
-          <form onSubmit={handleRegister} className="p-8 rounded-2xl bg-card border border-border shadow-elevated relative overflow-hidden">
+          <form onSubmit={handleLogin} className="p-8 rounded-2xl bg-card border border-border shadow-elevated relative overflow-hidden">
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-saffron" />
 
             <div className="text-center mb-8">
               <span className="text-saffron/40 text-2xl block mb-3">ॐ</span>
               <h1 className="font-display text-2xl font-bold text-foreground mb-1">
-                {t('Join Vanshmala', 'वंशमाला से जुड़ें')}
+                {t('Welcome Back', 'पुनः स्वागत है')}
               </h1>
               <p className="font-body text-sm text-muted-foreground">
-                {t("Begin your family's digital parampara", 'अपने परिवार की डिजिटल परंपरा शुरू करें')}
+                {t('Sign in to your Vanshmala account', 'अपने वंशमाला खाते में साइन इन करें')}
               </p>
             </div>
 
             <div className="space-y-4">
               <div>
                 <label className="block font-body text-sm font-medium text-foreground mb-1.5">
-                  {t('Full Name', 'पूरा नाम')} *
-                </label>
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder={t('Enter your full name', 'अपना पूरा नाम दर्ज करें')}
-                  className="w-full px-4 py-3 rounded-xl border border-input bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-saffron/40 focus:border-saffron/40"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block font-body text-sm font-medium text-foreground mb-1.5">
-                  {t('Gotra (Optional)', 'गोत्र (वैकल्पिक)')}
-                </label>
-                <input
-                  type="text"
-                  value={gotra}
-                  onChange={(e) => setGotra(e.target.value)}
-                  placeholder={t('Your family gotra', 'आपका पारिवारिक गोत्र')}
-                  className="w-full px-4 py-3 rounded-xl border border-input bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-saffron/40 focus:border-saffron/40"
-                />
-              </div>
-              <div>
-                <label className="block font-body text-sm font-medium text-foreground mb-1.5">
-                  {t('Email', 'ईमेल')} *
+                  {t('Email', 'ईमेल')}
                 </label>
                 <input
                   type="email"
@@ -110,7 +84,7 @@ const Register = () => {
               </div>
               <div>
                 <label className="block font-body text-sm font-medium text-foreground mb-1.5">
-                  {t('Password', 'पासवर्ड')} *
+                  {t('Password', 'पासवर्ड')}
                 </label>
                 <input
                   type="password"
@@ -119,7 +93,6 @@ const Register = () => {
                   placeholder="••••••••"
                   className="w-full px-4 py-3 rounded-xl border border-input bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-saffron/40 focus:border-saffron/40"
                   required
-                  minLength={6}
                 />
               </div>
 
@@ -129,20 +102,20 @@ const Register = () => {
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-saffron text-primary-foreground font-medium font-body hover:opacity-90 transition-opacity shadow-saffron disabled:opacity-50"
               >
                 {loading ? (
-                  <span className="animate-pulse">{t('Creating Account...', 'खाता बन रहा है...')}</span>
+                  <span className="animate-pulse">{t('Signing in...', 'साइन इन हो रहा है...')}</span>
                 ) : (
                   <>
-                    {t('Create Account', 'खाता बनाएं')}
-                    <ArrowRight className="w-4 h-4" />
+                    <LogIn className="w-4 h-4" />
+                    {t('Sign In', 'साइन इन')}
                   </>
                 )}
               </button>
             </div>
 
             <p className="text-center mt-6 font-body text-sm text-muted-foreground">
-              {t('Already have an account?', 'पहले से खाता है?')}{' '}
-              <Link to="/login" className="text-saffron hover:underline font-medium">
-                {t('Sign In', 'साइन इन')}
+              {t("Don't have an account?", 'खाता नहीं है?')}{' '}
+              <Link to="/register" className="text-saffron hover:underline font-medium">
+                {t('Sign Up', 'पंजीकरण करें')}
               </Link>
             </p>
           </form>
@@ -152,4 +125,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;
