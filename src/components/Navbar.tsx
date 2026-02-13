@@ -1,6 +1,8 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import LanguageToggle from './LanguageToggle';
 import { Link } from 'react-router-dom';
+import { User } from 'lucide-react';
 
 const OmIcon = () => (
   <svg viewBox="0 0 100 100" className="w-6 h-6" fill="currentColor">
@@ -10,6 +12,7 @@ const OmIcon = () => (
 
 const Navbar = () => {
   const { t } = useLanguage();
+  const { user, profile } = useAuth();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -27,22 +30,31 @@ const Navbar = () => {
           <Link to="/" className="hover:text-accent transition-colors">
             {t('Home', 'होम')}
           </Link>
-          <Link to="/tree" className="hover:text-accent transition-colors">
-            {t('Family Tree', 'वंशवृक्ष')}
-          </Link>
-          <Link to="/register" className="hover:text-accent transition-colors">
-            {t('Register', 'पंजीकरण')}
-          </Link>
+          {user && (
+            <Link to="/dashboard" className="hover:text-accent transition-colors">
+              {t('Dashboard', 'डैशबोर्ड')}
+            </Link>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
           <LanguageToggle />
-          <Link
-            to="/register"
-            className="hidden sm:inline-flex px-4 py-2 rounded-lg bg-gradient-saffron text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity shadow-saffron"
-          >
-            {t('Get Started', 'शुरू करें')}
-          </Link>
+          {user ? (
+            <Link
+              to="/dashboard"
+              className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-saffron text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity shadow-saffron"
+            >
+              <User className="w-3.5 h-3.5" />
+              {profile?.full_name?.split(' ')[0] || t('Dashboard', 'डैशबोर्ड')}
+            </Link>
+          ) : (
+            <Link
+              to="/login"
+              className="hidden sm:inline-flex px-4 py-2 rounded-lg bg-gradient-saffron text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity shadow-saffron"
+            >
+              {t('Sign In', 'साइन इन')}
+            </Link>
+          )}
         </div>
       </div>
     </nav>
