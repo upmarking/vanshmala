@@ -81,8 +81,8 @@ const FeaturesSection = () => {
           </h2>
           <p className="font-body text-lg text-muted-foreground max-w-2xl mx-auto">
             {t(
-              'A complete platform to build, manage, and preserve your family lineage — your digital kulvriksha.',
-              'अपनी वंशावली को बनाने, प्रबंधित करने और संरक्षित करने के लिए एक पूर्ण मंच — आपका डिजिटल कुलवृक्ष।'
+              'A complete platform to build, manage, and preserve your family lineage — your digital Vanshmala.',
+              'अपनी वंशावली को बनाने, प्रबंधित करने और संरक्षित करने के लिए एक पूर्ण मंच — आपकी डिजिटल वंशमाला।'
             )}
           </p>
         </motion.div>

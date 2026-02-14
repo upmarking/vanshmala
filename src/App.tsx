@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +18,7 @@ import PublicProfile from "./pages/PublicProfile";
 import ProfileSettings from "./pages/ProfileSettings";
 import { LegacyVault } from "./components/vault/LegacyVault";
 import DocumentVault from "./components/documents/DocumentVault";
+import { TagManagerWrapper } from "./components/tags/TagManagerWrapper";
 
 const queryClient = new QueryClient();
 

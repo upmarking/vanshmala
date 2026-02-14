@@ -223,7 +223,7 @@ const Dashboard = () => {
               className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-saffron text-primary-foreground font-medium font-body hover:opacity-90 transition-opacity shadow-saffron"
             >
               <Plus className="w-4 h-4" />
-              {t('Create New Kulvriksha', 'नया कुलवृक्ष बनाएं')}
+              {t('Create New Vanshmala', 'नई वंशमाला बनाएं')}
             </button>
             <button
               onClick={() => { setShowJoinTree(true); setShowCreateTree(false); }}
