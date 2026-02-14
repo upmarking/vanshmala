@@ -418,6 +418,7 @@ export type Database = {
           id: string
           mother_id: string | null
           phone: string | null
+          referral_code: string | null
           updated_at: string
           user_id: string
           vanshmala_id: string
@@ -436,6 +437,7 @@ export type Database = {
           id?: string
           mother_id?: string | null
           phone?: string | null
+          referral_code?: string | null
           updated_at?: string
           user_id: string
           vanshmala_id: string
@@ -454,6 +456,7 @@ export type Database = {
           id?: string
           mother_id?: string | null
           phone?: string | null
+          referral_code?: string | null
           updated_at?: string
           user_id?: string
           vanshmala_id?: string
@@ -474,6 +477,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referrals: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          referral_code: string
+          referred_reward_given: boolean
+          referred_user_id: string
+          referrer_id: string
+          referrer_reward_given: boolean
+          status: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_reward_given?: boolean
+          referred_user_id: string
+          referrer_id: string
+          referrer_reward_given?: boolean
+          status?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_reward_given?: boolean
+          referred_user_id?: string
+          referrer_id?: string
+          referrer_reward_given?: boolean
+          status?: string
+        }
+        Relationships: []
       }
       tags: {
         Row: {
@@ -617,11 +656,93 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string
+          description_hi: string | null
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          type: string
+          user_id: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description: string
+          description_hi?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          type: string
+          user_id: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string
+          description_hi?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          type?: string
+          user_id?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      deduct_wallet_balance: {
+        Args: {
+          p_amount: number
+          p_description: string
+          p_description_hi: string
+          p_reference_id: string
+          p_reference_type: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       generate_vanshmala_id: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -637,6 +758,19 @@ export type Database = {
       is_tree_member: {
         Args: { _tree_id: string; _user_id: string }
         Returns: boolean
+      }
+      process_referrer_reward: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      process_wallet_transfer: {
+        Args: {
+          p_amount: number
+          p_recipient_user_id: string
+          p_sender_name: string
+          p_sender_vanshmala_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

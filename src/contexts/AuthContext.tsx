@@ -14,6 +14,7 @@ interface Profile {
   phone: string | null;
   avatar_url: string | null;
   bio: string | null;
+  referral_code: string | null;
 }
 
 interface AuthContextType {
@@ -21,7 +22,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string, fullName: string, gotra?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, gotra?: string, referralCode?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -82,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName: string, gotra?: string) => {
+  const signUp = async (email: string, password: string, fullName: string, gotra?: string, referralCode?: string) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -91,6 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         data: {
           full_name: fullName,
           gotra: gotra || null,
+          referral_code: referralCode || null,
         },
       },
     });
