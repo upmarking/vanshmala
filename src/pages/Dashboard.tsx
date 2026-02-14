@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
-import { TreePine, Users, Plus, Settings, LogOut } from 'lucide-react';
+import { TreePine, Users, Plus, Settings, LogOut, Wallet } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -62,6 +62,22 @@ const Dashboard = () => {
     if (!newTreeName.trim()) return;
     setCreating(true);
 
+    // Check wallet balance — ₹101 Panjikaran fee
+    const { data: walletData } = await supabase
+      .from('wallets')
+      .select('id, balance')
+      .eq('user_id', user!.id)
+      .single();
+
+    if (!walletData || (walletData as any).balance < 101) {
+      toast.error(t(
+        'Insufficient balance. ₹101 Panjikaran Fees required. Please add money to your Dhan wallet.',
+        'अपर्याप्त शेष। ₹101 पंजीकरण राशि आवश्यक है। कृपया अपने धन वॉलेट में पैसे जोड़ें।'
+      ));
+      setCreating(false);
+      return;
+    }
+
     // Check if user already created a family
     const { count, error: countError } = await supabase
       .from('family_trees')
@@ -76,6 +92,22 @@ const Dashboard = () => {
 
     if (count && count >= 1) {
       toast.error(t('You can only create one VanshMala family.', 'आप केवल एक वंशमाला परिवार बना सकते हैं।'));
+      setCreating(false);
+      return;
+    }
+
+    // Deduct ₹101 Panjikaran fee
+    const { data: deducted } = await supabase.rpc('deduct_wallet_balance' as any, {
+      p_user_id: user!.id,
+      p_amount: 101,
+      p_description: 'Panjikaran Fees - New Family Tree',
+      p_description_hi: 'पंजीकरण राशि - नया कुलवृक्ष',
+      p_reference_type: 'panjikaran',
+      p_reference_id: newTreeName.trim(),
+    });
+
+    if (!deducted) {
+      toast.error(t('Payment failed. Please try again.', 'भुगतान विफल। कृपया पुनः प्रयास करें।'));
       setCreating(false);
       return;
     }
@@ -133,7 +165,10 @@ const Dashboard = () => {
         }
       }
 
-      toast.success(t('Family tree created!', 'कुलवृक्ष बन गया!'));
+      // Process referrer reward
+      await supabase.rpc('process_referrer_reward' as any, { p_user_id: user!.id });
+
+      toast.success(t('Family tree created! ₹101 deducted.', 'कुलवृक्ष बन गया! ₹101 काटे गए।'));
       setShowCreateTree(false);
       setNewTreeName('');
       setNewTreeGotra('');
@@ -146,6 +181,22 @@ const Dashboard = () => {
     e.preventDefault();
     if (!joinFamilyId.trim()) return;
     setCreating(true);
+
+    // Check wallet — ₹11 fee for joining
+    const { data: walletData } = await supabase
+      .from('wallets')
+      .select('id, balance')
+      .eq('user_id', user!.id)
+      .single();
+
+    if (!walletData || (walletData as any).balance < 11) {
+      toast.error(t(
+        'Insufficient balance. ₹11 Panjikaran Fees required.',
+        'अपर्याप्त शेष। ₹11 पंजीकरण राशि आवश्यक है।'
+      ));
+      setCreating(false);
+      return;
+    }
 
     // Check if user is already in 2 families
     const { count: membershipCount, error: membershipError } = await supabase
@@ -186,18 +237,32 @@ const Dashboard = () => {
         role: 'member',
       });
 
-    setCreating(false);
     if (error) {
+      setCreating(false);
       if (error.code === '23505') {
         toast.error(t('You are already a member of this family.', 'आप पहले से इस परिवार के सदस्य हैं।'));
       } else {
         toast.error(error.message);
       }
     } else {
-      toast.success(t('Joined family successfully!', 'परिवार से सफलतापूर्वक जुड़ गए!'));
+      // Deduct ₹11
+      await supabase.rpc('deduct_wallet_balance' as any, {
+        p_user_id: user!.id,
+        p_amount: 11,
+        p_description: 'Panjikaran Fees - Join Family',
+        p_description_hi: 'पंजीकरण राशि - परिवार से जुड़ना',
+        p_reference_type: 'panjikaran',
+        p_reference_id: tree.id,
+      });
+
+      // Process referrer reward
+      await supabase.rpc('process_referrer_reward' as any, { p_user_id: user!.id });
+
+      toast.success(t('Joined family! ₹11 deducted.', 'परिवार से जुड़ गए! ₹11 काटे गए।'));
       setShowJoinTree(false);
       setJoinFamilyId('');
       fetchTrees();
+      setCreating(false);
     }
   };
 
@@ -232,6 +297,13 @@ const Dashboard = () => {
                   )}
                 </p>
               </div>
+              <button
+                onClick={() => navigate('/wallet')}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-accent/10 transition-colors font-body text-sm"
+              >
+                <Wallet className="w-4 h-4" />
+                {t('Dhan', 'धन')} 💰
+              </button>
               <button
                 onClick={() => navigate('/settings/profile')}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-accent/10 transition-colors font-body text-sm"

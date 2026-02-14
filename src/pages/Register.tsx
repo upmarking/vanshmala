@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,8 @@ const Register = () => {
   const { t } = useLanguage();
   const { signUp, user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get('ref') || '';
   const [fullName, setFullName] = useState('');
   const [gotra, setGotra] = useState('');
   const [email, setEmail] = useState('');
@@ -39,7 +41,7 @@ const Register = () => {
     }
 
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, gotra);
+    const { error } = await signUp(email, password, fullName, gotra, refCode);
     setLoading(false);
 
     if (error) {
@@ -152,6 +154,12 @@ const Register = () => {
                   minLength={6}
                 />
               </div>
+
+              {refCode && (
+                <div className="p-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm">
+                  🎁 {t(`Referral code applied: ${refCode} — You'll get ₹11!`, `रेफरल कोड लागू: ${refCode} — आपको ₹11 मिलेंगे!`)}
+                </div>
+              )}
 
               {!showResend ? (
                 <button

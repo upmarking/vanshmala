@@ -16,6 +16,8 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import PublicProfile from "./pages/PublicProfile";
 import ProfileSettings from "./pages/ProfileSettings";
+import WalletPage from "./pages/Wallet";
+import ReferralsPage from "./pages/Referrals";
 import { LegacyVault } from "./components/vault/LegacyVault";
 import DocumentVault from "./components/documents/DocumentVault";
 import { TagManagerWrapper } from "./components/tags/TagManagerWrapper";
@@ -47,6 +49,12 @@ const App = () => (
               } />
               <Route path="/vault" element={
                 <ProtectedRoute><LegacyVault /></ProtectedRoute>
+              } />
+              <Route path="/wallet" element={
+                <ProtectedRoute><WalletPage /></ProtectedRoute>
+              } />
+              <Route path="/referrals" element={
+                <ProtectedRoute><ReferralsPage /></ProtectedRoute>
               } />
               <Route path="/tree/:treeId/documents" element={
                 <ProtectedRoute><DocumentVault /></ProtectedRoute>
