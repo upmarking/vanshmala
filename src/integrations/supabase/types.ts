@@ -14,14 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      documents: {
+        Row: {
+          access_level: string | null
+          category: string
+          created_at: string
+          description: string | null
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          generation_level: number | null
+          id: string
+          title: string
+          tree_id: string
+          uploader_id: string | null
+        }
+        Insert: {
+          access_level?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          generation_level?: number | null
+          id?: string
+          title: string
+          tree_id: string
+          uploader_id?: string | null
+        }
+        Update: {
+          access_level?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          generation_level?: number | null
+          id?: string
+          title?: string
+          tree_id?: string
+          uploader_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       family_members: {
         Row: {
+          achievements: string[] | null
           added_by: string | null
           avatar_url: string | null
+          awards: string[] | null
           bio: string | null
+          blood_group: string | null
+          career: Json | null
           created_at: string
           date_of_birth: string | null
           date_of_death: string | null
+          education: Json | null
           full_name: string
           full_name_hi: string | null
           gender: Database["public"]["Enums"]["gender_type"] | null
@@ -29,29 +87,29 @@ export type Database = {
           gotra: string | null
           id: string
           is_alive: boolean | null
+          marriage_date: string | null
+          migration_info: Json | null
           phone: string | null
+          place_of_birth: string | null
+          privacy_settings: Json | null
           tree_id: string
           updated_at: string
           user_id: string | null
-          vanshmala_id: string
           username: string | null
-          place_of_birth: string | null
-          blood_group: string | null
-          marriage_date: string | null
-          education: Json
-          career: Json
-          achievements: string[] | null
-          awards: string[] | null
-          migration_info: Json
-          privacy_settings: Json
+          vanshmala_id: string
         }
         Insert: {
+          achievements?: string[] | null
           added_by?: string | null
           avatar_url?: string | null
+          awards?: string[] | null
           bio?: string | null
+          blood_group?: string | null
+          career?: Json | null
           created_at?: string
           date_of_birth?: string | null
           date_of_death?: string | null
+          education?: Json | null
           full_name: string
           full_name_hi?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
@@ -59,29 +117,29 @@ export type Database = {
           gotra?: string | null
           id?: string
           is_alive?: boolean | null
+          marriage_date?: string | null
+          migration_info?: Json | null
           phone?: string | null
+          place_of_birth?: string | null
+          privacy_settings?: Json | null
           tree_id: string
           updated_at?: string
           user_id?: string | null
-          vanshmala_id?: string
           username?: string | null
-          place_of_birth?: string | null
-          blood_group?: string | null
-          marriage_date?: string | null
-          education?: Json
-          career?: Json
-          achievements?: string[] | null
-          awards?: string[] | null
-          migration_info?: Json
-          privacy_settings?: Json
+          vanshmala_id?: string
         }
         Update: {
+          achievements?: string[] | null
           added_by?: string | null
           avatar_url?: string | null
+          awards?: string[] | null
           bio?: string | null
+          blood_group?: string | null
+          career?: Json | null
           created_at?: string
           date_of_birth?: string | null
           date_of_death?: string | null
+          education?: Json | null
           full_name?: string
           full_name_hi?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
@@ -89,21 +147,16 @@ export type Database = {
           gotra?: string | null
           id?: string
           is_alive?: boolean | null
+          marriage_date?: string | null
+          migration_info?: Json | null
           phone?: string | null
+          place_of_birth?: string | null
+          privacy_settings?: Json | null
           tree_id?: string
           updated_at?: string
           user_id?: string | null
-          vanshmala_id?: string
           username?: string | null
-          place_of_birth?: string | null
-          blood_group?: string | null
-          marriage_date?: string | null
-          education?: Json
-          career?: Json
-          achievements?: string[] | null
-          awards?: string[] | null
-          migration_info?: Json
-          privacy_settings?: Json
+          vanshmala_id?: string
         }
         Relationships: [
           {
@@ -203,6 +256,62 @@ export type Database = {
         }
         Relationships: []
       }
+      legacy_messages: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          creator_id: string
+          id: string
+          is_unlocked: boolean | null
+          media_url: string | null
+          message_text: string | null
+          recipient_id: string | null
+          target_family_member_id: string | null
+          title: string
+          unlock_condition: string | null
+          unlock_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          creator_id: string
+          id?: string
+          is_unlocked?: boolean | null
+          media_url?: string | null
+          message_text?: string | null
+          recipient_id?: string | null
+          target_family_member_id?: string | null
+          title: string
+          unlock_condition?: string | null
+          unlock_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          creator_id?: string
+          id?: string
+          is_unlocked?: boolean | null
+          media_url?: string | null
+          message_text?: string | null
+          recipient_id?: string | null
+          target_family_member_id?: string | null
+          title?: string
+          unlock_condition?: string | null
+          unlock_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legacy_messages_target_family_member_id_fkey"
+            columns: ["target_family_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merge_requests: {
         Row: {
           created_at: string
@@ -261,6 +370,39 @@ export type Database = {
           },
         ]
       }
+      profile_tags: {
+        Row: {
+          created_at: string
+          profile_id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string
+          profile_id: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string
+          profile_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_tags_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -308,6 +450,88 @@ export type Database = {
           vanshmala_id?: string
         }
         Relationships: []
+      }
+      tags: {
+        Row: {
+          category: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          tree_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          tree_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          tree_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tags_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timeline_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date: string | null
+          description: string | null
+          event_type: string | null
+          family_member_id: string
+          id: string
+          media_urls: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date?: string | null
+          description?: string | null
+          event_type?: string | null
+          family_member_id: string
+          id?: string
+          media_urls?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date?: string | null
+          description?: string | null
+          event_type?: string | null
+          family_member_id?: string
+          id?: string
+          media_urls?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_events_family_member_id_fkey"
+            columns: ["family_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tree_memberships: {
         Row: {
@@ -409,116 +633,116 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-  : never = never,
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-  ? R
-  : never
+    ? R
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])
-  ? (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-      Row: infer R
-    }
-  ? R
-  : never
-  : never
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
+      Insert: infer I
+    }
+    ? I
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Update: infer U
-  }
-  ? U
-  : never
+      Update: infer U
+    }
+    ? U
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-  | keyof DefaultSchema["Enums"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-  : never
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-  | keyof DefaultSchema["CompositeTypes"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-  : never
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
 export const Constants = {
   public: {
