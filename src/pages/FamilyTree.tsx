@@ -4,7 +4,7 @@ import Footer from '@/components/Footer';
 import { Plus, GitMerge } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTree, useTreeMembers } from '@/hooks/useFamilyTree';
+import { useTree, useTreeMembers, useIsTreeAdmin } from '@/hooks/useFamilyTree';
 import { buildFamilyTree, FamilyTreeNode } from '@/utils/familyTreeUtils';
 import { TreeNode } from '@/components/family-tree/TreeNode';
 import { Button } from '@/components/ui/button';
@@ -15,14 +15,13 @@ import { Database } from "@/integrations/supabase/types";
 import { useMergeRequests } from '@/hooks/useMergeRequests';
 import { Badge } from '@/components/ui/badge';
 import { toast } from "sonner";
+import { useAuth } from '@/contexts/AuthContext';
 
 type RelationshipType = Database['public']['Enums']['relationship_type'];
 
 const createDummyMember = (id: string, name: string, nameHi: string, gen: number, gender: 'male' | 'female' = 'male'): FamilyTreeNode => ({
   id,
   tree_id: 'demo',
-  first_name: name.split(' ')[0],
-  last_name: name.split(' ')[1] || '',
   full_name: name,
   full_name_hi: nameHi,
   gender,
@@ -30,20 +29,29 @@ const createDummyMember = (id: string, name: string, nameHi: string, gen: number
   vanshmala_id: `DEMO-${id}`,
   user_id: null,
   is_alive: true,
-  birth_date: null,
-  death_date: null,
+  date_of_birth: null,
+  date_of_death: null,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
   username: null,
-  contact_number: null,
-  email: null,
-  address: null,
+  phone: null,
   bio: null,
   avatar_url: null,
   children: [],
   parents: [],
   siblings: [],
-  spouse: undefined
+  spouse: undefined,
+  gotra: null,
+  place_of_birth: null,
+  blood_group: null,
+  marriage_date: null,
+  education: null,
+  career: null,
+  achievements: null,
+  awards: null,
+  migration_info: null,
+  privacy_settings: null,
+  added_by: null
 });
 
 const FamilyTree = () => {
@@ -55,6 +63,10 @@ const FamilyTree = () => {
   const { data: tree, isLoading: treeLoading } = useTree(treeId || '');
   const { data: treeData, isLoading: membersLoading } = useTreeMembers(treeId || '');
   const { requests: mergeRequests } = useMergeRequests(treeId || '');
+
+  // Check admin status
+  const { user } = useAuth();
+  const { data: isAdmin } = useIsTreeAdmin(treeId || '', user?.id);
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<{ id: string, name: string } | undefined>(undefined);
@@ -177,20 +189,23 @@ const FamilyTree = () => {
                 >
                   <span className="hidden sm:inline">{t('Tags', 'टैग')}</span>
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => setMergeListOpen(true)}
-                >
-                  <GitMerge className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t('Merge Requests', 'विलय अनुरोध')}</span>
-                  {mergeRequests && mergeRequests.length > 0 && (
-                    <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px]">
-                      {mergeRequests.length}
-                    </Badge>
-                  )}
-                </Button>
+
+                {isAdmin && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => setMergeListOpen(true)}
+                  >
+                    <GitMerge className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t('Merge Requests', 'विलय अनुरोध')}</span>
+                    {mergeRequests && mergeRequests.length > 0 && (
+                      <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px]">
+                        {mergeRequests.length}
+                      </Badge>
+                    )}
+                  </Button>
+                )}
               </div>
             )}
 

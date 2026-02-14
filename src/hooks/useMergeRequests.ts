@@ -61,67 +61,70 @@ export const useMergeRequests = (treeId: string) => {
             const targetId = request.target_member_id;
 
             // Perform Merge Logic (Frontend Transaction Simulation)
+            // We must update ALL references to sourceId to targetId
 
             // 1. Update relationships where source is 'from'
             const { error: error1 } = await supabase
                 .from('family_relationships')
                 .update({ from_member_id: targetId })
                 .eq('from_member_id', sourceId);
-            if (error1) throw error1;
+            if (error1) throw new Error("Failed to update from_relationships: " + error1.message);
 
             // 2. Update relationships where source is 'to'
             const { error: error2 } = await supabase
                 .from('family_relationships')
                 .update({ to_member_id: targetId })
                 .eq('to_member_id', sourceId);
-            if (error2) throw error2;
+            if (error2) throw new Error("Failed to update to_relationships: " + error2.message);
 
-            // 3. Mark source member as "merged" or delete?
-            // Ideally we should delete, but maybe keep for history?
-            // Let's delete for now to clean up tree.
-            const { error: error3 } = await supabase
+            // 3. Update Timeline Events
+            const { error: errorTimeline } = await supabase
+                .from('timeline_events')
+                .update({ family_member_id: targetId })
+                .eq('family_member_id', sourceId);
+            if (errorTimeline) throw new Error("Failed to update timeline events: " + errorTimeline.message);
+
+            // 4. Update Legacy Messages (Target Member)
+            const { error: errorLegacy } = await supabase
+                .from('legacy_messages')
+                .update({ target_family_member_id: targetId })
+                .eq('target_family_member_id', sourceId);
+            if (errorLegacy) throw new Error("Failed to update legacy messages: " + errorLegacy.message);
+
+            // 5. Update Tree Memberships (User Accounts linked to this member)
+            const { error: errorMembership } = await supabase
+                .from('tree_memberships')
+                .update({ member_id: targetId })
+                .eq('member_id', sourceId);
+            if (errorMembership) throw new Error("Failed to update tree memberships: " + errorMembership.message);
+
+
+            // 6. Delete source member
+            // Now safe to delete as references are moved.
+            const { error: errorDelete } = await supabase
                 .from('family_members')
                 .delete()
                 .eq('id', sourceId);
 
-            // Note: Check for foreign key constraints. 
-            // merge_requests has FK to source_member. 
-            // So we might need to update the merge_request first or keep member?
-            // Let's NOT delete the member yet, maybe just update status if possible.
-            // Or update merge_request to remove FK dependency? No.
-            // Better: Delete the merge request or archive it.
-            // But we want to keep history of merge.
-            // It seems creating a history table or allowing member to stay but marked 'merged' is better.
-            // But 'family_members' doesn't have 'status' column (only is_alive).
-            // If we delete member, `merge_requests` rows linking to it will be deleted if ON DELETE CASCADE.
-            // Let's assume ON DELETE CASCADE is set for merge_requests -> members.
-            // If not, we'll get an error.
-            // Let's try deleting.
-            if (error3) {
-                console.error("Failed to delete source member:", error3);
-                // If foreign key violation, we might have to keep it.
-                throw error3;
+            if (errorDelete) {
+                console.error("Failed to delete source member:", errorDelete);
+                // If foreign key violation still exists, we might have missed a table.
+                // But we should try to proceed to update request status.
+                throw new Error("Failed to delete source member. Partial merge may have occurred. Error: " + errorDelete.message);
             }
 
-            // 4. Update request status (if it wasn't deleted by cascade)
-            // If we deleted source, this request might be gone.
-            // Does Supabase return count?
-
-            // If we can't delete, we should update request status.
-            const { error: error4 } = await supabase
+            // 7. Update request status
+            const { error: errorStatus } = await supabase
                 .from('merge_requests')
                 .update({ status: 'approved', resolved_at: new Date().toISOString() })
                 .eq('id', requestId);
 
-            if (error4) {
-                // If error4 is "Row not found", it means cascade delete worked. Ignore.
-                // Otherwise throw.
-            }
+            if (errorStatus) throw errorStatus;
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['merge-requests', treeId] });
             queryClient.invalidateQueries({ queryKey: ['tree-members', treeId] });
-            toast.success("Merge approved and executed");
+            toast.success("Merge approved and executed successfully");
         },
         onError: (err) => {
             toast.error("Merge failed: " + err.message);

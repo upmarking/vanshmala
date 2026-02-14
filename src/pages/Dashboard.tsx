@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 interface FamilyTreeRecord {
   id: string;
+  id: string;
   family_name: string;
   family_name_hi: string | null;
   family_id: string;
@@ -18,6 +19,14 @@ interface FamilyTreeRecord {
   kuldevi: string | null;
   description: string | null;
 }
+
+// Helper to extract first/last name
+const splitName = (fullName: string) => {
+  const parts = fullName.trim().split(' ');
+  const firstName = parts[0];
+  const lastName = parts.length > 1 ? parts.slice(1).join(' ') : '';
+  return { firstName, lastName };
+};
 
 const Dashboard = () => {
   const { t } = useLanguage();
@@ -54,7 +63,25 @@ const Dashboard = () => {
     if (!newTreeName.trim()) return;
     setCreating(true);
 
-    const { data, error } = await supabase
+    // Check if user already created a family
+    const { count, error: countError } = await supabase
+      .from('family_trees')
+      .select('*', { count: 'exact', head: true })
+      .eq('created_by', user!.id);
+
+    if (countError) {
+      toast.error(countError.message);
+      setCreating(false);
+      return;
+    }
+
+    if (count && count >= 1) {
+      toast.error(t('You can only create one VanshMala family.', 'आप केवल एक वंशमाला परिवार बना सकते हैं।'));
+      setCreating(false);
+      return;
+    }
+
+    const { data: treeData, error } = await supabase
       .from('family_trees')
       .insert({
         family_name: newTreeName.trim(),
@@ -64,22 +91,80 @@ const Dashboard = () => {
       .select()
       .single();
 
-    setCreating(false);
     if (error) {
       toast.error(error.message);
-    } else {
+      setCreating(false);
+      return;
+    }
+
+    if (treeData) {
+      // 1. Add creator as family member
+      const { data: memberData, error: memberError } = await supabase
+        .from('family_members')
+        .insert({
+          tree_id: treeData.id,
+          full_name: profile?.full_name || user!.email?.split('@')[0] || 'Admin',
+          gender: profile?.gender,
+          user_id: user!.id,
+          is_alive: true,
+          generation_level: 1, // Foundational generation
+          gotra: newTreeGotra.trim() || profile?.gotra || null
+        })
+        .select()
+        .single();
+
+      if (memberError) {
+        console.error("Failed to add creator as member:", memberError);
+        toast.error(t("Tree created, but failed to add you as a member.", "कुलवृक्ष बना, लेकिन आपको सदस्य के रूप में जोड़ने में विफल रहा।"));
+        // We allow to proceed, user can be added manually or fixed later? 
+        // Ideally we should transaction this or rollback.
+      } else {
+        // 2. Add to tree_memberships as Admin
+        const { error: membershipError } = await supabase
+          .from('tree_memberships')
+          .insert({
+            tree_id: treeData.id,
+            user_id: user!.id,
+            member_id: memberData.id,
+            role: 'admin'
+          });
+
+        if (membershipError) {
+          console.error("Failed to add admin membership:", membershipError);
+        }
+      }
+
       toast.success(t('Family tree created!', 'कुलवृक्ष बन गया!'));
       setShowCreateTree(false);
       setNewTreeName('');
       setNewTreeGotra('');
       fetchTrees();
     }
+    setCreating(false);
   };
 
   const handleJoinTree = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!joinFamilyId.trim()) return;
     setCreating(true);
+
+    // Check if user is already in 2 families
+    const { count: membershipCount, error: membershipError } = await supabase
+      .from('tree_memberships')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user!.id);
+
+    if (membershipError) {
+      toast.error(membershipError.message);
+      setCreating(false);
+      return;
+    }
+
+    if (membershipCount && membershipCount >= 2) {
+      toast.error(t('You can be part of maximum 2 families (Paternal and Maternal).', 'आप केवल 2 परिवारों (पैतृक और मातृक) का हिस्सा बन सकते हैं।'));
+      setCreating(false);
+      return;
+    }
 
     // Find tree by family_id
     const { data: tree, error: findError } = await supabase

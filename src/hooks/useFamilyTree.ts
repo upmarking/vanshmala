@@ -134,11 +134,11 @@ export const useSearchProfiles = (query: string) => {
     queryFn: async () => {
       if (!query || query.length < 3) return [];
 
-      // Search by phone or vanshmala_id
+      // Search by phone, email, or vanshmala_id
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .or(`phone.eq.${query},vanshmala_id.eq.${query}`)
+        .or(`phone.eq.${query},email.eq.${query},vanshmala_id.eq.${query}`)
         .limit(5);
 
       // Note: simple OR query. If we want partial match, we need like/ilike.
@@ -228,3 +228,23 @@ export const useMemberByUserId = (userId: string | undefined) => {
   });
 };
 
+export const useIsTreeAdmin = (treeId: string, userId: string | undefined) => {
+  return useQuery({
+    queryKey: ['is-tree-admin', treeId, userId],
+    queryFn: async () => {
+      if (!userId || !treeId) return false;
+
+      const { data, error } = await supabase.rpc('is_tree_admin', {
+        _tree_id: treeId,
+        _user_id: userId
+      });
+
+      if (error) {
+        console.error('Error checking admin status:', error);
+        return false;
+      }
+      return data;
+    },
+    enabled: !!treeId && !!userId,
+  });
+};

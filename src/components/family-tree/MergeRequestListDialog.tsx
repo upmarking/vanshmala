@@ -2,6 +2,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useMergeRequests } from '@/hooks/useMergeRequests';
+import { useIsTreeAdmin } from '@/hooks/useFamilyTree';
+import { useAuth } from '@/contexts/AuthContext';
 import { Check, X, ArrowRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -13,7 +15,9 @@ interface MergeRequestListDialogProps {
 
 export const MergeRequestListDialog = ({ isOpen, onClose, treeId }: MergeRequestListDialogProps) => {
     const { t } = useLanguage();
+    const { user } = useAuth();
     const { requests, isLoading, approveRequest, rejectRequest } = useMergeRequests(treeId);
+    const { data: isAdmin } = useIsTreeAdmin(treeId, user?.id);
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -49,24 +53,28 @@ export const MergeRequestListDialog = ({ isOpen, onClose, treeId }: MergeRequest
                                     </div>
 
                                     <div className="flex gap-2 shrink-0">
-                                        <Button
-                                            size="icon"
-                                            variant="outline"
-                                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                            onClick={() => rejectRequest.mutate(req.id)}
-                                            disabled={rejectRequest.isPending || approveRequest.isPending}
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </Button>
-                                        <Button
-                                            size="icon"
-                                            variant="outline"
-                                            className="h-8 w-8 text-green-600 hover:text-green-600 hover:bg-green-50"
-                                            onClick={() => approveRequest.mutate(req.id)}
-                                            disabled={rejectRequest.isPending || approveRequest.isPending}
-                                        >
-                                            <Check className="w-4 h-4" />
-                                        </Button>
+                                        {isAdmin && (
+                                            <>
+                                                <Button
+                                                    size="icon"
+                                                    variant="outline"
+                                                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                    onClick={() => rejectRequest.mutate(req.id)}
+                                                    disabled={rejectRequest.isPending || approveRequest.isPending}
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    size="icon"
+                                                    variant="outline"
+                                                    className="h-8 w-8 text-green-600 hover:text-green-600 hover:bg-green-50"
+                                                    onClick={() => approveRequest.mutate(req.id)}
+                                                    disabled={rejectRequest.isPending || approveRequest.isPending}
+                                                >
+                                                    <Check className="w-4 h-4" />
+                                                </Button>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             ))}

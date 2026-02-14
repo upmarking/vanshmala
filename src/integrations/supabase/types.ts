@@ -309,6 +309,103 @@ export type Database = {
         }
         Relationships: []
       }
+      timeline_events: {
+        Row: {
+          id: string
+          family_member_id: string
+          title: string
+          date: string | null
+          event_type: string
+          description: string | null
+          media_urls: Json[] | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          family_member_id: string
+          title: string
+          date?: string | null
+          event_type: string
+          description?: string | null
+          media_urls?: Json[] | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          family_member_id?: string
+          title?: string
+          date?: string | null
+          event_type?: string
+          description?: string | null
+          media_urls?: Json[] | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_events_family_member_id_fkey"
+            columns: ["family_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      legacy_messages: {
+        Row: {
+          id: string
+          creator_id: string
+          recipient_id: string | null
+          target_family_member_id: string | null
+          title: string
+          content_type: string
+          media_url: string | null
+          message_text: string | null
+          unlock_condition: string
+          unlock_date: string | null
+          is_unlocked: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          creator_id: string
+          recipient_id?: string | null
+          target_family_member_id?: string | null
+          title: string
+          content_type: string
+          media_url?: string | null
+          message_text?: string | null
+          unlock_condition: string
+          unlock_date?: string | null
+          is_unlocked?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          creator_id?: string
+          recipient_id?: string | null
+          target_family_member_id?: string | null
+          title?: string
+          content_type?: string
+          media_url?: string | null
+          message_text?: string | null
+          unlock_condition?: string
+          unlock_date?: string | null
+          is_unlocked?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legacy_messages_target_family_member_id_fkey"
+            columns: ["target_family_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       tree_memberships: {
         Row: {
           id: string
