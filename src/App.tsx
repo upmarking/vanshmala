@@ -13,6 +13,10 @@ import Login from "./pages/Login";
 import VerifyEmail from "./pages/VerifyEmail";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import PublicProfile from "./pages/PublicProfile";
+import ProfileSettings from "./pages/ProfileSettings";
+import { LegacyVault } from "./components/vault/LegacyVault";
+import DocumentVault from "./components/documents/DocumentVault";
 
 const queryClient = new QueryClient();
 
@@ -35,9 +39,27 @@ const App = () => (
               <Route path="/tree/:treeId" element={
                 <ProtectedRoute><FamilyTree /></ProtectedRoute>
               } />
-              <Route path="/tree" element={
-                <ProtectedRoute><FamilyTree /></ProtectedRoute>
+              <Route path="/tree" element={<FamilyTree />} />
+              <Route path="/settings/profile" element={
+                <ProtectedRoute><ProfileSettings /></ProtectedRoute>
               } />
+              <Route path="/vault" element={
+                <ProtectedRoute><LegacyVault /></ProtectedRoute>
+              } />
+              <Route path="/tree/:treeId/documents" element={
+                <ProtectedRoute><DocumentVault /></ProtectedRoute>
+              } />
+              <Route path="/tree/:treeId/tags" element={
+                <ProtectedRoute>
+                  <div className="container mx-auto py-8">
+                    <TagManagerWrapper />
+                  </div>
+                </ProtectedRoute>
+              } />
+
+              {/* Public Profile - specific username route */}
+              <Route path="/:username" element={<PublicProfile />} />
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

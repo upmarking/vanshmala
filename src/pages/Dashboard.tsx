@@ -149,6 +149,13 @@ const Dashboard = () => {
                 </p>
               </div>
               <button
+                onClick={() => navigate('/settings/profile')}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-accent/10 transition-colors font-body text-sm"
+              >
+                <Settings className="w-4 h-4" />
+                {t('Settings', 'सेटिंग्स')}
+              </button>
+              <button
                 onClick={handleSignOut}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors font-body text-sm"
               >

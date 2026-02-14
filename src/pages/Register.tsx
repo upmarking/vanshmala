@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { supabase } from '@/integrations/supabase/client';
+
 const Register = () => {
   const { t } = useLanguage();
   const { signUp, user } = useAuth();
@@ -16,6 +18,9 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [showResend, setShowResend] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   if (user) {
     navigate('/dashboard', { replace: true });
@@ -38,9 +43,32 @@ const Register = () => {
     setLoading(false);
 
     if (error) {
+      if (error.message.includes('already registered') || error.message.includes('User already registered')) {
+        setShowResend(true);
+      }
       toast.error(error.message || t('Registration failed', 'पंजीकरण विफल'));
     } else {
-      navigate('/verify-email');
+      // Pass email to verify page
+      navigate('/verify-email', { state: { email } });
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+      options: {
+        emailRedirectTo: window.location.origin + '/dashboard'
+      }
+    });
+    setResendLoading(false);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(t('Verification email sent!', 'सत्यापन ईमेल भेजा गया!'));
+      navigate('/verify-email', { state: { email } });
     }
   };
 
@@ -70,6 +98,7 @@ const Register = () => {
             </div>
 
             <div className="space-y-4">
+              {/* ... existing fields ... */}
               <div>
                 <label className="block font-body text-sm font-medium text-foreground mb-1.5">
                   {t('Full Name', 'पूरा नाम')} *
@@ -106,6 +135,7 @@ const Register = () => {
                   placeholder={t('Enter your email', 'अपना ईमेल दर्ज करें')}
                   className="w-full px-4 py-3 rounded-xl border border-input bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-saffron/40 focus:border-saffron/40"
                   required
+                  disabled={showResend}
                 />
               </div>
               <div>
@@ -123,28 +153,41 @@ const Register = () => {
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-saffron text-primary-foreground font-medium font-body hover:opacity-90 transition-opacity shadow-saffron disabled:opacity-50"
-              >
-                {loading ? (
-                  <span className="animate-pulse">{t('Creating Account...', 'खाता बन रहा है...')}</span>
-                ) : (
-                  <>
-                    {t('Create Account', 'खाता बनाएं')}
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
+              {!showResend ? (
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-saffron text-primary-foreground font-medium font-body hover:opacity-90 transition-opacity shadow-saffron disabled:opacity-50"
+                >
+                  {loading ? (
+                    <span className="animate-pulse">{t('Creating Account...', 'खाता बन रहा है...')}</span>
+                  ) : (
+                    <>
+                      {t('Create Account', 'खाता बनाएं')}
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-lg text-center">
+                    {t('Account already exists but is not verified.', 'खाता पहले से मौजूद है लेकिन सत्यापित नहीं है।')}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    disabled={resendLoading}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-saffron text-saffron font-medium font-body hover:bg-saffron/5 transition-colors disabled:opacity-50"
+                  >
+                    {resendLoading ? (
+                      <span className="animate-pulse">{t('Sending...', 'भेज रहा है...')}</span>
+                    ) : (
+                      t('Resend Verification Email', 'सत्यापन ईमेल पुनः भेजें')
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
-
-            <p className="text-center mt-6 font-body text-sm text-muted-foreground">
-              {t('Already have an account?', 'पहले से खाता है?')}{' '}
-              <Link to="/login" className="text-saffron hover:underline font-medium">
-                {t('Sign In', 'साइन इन')}
-              </Link>
-            </p>
           </form>
         </motion.div>
       </div>

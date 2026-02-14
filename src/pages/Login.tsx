@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
+import { supabase } from '@/integrations/supabase/client';
+
 const Login = () => {
   const { t } = useLanguage();
   const { signIn, user } = useAuth();
@@ -14,6 +16,9 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const [showResend, setShowResend] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
 
   // Redirect if already logged in
   if (user) {
@@ -28,18 +33,42 @@ const Login = () => {
       return;
     }
     setLoading(true);
+    // Reset resend state on new attempt
+    setShowResend(false);
+
     const { error } = await signIn(email, password);
     setLoading(false);
 
     if (error) {
       if (error.message?.includes('Email not confirmed')) {
-        toast.error(t('Please verify your email first. Check your inbox.', 'कृपया पहले अपना ईमेल सत्यापित करें। अपना इनबॉक्स जांचें।'));
+        setShowResend(true);
+        toast.error(t('Please verify your email first.', 'कृपया पहले अपना ईमेल सत्यापित करें।'));
       } else {
         toast.error(error.message || t('Login failed', 'लॉगिन विफल'));
       }
     } else {
       toast.success(t('Welcome back!', 'वापसी पर स्वागत!'));
       navigate('/dashboard');
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+      options: {
+        emailRedirectTo: window.location.origin + '/dashboard'
+      }
+    });
+    setResendLoading(false);
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(t('Verification email sent!', 'सत्यापन ईमेल भेजा गया!'));
+      // Optionally redirect to verify page
+      navigate('/verify-email', { state: { email } });
     }
   };
 
@@ -110,6 +139,26 @@ const Login = () => {
                   </>
                 )}
               </button>
+
+              {showResend && (
+                <div className="space-y-3 pt-2">
+                  <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-lg text-center">
+                    {t('Your email is not verified yet.', 'आपका ईमेल अभी सत्यापित नहीं है।')}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    disabled={resendLoading}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-saffron text-saffron font-medium font-body hover:bg-saffron/5 transition-colors disabled:opacity-50"
+                  >
+                    {resendLoading ? (
+                      <span className="animate-pulse">{t('Sending...', 'भेज रहा है...')}</span>
+                    ) : (
+                      t('Resend Verification Email', 'सत्यापन ईमेल पुनः भेजें')
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
 
             <p className="text-center mt-6 font-body text-sm text-muted-foreground">

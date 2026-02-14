@@ -35,6 +35,12 @@ const Navbar = () => {
               {t('Dashboard', 'डैशबोर्ड')}
             </Link>
           )}
+          {user && (
+            <Link to="/vault" className="hover:text-accent transition-colors">
+              {t('Legacy Vault', 'विरासत तिजोरी')}
+            </Link>
+          )}
+
         </div>
 
         <div className="flex items-center gap-3">
