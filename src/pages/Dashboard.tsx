@@ -11,7 +11,6 @@ import { toast } from 'sonner';
 
 interface FamilyTreeRecord {
   id: string;
-  id: string;
   family_name: string;
   family_name_hi: string | null;
   family_id: string;
@@ -101,15 +100,15 @@ const Dashboard = () => {
       // 1. Add creator as family member
       const { data: memberData, error: memberError } = await supabase
         .from('family_members')
-        .insert({
+        .insert([{
           tree_id: treeData.id,
           full_name: profile?.full_name || user!.email?.split('@')[0] || 'Admin',
-          gender: profile?.gender,
+          gender: profile?.gender as any,
           user_id: user!.id,
           is_alive: true,
-          generation_level: 1, // Foundational generation
+          generation_level: 1,
           gotra: newTreeGotra.trim() || profile?.gotra || null
-        })
+        }])
         .select()
         .single();
 

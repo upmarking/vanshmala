@@ -122,7 +122,7 @@ const PublicProfile = () => {
                                 )}
                                 {isFieldVisible('work') && career.length > 0 && (
                                     <div className="flex items-center gap-1">
-                                        <Briefcase className="w-3 h-3" /> {career[0].role || 'Professional'}
+                                        <Briefcase className="w-3 h-3" /> {(career[0] as any)?.role || 'Professional'}
                                     </div>
                                 )}
                             </div>

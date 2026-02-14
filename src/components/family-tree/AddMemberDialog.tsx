@@ -56,7 +56,7 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
         if (checkResults && checkResults.length > 0 && activeTab === 'new') {
             // Only alert if exact match on email or phone
             const match = checkResults.find(p =>
-                (formData.email && p.email === formData.email) ||
+                (formData.email && (p as any).email === formData.email) ||
                 (formData.phone && p.phone === formData.phone)
             );
 

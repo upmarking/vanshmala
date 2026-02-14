@@ -409,11 +409,14 @@ export type Database = {
           bio: string | null
           created_at: string
           date_of_birth: string | null
+          email: string | null
+          father_id: string | null
           full_name: string
           full_name_hi: string | null
           gender: Database["public"]["Enums"]["gender_type"] | null
           gotra: string | null
           id: string
+          mother_id: string | null
           phone: string | null
           updated_at: string
           user_id: string
@@ -424,11 +427,14 @@ export type Database = {
           bio?: string | null
           created_at?: string
           date_of_birth?: string | null
+          email?: string | null
+          father_id?: string | null
           full_name: string
           full_name_hi?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
           gotra?: string | null
           id?: string
+          mother_id?: string | null
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -439,17 +445,35 @@ export type Database = {
           bio?: string | null
           created_at?: string
           date_of_birth?: string | null
+          email?: string | null
+          father_id?: string | null
           full_name?: string
           full_name_hi?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
           gotra?: string | null
           id?: string
+          mother_id?: string | null
           phone?: string | null
           updated_at?: string
           user_id?: string
           vanshmala_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_father_id_fkey"
+            columns: ["father_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_mother_id_fkey"
+            columns: ["mother_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tags: {
         Row: {
