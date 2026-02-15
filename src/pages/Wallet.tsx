@@ -1,7 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+
 import { motion } from 'framer-motion';
 import { Wallet, Plus, Send, ArrowDownLeft, ArrowUpRight, Gift, History, Tag } from 'lucide-react';
 import GiftCardDialog from '@/components/wallet/GiftCardDialog';
@@ -293,116 +292,110 @@ const WalletPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-24 pb-16">
-        <div className="container mx-auto px-4 max-w-2xl">
-          {/* Wallet Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-6 rounded-2xl bg-gradient-saffron text-primary-foreground shadow-saffron mb-8"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <Wallet className="w-8 h-8" />
-              <div>
-                <h1 className="font-display text-2xl font-bold">{t('Dhan', 'धन')} 💰</h1>
-                <p className="text-sm opacity-80">{t('Your Vanshmala Wallet', 'आपका वंशमाला वॉलेट')}</p>
-              </div>
-            </div>
-            <div className="text-4xl font-bold font-display mb-6">
-              ₹{loading ? '...' : (wallet?.balance || 0).toFixed(2)}
-            </div>
-            <div className="flex gap-3">
-              <Button
-                onClick={() => setShowAddMoney(true)}
-                variant="secondary"
-                className="flex-1 gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                {t('Add Money', 'पैसे जोड़ें')}
-              </Button>
-              <Button
-                onClick={() => setShowTransfer(true)}
-                variant="secondary"
-                className="flex-1 gap-2"
-              >
-                <Send className="w-4 h-4" />
-                {t('Transfer', 'भेजें')}
-              </Button>
-            </div>
-          </motion.div>
-
-          {/* Quick Links */}
-          <div className="flex gap-3 mb-8">
-            <Button
-              variant="outline"
-              onClick={() => setShowGiftCard(true)}
-              className="flex-1 gap-2"
-            >
-              <Gift className="w-4 h-4" />
-              {t('Gift Card', 'गिफ्ट कार्ड')}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate('/referrals')}
-              className="flex-1 gap-2"
-            >
-              <Gift className="w-4 h-4" />
-              {t('Refer & Earn', 'रेफर करें और कमाएं')}
-            </Button>
-          </div>
-
-          {/* Transaction History */}
+    <div className="container mx-auto px-4 max-w-2xl py-8">
+      {/* Wallet Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-6 rounded-2xl bg-gradient-saffron text-primary-foreground shadow-saffron mb-8"
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <Wallet className="w-8 h-8" />
           <div>
-            <h2 className="font-display text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-              <History className="w-5 h-5" />
-              {t('Transaction History', 'लेन-देन इतिहास')}
-            </h2>
-
-            {transactions.length === 0 ? (
-              <div className="text-center py-12 rounded-2xl border-2 border-dashed border-border">
-                <Wallet className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
-                <p className="font-body text-muted-foreground">
-                  {t('No transactions yet', 'अभी कोई लेन-देन नहीं')}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {transactions.map((txn) => (
-                  <motion.div
-                    key={txn.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex items-center justify-between p-4 rounded-xl bg-card border border-border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        txn.type === 'credit' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                      }`}>
-                        {txn.type === 'credit' ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
-                      </div>
-                      <div>
-                        <p className="font-body text-sm font-medium text-foreground">
-                          {t(txn.description, txn.description_hi || txn.description)}
-                        </p>
-                        <p className="font-body text-xs text-muted-foreground">
-                          {formatDate(txn.created_at)}
-                        </p>
-                      </div>
-                    </div>
-                    <span className={`font-display font-semibold ${
-                      txn.type === 'credit' ? 'text-green-600' : 'text-destructive'
-                    }`}>
-                      {txn.type === 'credit' ? '+' : '-'}₹{txn.amount}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            )}
+            <h1 className="font-display text-2xl font-bold">{t('Dhan', 'धन')} 💰</h1>
+            <p className="text-sm opacity-80">{t('Your Vanshmala Wallet', 'आपका वंशमाला वॉलेट')}</p>
           </div>
         </div>
+        <div className="text-4xl font-bold font-display mb-6">
+          ₹{loading ? '...' : (wallet?.balance || 0).toFixed(2)}
+        </div>
+        <div className="flex gap-3">
+          <Button
+            onClick={() => setShowAddMoney(true)}
+            variant="secondary"
+            className="flex-1 gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            {t('Add Money', 'पैसे जोड़ें')}
+          </Button>
+          <Button
+            onClick={() => setShowTransfer(true)}
+            variant="secondary"
+            className="flex-1 gap-2"
+          >
+            <Send className="w-4 h-4" />
+            {t('Transfer', 'भेजें')}
+          </Button>
+        </div>
+      </motion.div>
+
+      {/* Quick Links */}
+      <div className="flex gap-3 mb-8">
+        <Button
+          variant="outline"
+          onClick={() => setShowGiftCard(true)}
+          className="flex-1 gap-2"
+        >
+          <Gift className="w-4 h-4" />
+          {t('Gift Card', 'गिफ्ट कार्ड')}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => navigate('/refer')}
+          className="flex-1 gap-2"
+        >
+          <Gift className="w-4 h-4" />
+          {t('Refer & Earn', 'रेफर करें और कमाएं')}
+        </Button>
       </div>
+
+      {/* Transaction History */}
+      <div>
+        <h2 className="font-display text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+          <History className="w-5 h-5" />
+          {t('Transaction History', 'लेन-देन इतिहास')}
+        </h2>
+
+        {transactions.length === 0 ? (
+          <div className="text-center py-12 rounded-2xl border-2 border-dashed border-border">
+            <Wallet className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
+            <p className="font-body text-muted-foreground">
+              {t('No transactions yet', 'अभी कोई लेन-देन नहीं')}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {transactions.map((txn) => (
+              <motion.div
+                key={txn.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center justify-between p-4 rounded-xl bg-card border border-border"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${txn.type === 'credit' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                    }`}>
+                    {txn.type === 'credit' ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
+                  </div>
+                  <div>
+                    <p className="font-body text-sm font-medium text-foreground">
+                      {t(txn.description, txn.description_hi || txn.description)}
+                    </p>
+                    <p className="font-body text-xs text-muted-foreground">
+                      {formatDate(txn.created_at)}
+                    </p>
+                  </div>
+                </div>
+                <span className={`font-display font-semibold ${txn.type === 'credit' ? 'text-green-600' : 'text-destructive'
+                  }`}>
+                  {txn.type === 'credit' ? '+' : '-'}₹{txn.amount}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+
 
       {/* Add Money Dialog */}
       <Dialog open={showAddMoney} onOpenChange={setShowAddMoney}>
@@ -483,7 +476,6 @@ const WalletPage = () => {
         onSuccess={() => { fetchWallet(); fetchTransactions(); }}
       />
 
-      <Footer />
     </div>
   );
 };

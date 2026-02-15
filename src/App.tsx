@@ -12,7 +12,7 @@ import Index from "./pages/Index";
 import FamilyTree from "./pages/FamilyTree";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
-import VerifyEmail from "./pages/VerifyEmail";
+import UpdatePassword from "./pages/UpdatePassword";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import PublicProfile from "./pages/PublicProfile";
@@ -39,7 +39,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/update-password" element={<UpdatePassword />} />
 
               {/* Authenticated Routes wrapped in MainLayout */}
               <Route path="/dashboard" element={

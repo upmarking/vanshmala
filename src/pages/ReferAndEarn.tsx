@@ -12,12 +12,11 @@ const ReferAndEarn = () => {
     const { user, profile } = useAuth();
     const [copied, setCopied] = useState(false);
 
-    // Mock referral code based on user ID or name
-    const referralCode = profile?.full_name
-        ? `${profile.full_name.split(' ')[0].toUpperCase()}${user?.id.slice(0, 4).toUpperCase()}`
-        : `VANS${user?.id.slice(0, 6).toUpperCase()}`;
+    // Use actual referral code from profile
+    const referralCode = profile?.referral_code || '...';
 
     const handleCopy = () => {
+        if (!referralCode || referralCode === '...') return;
         navigator.clipboard.writeText(referralCode);
         setCopied(true);
         toast.success(t('Referral code copied!', 'रेफरल कोड कॉपी किया गया!'));
@@ -25,18 +24,22 @@ const ReferAndEarn = () => {
     };
 
     const handleShare = async () => {
+        if (!referralCode || referralCode === '...') return;
+        const shareUrl = `${window.location.origin}/register?ref=${referralCode}`;
+
         if (navigator.share) {
             try {
                 await navigator.share({
                     title: 'Join Vanshmala',
-                    text: `Join me on Vanshmala to preserve our family history! Use my code ${referralCode}`,
-                    url: window.location.origin,
+                    text: `Join me on Vanshmala to preserve our family history! Use my code ${referralCode}. Sign up here:`,
+                    url: shareUrl,
                 });
             } catch (err) {
                 // Share cancelled or failed
             }
         } else {
-            handleCopy();
+            navigator.clipboard.writeText(`${t('Join Vanshmala', 'वंशमाला से जुड़ें')}: ${shareUrl}`);
+            toast.success(t('Referral link copied to clipboard!', 'रेफरल लिंक क्लिपबोर्ड पर कॉपी किया गया!'));
         }
     };
 

@@ -2,9 +2,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Gift } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { supabase } from '@/integrations/supabase/client';
@@ -13,10 +13,14 @@ const Register = () => {
   const { t } = useLanguage();
   const { signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
   const [fullName, setFullName] = useState('');
   const [gotra, setGotra] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [referralCode, setReferralCode] = useState('');
+  const [isReferralLocked, setIsReferralLocked] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [showResend, setShowResend] = useState(false);
@@ -27,6 +31,15 @@ const Register = () => {
       navigate('/dashboard', { replace: true });
     }
   }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+      setIsReferralLocked(true);
+      toast.success(t('Referral code applied! You will earn ₹11.', 'रेफरल कोड लागू! आपको ₹11 मिलेंगे।'));
+    }
+  }, [searchParams, t]);
 
   if (authLoading) {
     return null; // Or a loading spinner
@@ -44,7 +57,7 @@ const Register = () => {
     }
 
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, gotra);
+    const { error } = await signUp(email, password, fullName, gotra, referralCode);
     setLoading(false);
 
     if (error) {
@@ -53,8 +66,9 @@ const Register = () => {
       }
       toast.error(error.message || t('Registration failed', 'पंजीकरण विफल'));
     } else {
-      // Pass email to verify page
-      navigate('/verify-email', { state: { email } });
+      toast.success(t('Account created! Please verify your email.', 'खाता बनाया गया! कृपया अपना ईमेल सत्यापित करें।'));
+      // Pass email to login page
+      navigate('/login', { state: { email, message: 'Please check your email to verify your account.' } });
     }
   };
 
@@ -73,7 +87,7 @@ const Register = () => {
       toast.error(error.message);
     } else {
       toast.success(t('Verification email sent!', 'सत्यापन ईमेल भेजा गया!'));
-      navigate('/verify-email', { state: { email } });
+      navigate('/login', { state: { email, message: 'Verification email sent! Please check your inbox.' } });
     }
   };
 
@@ -101,6 +115,19 @@ const Register = () => {
                 {t("Begin your family's digital parampara", 'अपने परिवार की डिजिटल परंपरा शुरू करें')}
               </p>
             </div>
+
+            {/* Referral Banner */}
+            {referralCode && (
+              <div className="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 flex items-start gap-3">
+                <Gift className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
+                <div>
+                  <h3 className="font-bold text-green-800 text-sm">{t('Referral Applied!', 'रेफरल लागू!')}</h3>
+                  <p className="text-xs text-green-700 mt-1">
+                    {t('You will get ₹11 in your wallet after signup.', 'साइनअप के बाद आपको अपने वॉलेट में ₹11 मिलेंगे।')}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-4">
               {/* ... existing fields ... */}
@@ -158,6 +185,21 @@ const Register = () => {
                 />
               </div>
 
+              {/* Referral input, only if not locked or explicitly wanted */}
+              <div>
+                <label className="block font-body text-sm font-medium text-foreground mb-1.5">
+                  {t('Referral Code (Optional)', 'रेफरल कोड (वैकल्पिक)')}
+                </label>
+                <input
+                  type="text"
+                  value={referralCode}
+                  onChange={(e) => !isReferralLocked && setReferralCode(e.target.value)}
+                  placeholder={t('Enter referral code', 'रेफरल कोड दर्ज करें')}
+                  className={`w-full px-4 py-3 rounded-xl border border-input bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-saffron/40 focus:border-saffron/40 ${isReferralLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : ''}`}
+                  disabled={isReferralLocked}
+                />
+              </div>
+
               {!showResend ? (
                 <button
                   type="submit"
@@ -192,6 +234,16 @@ const Register = () => {
                   </button>
                 </div>
               )}
+            </div>
+
+            <div className="mt-8 text-center">
+              <p className="font-body text-sm text-muted-foreground">
+                {t('Already have an account?', 'क्या आपके पास पहले से एक खाता है?')}
+                {' '}
+                <Link to="/login" className="text-saffron font-medium hover:underline">
+                  {t('Sign in', 'साइन इन करें')}
+                </Link>
+              </p>
             </div>
           </form>
         </motion.div>

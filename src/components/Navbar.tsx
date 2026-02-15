@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import LanguageToggle from './LanguageToggle';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { User, LogOut, Settings, TreePine, Archive, ChevronDown, Gift, MessageSquare, Wallet } from 'lucide-react';
 import {
   DropdownMenu,
@@ -26,6 +26,7 @@ const Navbar = () => {
   const { t } = useLanguage();
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [balance, setBalance] = useState<number | null>(null);
 
@@ -78,6 +79,8 @@ const Navbar = () => {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
+  const isActive = (path: string) => location.pathname === path;
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
@@ -92,21 +95,36 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6 font-body text-sm font-medium text-muted-foreground">
-          <Link to={user ? "/dashboard" : "/"} className="hover:text-accent transition-colors">
+          <Link
+            to={user ? "/dashboard" : "/"}
+            className={`hover:text-accent transition-colors ${isActive(user ? "/dashboard" : "/") ? "text-saffron font-bold" : ""}`}
+          >
             {user ? t('Dashboard', 'डैशबोर्ड') : t('Home', 'होम')}
           </Link>
           {user && (
             <>
-              <Link to="/tree" className="hover:text-accent transition-colors">
+              <Link
+                to="/tree"
+                className={`hover:text-accent transition-colors ${isActive('/tree') ? "text-saffron font-bold" : ""}`}
+              >
                 {t('Family Tree', 'कुलवृक्ष')}
               </Link>
-              <Link to="/feed" className="hover:text-accent transition-colors">
+              <Link
+                to="/feed"
+                className={`hover:text-accent transition-colors ${isActive('/feed') ? "text-saffron font-bold" : ""}`}
+              >
                 {t('Feed', 'फ़ीड')}
               </Link>
-              <Link to="/vault" className="hover:text-accent transition-colors">
+              <Link
+                to="/vault"
+                className={`hover:text-accent transition-colors ${isActive('/vault') ? "text-saffron font-bold" : ""}`}
+              >
                 {t('Legacy Vault', 'विरासत तिजोरी')}
               </Link>
-              <Link to="/refer" className="hover:text-accent transition-colors text-saffron font-semibold">
+              <Link
+                to="/refer"
+                className={`hover:text-accent transition-colors ${isActive('/refer') ? "text-saffron font-bold" : ""}`}
+              >
                 {t('Refer & Earn', 'रेफर करें')}
               </Link>
             </>
@@ -145,27 +163,27 @@ const Navbar = () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                <DropdownMenuItem onClick={() => navigate('/dashboard')} className={isActive('/dashboard') ? "text-saffron font-bold" : ""}>
                   <TreePine className="mr-2 h-4 w-4" />
                   <span>{t('Dashboard', 'डैशबोर्ड')}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/feed')}>
+                <DropdownMenuItem onClick={() => navigate('/feed')} className={isActive('/feed') ? "text-saffron font-bold" : ""}>
                   <MessageSquare className="mr-2 h-4 w-4" />
                   <span>{t('Feed', 'फ़ीड')}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/tree')}>
+                <DropdownMenuItem onClick={() => navigate('/tree')} className={isActive('/tree') ? "text-saffron font-bold" : ""}>
                   <TreePine className="mr-2 h-4 w-4" />
                   <span>{t('Family Tree', 'कुलवृक्ष')}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/vault')}>
+                <DropdownMenuItem onClick={() => navigate('/vault')} className={isActive('/vault') ? "text-saffron font-bold" : ""}>
                   <Archive className="mr-2 h-4 w-4" />
                   <span>{t('Legacy Vault', 'विरासत तिजोरी')}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/refer')} className="text-saffron focus:text-saffron">
+                <DropdownMenuItem onClick={() => navigate('/refer')} className={isActive('/refer') ? "text-saffron font-bold" : ""}>
                   <Gift className="mr-2 h-4 w-4" />
                   <span>{t('Refer & Earn', 'रेफर करें')}</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/settings/profile')}>
+                <DropdownMenuItem onClick={() => navigate('/settings/profile')} className={isActive('/settings/profile') ? "text-saffron font-bold" : ""}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>{t('Settings', 'सेटिंग्स')}</span>
                 </DropdownMenuItem>

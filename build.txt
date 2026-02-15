@@ -1,0 +1,98 @@
+
+> vite_react_shadcn_ts@0.0.0 build
+> vite build
+
+[36mvite v5.4.19 [32mbuilding for production...[36m[39m
+transforming...
+node.exe : Browserslist: 
+browsers data 
+(caniuse-lite) is 8 months 
+old. Please run:
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (Bro  
+  wserslist: b...ld. Ple   
+ ase run::String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+  npx update-browserslist-d
+b@latest
+  Why you should do it 
+regularly: https://github.c
+om/browserslist/update-db#r
+eadme
+[32m???[39m 19 modules transformed.
+[31mx[39m Build failed 
+in 2.54s
+[31merror during build:
+[31m[vite:esbuild] 
+Transform failed with 1 
+error:
+C:/Users/ppdub/Documents/Wo
+rk/Weskill/Software/vanshma
+la/src/pages/Login.tsx:281:
+0: ERROR: Expected ")" but 
+found "}"[31m
+file: [36mC:/Users/ppdub/D
+ocuments/Work/Weskill/Softw
+are/vanshmala/src/pages/Log
+in.tsx:281:0[31m
+[33m
+[33mExpected ")" but 
+found "}"[33m
+279|        }
+280|      </div >
+281|  };
+   |  ^
+282|  
+283|  export default Login;
+[31m
+    at failureErrorWithLog 
+(C:\Users\ppdub\Documents\W
+ork\Weskill\Software\vanshm
+ala\node_modules\esbuild\li
+b\main.js:1472:15)
+    at C:\Users\ppdub\Docum
+ents\Work\Weskill\Software\
+vanshmala\node_modules\esbu
+ild\lib\main.js:755:50
+    at responseCallbacks.<c
+omputed> (C:\Users\ppdub\Do
+cuments\Work\Weskill\Softwa
+re\vanshmala\node_modules\e
+sbuild\lib\main.js:622:9)
+    at 
+handleIncomingPacket (C:\Us
+ers\ppdub\Documents\Work\We
+skill\Software\vanshmala\no
+de_modules\esbuild\lib\main
+.js:677:12)
+    at 
+Socket.readFromStdout (C:\U
+sers\ppdub\Documents\Work\W
+eskill\Software\vanshmala\n
+ode_modules\esbuild\lib\mai
+n.js:600:7)
+    at Socket.emit 
+(node:events:519:28)
+    at addChunk (node:inter
+nal/streams/readable:561:12
+)
+    at readableAddChunkPush
+ByteMode (node:internal/str
+eams/readable:512:3)
+    at Readable.push (node:
+internal/streams/readable:3
+92:5)
+    at Pipe.onStreamRead (n
+ode:internal/stream_base_co
+mmons:189:23)[39m
