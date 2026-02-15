@@ -90,42 +90,66 @@ const WalletPage = () => {
 
     setProcessing(true);
 
-    // For now, simulate Razorpay — in production, this would open Razorpay checkout
-    // and verify payment server-side before crediting
     try {
+      // Create Razorpay order via edge function
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+
+      const orderRes = await fetch(
+        `https://qngfdcbccnguftxzecwq.supabase.co/functions/v1/razorpay-wallet`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ action: 'create_order', amount }),
+        }
+      );
+
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok || !orderData.order_id) {
+        toast.error(t('Failed to create payment order', 'भुगतान ऑर्डर बनाने में विफल'));
+        setProcessing(false);
+        return;
+      }
+
       const options = {
-        key: 'rzp_test_placeholder', // Will be replaced with actual key
+        key: orderData.key_id,
         amount: amount * 100,
         currency: 'INR',
         name: 'Vanshmala',
         description: t('Add money to Dhan wallet', 'धन वॉलेट में पैसे जोड़ें'),
+        order_id: orderData.order_id,
         handler: async function (response: any) {
-          // Credit wallet after successful payment
-          if (!wallet) return;
-          
-          await supabase
-            .from('wallets')
-            .update({ balance: (wallet.balance || 0) + amount })
-            .eq('id', wallet.id);
+          // Verify payment server-side
+          const verifyRes = await fetch(
+            `https://qngfdcbccnguftxzecwq.supabase.co/functions/v1/razorpay-wallet`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                action: 'verify_payment',
+                payment_id: response.razorpay_payment_id,
+                order_id: response.razorpay_order_id,
+              }),
+            }
+          );
 
-          await supabase
-            .from('wallet_transactions')
-            .insert({
-              wallet_id: wallet.id,
-              user_id: user!.id,
-              type: 'credit',
-              amount,
-              description: `Added ₹${amount} via Razorpay`,
-              description_hi: `Razorpay से ₹${amount} जोड़े`,
-              reference_type: 'razorpay',
-              reference_id: response.razorpay_payment_id || 'sim_' + Date.now(),
-            });
-
-          toast.success(t(`₹${amount} added to wallet!`, `₹${amount} वॉलेट में जोड़े गए!`));
-          setShowAddMoney(false);
-          setAddAmount('');
-          fetchWallet();
-          fetchTransactions();
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            toast.success(t(`₹${amount} added to wallet!`, `₹${amount} वॉलेट में जोड़े गए!`));
+            setShowAddMoney(false);
+            setAddAmount('');
+            fetchWallet();
+            fetchTransactions();
+          } else {
+            toast.error(t('Payment verification failed', 'भुगतान सत्यापन विफल'));
+          }
         },
         prefill: {
           email: user?.email || '',
@@ -134,36 +158,11 @@ const WalletPage = () => {
         theme: { color: '#D97706' },
       };
 
-      // Check if Razorpay is loaded
       if (typeof (window as any).Razorpay !== 'undefined') {
         const rzp = new (window as any).Razorpay(options);
         rzp.open();
       } else {
-        // Simulate for development — directly credit
-        if (!wallet) return;
-        await supabase
-          .from('wallets')
-          .update({ balance: (wallet.balance || 0) + amount })
-          .eq('id', wallet.id);
-
-        await supabase
-          .from('wallet_transactions')
-          .insert({
-            wallet_id: wallet.id,
-            user_id: user!.id,
-            type: 'credit',
-            amount,
-            description: `Added ₹${amount}`,
-            description_hi: `₹${amount} जोड़े गए`,
-            reference_type: 'razorpay',
-            reference_id: 'sim_' + Date.now(),
-          });
-
-        toast.success(t(`₹${amount} added to wallet!`, `₹${amount} वॉलेट में जोड़े गए!`));
-        setShowAddMoney(false);
-        setAddAmount('');
-        fetchWallet();
-        fetchTransactions();
+        toast.error(t('Razorpay not loaded. Please refresh.', 'Razorpay लोड नहीं हुआ। कृपया रिफ्रेश करें।'));
       }
     } catch (err) {
       toast.error(t('Payment failed', 'भुगतान विफल'));
