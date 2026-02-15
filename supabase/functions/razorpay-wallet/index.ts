@@ -44,7 +44,7 @@ serve(async (req) => {
         body: JSON.stringify({
           amount: Math.round(amount * 100), // in paise
           currency: 'INR',
-          receipt: `wallet_${user.id}_${Date.now()}`,
+          receipt: `w_${Date.now()}`,
         }),
       });
 
@@ -129,7 +129,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: (err as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
