@@ -36,6 +36,9 @@ const ProfileSettings = () => {
                 place_of_birth: member.place_of_birth || '',
                 blood_group: member.blood_group || '',
                 marriage_date: member.marriage_date || '',
+                mool_niwas: member.mool_niwas || '',
+                kuldevi: member.kuldevi || '',
+                kuldevta: member.kuldevta || '',
                 // Ensure arrays
                 education: Array.isArray(member.education) ? member.education : [],
                 career: Array.isArray(member.career) ? member.career : [],
@@ -179,6 +182,7 @@ const ProfileSettings = () => {
             <Tabs defaultValue="basic" className="w-full space-y-6">
                 <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1">
                     <TabsTrigger value="basic">{t('Basic Info', 'मूल जानकारी')}</TabsTrigger>
+                    {/* <TabsTrigger value="roots">{t('Roots', 'मूल')}</TabsTrigger> */}
                     <TabsTrigger value="education">{t('Education', 'शिक्षा')}</TabsTrigger>
                     <TabsTrigger value="career">{t('Work', 'कार्य')}</TabsTrigger>
                     <TabsTrigger value="privacy">{t('Privacy', 'गोपनीयता')}</TabsTrigger>
@@ -266,9 +270,55 @@ const ProfileSettings = () => {
                                     />
                                 </div>
                             </div>
+
+                            {/* ROOTS SECTION INTEGRATED */}
+                            <div className="pt-4 border-t">
+                                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                                    {t('Ancestral Roots', 'पैतृक मूल')}
+                                    <span className="text-xs font-normal text-muted-foreground">({t('Visible on profile', 'प्रोफ़ाइल पर दिखाई दे रहा है')})</span>
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <Label>{t('Mool Niwas (Ancestral Village)', 'मूल निवास (पैतृक गाँव)')}</Label>
+                                            <PrivacySelector field="mool_niwas" />
+                                        </div>
+                                        <Input
+                                            value={formData.mool_niwas}
+                                            onChange={(e) => handleBasicChange('mool_niwas', e.target.value)}
+                                            placeholder="Village, District"
+                                        />
+                                        <p className="text-[10px] text-muted-foreground">The village where your ancestors are from.</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <Label>{t('Kuldevi', 'कुलदेवी')}</Label>
+                                            <PrivacySelector field="kuldevi" />
+                                        </div>
+                                        <Input
+                                            value={formData.kuldevi}
+                                            onChange={(e) => handleBasicChange('kuldevi', e.target.value)}
+                                            placeholder="Maa Kuldevi Name"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <Label>{t('Kuldevta', 'कुलदेवता')}</Label>
+                                            <PrivacySelector field="kuldevta" />
+                                        </div>
+                                        <Input
+                                            value={formData.kuldevta}
+                                            onChange={(e) => handleBasicChange('kuldevta', e.target.value)}
+                                            placeholder="Kuldevta Name"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
+
+
 
                 {/* EDUCATION */}
                 <TabsContent value="education">
@@ -420,7 +470,7 @@ const ProfileSettings = () => {
                                 <Lock className="w-4 h-4 inline mr-2" /> <strong>Private</strong>: Visible only to you.
                             </div>
                             <div className="space-y-4">
-                                {['name', 'bio', 'place_of_birth', 'blood_group', 'marriage_date', 'education', 'career'].map(field => (
+                                {['name', 'bio', 'place_of_birth', 'blood_group', 'marriage_date', 'education', 'career', 'mool_niwas', 'kuldevi'].map(field => (
                                     <div key={field} className="flex justify-between items-center p-2 border-b last:border-0">
                                         <Label className="capitalize">{field.replace(/_/g, ' ')}</Label>
                                         <PrivacySelector field={field} />
@@ -431,7 +481,7 @@ const ProfileSettings = () => {
                     </Card>
                 </TabsContent>
             </Tabs>
-        </div>
+        </div >
     );
 };
 

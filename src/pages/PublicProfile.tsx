@@ -1,8 +1,8 @@
 import { useParams } from 'react-router-dom';
-import { useMemberByUsername } from '@/hooks/useFamilyTree';
+import { useMemberByUsername, useProfileVerificationStatus } from '@/hooks/useFamilyTree';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { User, MapPin, Briefcase, GraduationCap, Link as LinkIcon, Users, Heart } from 'lucide-react';
+import { User, MapPin, Briefcase, GraduationCap, Link as LinkIcon, Users, Heart, BadgeCheck, Landmark, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -10,7 +10,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const PublicProfile = () => {
     const { username } = useParams<{ username: string }>();
-    const { data: member, isLoading, error } = useMemberByUsername(username || '');
+    const { data: memberData, isLoading, error } = useMemberByUsername(username || '');
+    const member = memberData as any;
+    const { data: isVerified } = useProfileVerificationStatus(member?.user_id);
     const { t } = useLanguage();
 
     if (isLoading) {
@@ -87,7 +89,10 @@ const PublicProfile = () => {
                     {/* Info */}
                     <div className="flex-1 text-center md:text-left space-y-4">
                         <div className="flex flex-col md:flex-row items-center gap-4">
-                            <h1 className="text-2xl md:text-3xl font-light">{member.username}</h1>
+                            <h1 className="text-2xl md:text-3xl font-light flex items-center gap-2">
+                                {member.username}
+                                {isVerified && <BadgeCheck className="w-6 h-6 text-blue-500" />}
+                            </h1>
                             {/* Actions */}
                             <div className="flex gap-2">
                                 <Button variant="secondary" size="sm" className="font-semibold px-6">{t('Message', 'संदेश')}</Button>
@@ -110,6 +115,16 @@ const PublicProfile = () => {
                             )}
 
                             <div className="text-muted-foreground flex flex-wrap justify-center md:justify-start gap-x-4 gap-y-1 mt-2">
+                                {isFieldVisible('mool_niwas') && member.mool_niwas && (
+                                    <div className="flex items-center gap-1 text-amber-700 dark:text-amber-500 font-medium">
+                                        <Landmark className="w-3 h-3" /> {member.mool_niwas}
+                                    </div>
+                                )}
+                                {(member.kuldevi || member.kuldevta) && (
+                                    <div className="flex items-center gap-1 text-purple-700 dark:text-purple-400 font-medium">
+                                        <Sparkles className="w-3 h-3" /> {member.kuldevi} {member.kuldevi && member.kuldevta && '&'} {member.kuldevta}
+                                    </div>
+                                )}
                                 {isFieldVisible('place_of_birth') && member.place_of_birth && (
                                     <div className="flex items-center gap-1">
                                         <MapPin className="w-3 h-3" /> {member.place_of_birth}

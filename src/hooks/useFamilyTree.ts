@@ -272,3 +272,21 @@ export const useUserTrees = (userId: string | null | undefined) => {
     enabled: !!userId,
   });
 };
+
+export const useProfileVerificationStatus = (userId: string | undefined) => {
+  return useQuery({
+    queryKey: ['profile-verification', userId],
+    queryFn: async () => {
+      if (!userId) return false;
+      const { data, error } = await supabase.rpc('get_profile_verification_status', {
+        check_user_id: userId
+      });
+      if (error) {
+        console.error('Error fetching verification status:', error);
+        return false;
+      }
+      return data;
+    },
+    enabled: !!userId,
+  });
+};

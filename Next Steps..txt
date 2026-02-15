@@ -1,0 +1,26 @@
+2. "Voice of the Vansh" (Audio Intro)
+Text bios are standard, but hearing a voice is emotional and personal—perfect for a legacy app.
+
+The Idea: Add a simple "Record Intro" button in Profile Settings. Allow users to record a 30-second greeting or "Statement of Values."
+Public View: Add a small "Play Voice" button next to their avatar on the public profile.
+Why: When a great-grandchild visits this profile 50 years from now, hearing the voice will be magical.
+3. The "Life Journey" Timeline Mode
+Data entry forms are boring. A timeline is a story.
+
+The Idea: In Profile Setup, offer a "Timeline Mode" alongside the standard form. Ask questions like "When was your Mundan/First Job/Wedding?" and plot them on a visual line.
+Integration: Sync this with your existing Timeline feature.
+Public View: Replace the static "Education/Work" tabs with a single, beautiful vertical "Life Journey" timeline that weaves career, education, and family milestones together chronologically.
+4. Featured "Legacy Artifacts" Showcase
+You already have a 
+DocumentVault
+, but it's hidden away.
+
+The Idea: Allow users to "Star" or "Pin" up to 3 items from their Vault to their Public Profile.
+Examples: A blurry photo of their ancestral home, a handwritten letter, or a scanned degree.
+Public View: A "Featured Memories" carousel right below the Bio. This turns the profile into a mini-museum rather than just a resume.
+5. "Kinsman" Relationship Context
+On Instagram, you see "Followed by..." to understand context. On VanshMala, context is kinship.
+
+The Idea: When User A views User B's profile, dynamically calculate and display the relationship text at the very top.
+Example: Instead of just "Bio", show: "Amit is your Paternal First Cousin (Chacha's Son)."
+How: Use the underlying graph data to find the shortest path between the logged-in user and the profile being viewed. This immediately grounds the user in their relationship.
