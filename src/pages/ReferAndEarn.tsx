@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Gift, Share2, Wallet } from 'lucide-react';
+import { Copy, Gift, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 
@@ -78,10 +78,7 @@ const ReferAndEarn = () => {
                                 <span className="text-sm font-medium">{t('Pending Rewards', 'लंबित पुरस्कार')}</span>
                                 <span className="font-bold">₹0</span>
                             </div>
-                            <Button className="w-full" variant="outline" disabled>
-                                <Wallet className="mr-2 h-4 w-4" />
-                                {t('Withdraw (Coming Soon)', 'निकालें (जल्द आ रहा है)')}
-                            </Button>
+
                         </div>
                     </CardContent>
                 </Card>
