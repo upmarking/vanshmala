@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import MainLayout from "@/components/layout/MainLayout";
 import Index from "./pages/Index";
 import FamilyTree from "./pages/FamilyTree";
 import Register from "./pages/Register";
@@ -16,6 +17,8 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import PublicProfile from "./pages/PublicProfile";
 import ProfileSettings from "./pages/ProfileSettings";
+import Feed from "./pages/Feed";
+import ReferAndEarn from "./pages/ReferAndEarn";
 import { LegacyVault } from "./components/vault/LegacyVault";
 import DocumentVault from "./components/documents/DocumentVault";
 import { TagManagerWrapper } from "./components/tags/TagManagerWrapper";
@@ -31,31 +34,70 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
+
+              {/* Authenticated Routes wrapped in MainLayout */}
               <Route path="/dashboard" element={
-                <ProtectedRoute><Dashboard /></ProtectedRoute>
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Dashboard />
+                  </MainLayout>
+                </ProtectedRoute>
               } />
               <Route path="/tree/:treeId" element={
-                <ProtectedRoute><FamilyTree /></ProtectedRoute>
+                <ProtectedRoute>
+                  <MainLayout>
+                    <FamilyTree />
+                  </MainLayout>
+                </ProtectedRoute>
               } />
               <Route path="/tree" element={<FamilyTree />} />
               <Route path="/settings/profile" element={
-                <ProtectedRoute><ProfileSettings /></ProtectedRoute>
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ProfileSettings />
+                  </MainLayout>
+                </ProtectedRoute>
               } />
               <Route path="/vault" element={
-                <ProtectedRoute><LegacyVault /></ProtectedRoute>
+                <ProtectedRoute>
+                  <MainLayout>
+                    <LegacyVault />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/feed" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Feed />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/refer" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ReferAndEarn />
+                  </MainLayout>
+                </ProtectedRoute>
               } />
               <Route path="/tree/:treeId/documents" element={
-                <ProtectedRoute><DocumentVault /></ProtectedRoute>
+                <ProtectedRoute>
+                  <MainLayout>
+                    <DocumentVault />
+                  </MainLayout>
+                </ProtectedRoute>
               } />
               <Route path="/tree/:treeId/tags" element={
                 <ProtectedRoute>
-                  <div className="container mx-auto py-8">
-                    <TagManagerWrapper />
-                  </div>
+                  <MainLayout>
+                    <div className="container mx-auto py-8">
+                      <TagManagerWrapper />
+                    </div>
+                  </MainLayout>
                 </ProtectedRoute>
               } />
 

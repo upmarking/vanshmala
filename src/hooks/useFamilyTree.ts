@@ -245,6 +245,30 @@ export const useIsTreeAdmin = (treeId: string, userId: string | undefined) => {
       }
       return data;
     },
+
     enabled: !!treeId && !!userId,
+  });
+};
+
+export const useUserTrees = (userId: string | null | undefined) => {
+  return useQuery({
+    queryKey: ['user-trees', userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const { data, error } = await supabase
+        .from('tree_memberships')
+        .select(`
+          tree_id,
+          family_trees:tree_id (
+            id,
+            family_name
+          )
+        `)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userId,
   });
 };

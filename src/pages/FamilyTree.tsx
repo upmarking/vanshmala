@@ -2,9 +2,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Plus, GitMerge } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTree, useTreeMembers, useIsTreeAdmin } from '@/hooks/useFamilyTree';
+import { useTree, useTreeMembers, useIsTreeAdmin, useUserTrees } from '@/hooks/useFamilyTree';
 import { buildFamilyTree, FamilyTreeNode } from '@/utils/familyTreeUtils';
 import { TreeNode } from '@/components/family-tree/TreeNode';
 import { Button } from '@/components/ui/button';
@@ -67,6 +67,20 @@ const FamilyTree = () => {
   // Check admin status
   const { user } = useAuth();
   const { data: isAdmin } = useIsTreeAdmin(treeId || '', user?.id);
+
+  // Auto-redirect for logged-in users if no treeId is provided
+  const { data: userTrees, isLoading: userTreesLoading } = useUserTrees(user?.id);
+
+  useEffect(() => {
+    if (!treeId && user && userTrees && userTrees.length > 0) {
+      // Redirect to the first tree found
+      // @ts-ignore
+      const firstTreeId = userTrees[0].tree_id;
+      if (firstTreeId) {
+        navigate(`/tree/${firstTreeId}`, { replace: true });
+      }
+    }
+  }, [treeId, user, userTrees, navigate]);
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<{ id: string, name: string } | undefined>(undefined);
@@ -211,7 +225,7 @@ const FamilyTree = () => {
 
             <span className="text-saffron/40 text-2xl block mb-2">🕉</span>
 
-            {isLoading ? (
+            {isLoading || userTreesLoading ? (
               <div className="animate-pulse">
                 <div className="h-8 bg-muted rounded w-1/3 mx-auto mb-3"></div>
                 <div className="h-4 bg-muted rounded w-1/4 mx-auto"></div>
@@ -219,11 +233,21 @@ const FamilyTree = () => {
             ) : (tree || !treeId) ? (
               <>
                 <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-3">
-                  {treeId ? tree?.family_name : t('Sample Family Tree', 'उदाहरण वंशवृक्ष')}
+                  {treeId ? tree?.family_name : user ? t('Your Family Tree', 'आपका कुलवृक्ष') : t('Sample Family Tree', 'उदाहरण वंशवृक्ष')}
                 </h1>
                 <p className="font-body text-muted-foreground text-lg">
-                  {treeId ? (tree?.description || t('Family Tree', 'वंशवृक्ष')) : t('This is a sample view of how a family tree looks.', 'यह एक उदाहरण है कि वंशवृक्ष कैसा दिखता है।')}
+                  {treeId ? (tree?.description || t('Family Tree', 'वंशवृक्ष')) :
+                    user ?
+                      (userTrees && userTrees.length === 0 ? t('You are not part of any family tree yet.', 'आप अभी तक किसी भी कुलवृक्ष का हिस्सा नहीं हैं।') : t('Loading your tree...', 'आपका कुलवृक्ष लोड हो रहा है...'))
+                      : t('This is a sample view of how a family tree looks.', 'यह एक उदाहरण है कि वंशवृक्ष कैसा दिखता है।')}
                 </p>
+                {user && !treeId && userTrees && userTrees.length === 0 && (
+                  <div className="mt-6">
+                    <Button onClick={() => navigate('/dashboard')} className="bg-gradient-saffron text-white">
+                      {t('Create or Join Family', 'परिवार बनाएं या शामिल हों')}
+                    </Button>
+                  </div>
+                )}
               </>
             ) : (
               <h1 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-3">

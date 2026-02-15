@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
 import { ArrowRight, LogIn } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const { t } = useLanguage();
-  const { signIn, user } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,8 +21,13 @@ const Login = () => {
   const [resendLoading, setResendLoading] = useState(false);
 
   // Redirect if already logged in
-  if (user) {
-    navigate('/dashboard', { replace: true });
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading) {
     return null;
   }
 

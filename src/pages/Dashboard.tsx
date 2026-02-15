@@ -1,61 +1,119 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
-import { TreePine, Users, Plus, Settings, LogOut } from 'lucide-react';
+import { Users, Plus, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { FeedPost } from '@/components/dashboard/FeedPost';
 
 interface FamilyTreeRecord {
   id: string;
-  id: string;
   family_name: string;
-  family_name_hi: string | null;
   family_id: string;
-  gotra: string | null;
-  kuldevi: string | null;
-  description: string | null;
 }
-
-// Helper to extract first/last name
-const splitName = (fullName: string) => {
-  const parts = fullName.trim().split(' ');
-  const firstName = parts[0];
-  const lastName = parts.length > 1 ? parts.slice(1).join(' ') : '';
-  return { firstName, lastName };
-};
 
 const Dashboard = () => {
   const { t } = useLanguage();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const [trees, setTrees] = useState<FamilyTreeRecord[]>([]);
-  const [loadingTrees, setLoadingTrees] = useState(true);
-  const [showCreateTree, setShowCreateTree] = useState(false);
-  const [showJoinTree, setShowJoinTree] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+  const [hasFamily, setHasFamily] = useState(false);
+  const [feedEvents, setFeedEvents] = useState<any[]>([]);
+
+  // Onboarding States
+  const [creating, setCreating] = useState(false);
   const [newTreeName, setNewTreeName] = useState('');
   const [newTreeGotra, setNewTreeGotra] = useState('');
   const [joinFamilyId, setJoinFamilyId] = useState('');
-  const [creating, setCreating] = useState(false);
+  const [primaryTreeId, setPrimaryTreeId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchTrees();
+    checkFamilyStatus();
   }, [user]);
 
-  const fetchTrees = async () => {
+  const checkFamilyStatus = async () => {
     if (!user) return;
-    setLoadingTrees(true);
-    const { data, error } = await supabase
-      .from('family_trees')
-      .select('id, family_name, family_name_hi, family_id, gotra, kuldevi, description');
+    setLoading(true);
 
-    if (!error && data) {
-      setTrees(data as FamilyTreeRecord[]);
+    // Check if user is member of any tree
+    const { count, error } = await supabase
+      .from('tree_memberships')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+
+    if (count && count > 0) {
+      setHasFamily(true);
+      fetchFeed();
+    } else {
+      setHasFamily(false);
+      setLoading(false);
     }
-    setLoadingTrees(false);
+  };
+
+  const fetchFeed = async () => {
+    setLoading(true);
+    try {
+      // 1. Get my tree IDs
+      const { data: memberships } = await supabase
+        .from('tree_memberships')
+        .select('tree_id')
+        .eq('user_id', user!.id);
+
+      if (!memberships || memberships.length === 0) {
+        setLoading(false);
+        return;
+      };
+
+      const treeIds = memberships.map(m => m.tree_id);
+      if (treeIds.length > 0) setPrimaryTreeId(treeIds[0]);
+
+      // 2. Get members of these trees (to link events to people)
+      const { data: members } = await supabase
+        .from('family_members')
+        .select('id, full_name, avatar_url, tree_id')
+        .in('tree_id', treeIds);
+
+      const memberMap = new Map(members?.map(m => [m.id, m]));
+
+      // 3. Fetch Timeline Events for these members
+      const memberIds = members?.map(m => m.id) || [];
+
+      if (memberIds.length === 0) {
+        setFeedEvents([]);
+        setLoading(false);
+        return;
+      }
+
+      const { data: events, error } = await supabase
+        .from('timeline_events')
+        .select('*')
+        .in('family_member_id', memberIds)
+        .order('created_at', { ascending: false })
+        .limit(50); // Pagination later
+
+      if (error) throw error;
+
+      // Combine event with member data
+      const combined = events?.map(event => ({
+        ...event,
+        member: memberMap.get(event.family_member_id)
+      })) || [];
+
+      setFeedEvents(combined);
+
+    } catch (error) {
+      console.error("Error fetching feed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCreateTree = async (e: React.FormEvent) => {
@@ -63,84 +121,66 @@ const Dashboard = () => {
     if (!newTreeName.trim()) return;
     setCreating(true);
 
-    // Check if user already created a family
-    const { count, error: countError } = await supabase
-      .from('family_trees')
-      .select('*', { count: 'exact', head: true })
-      .eq('created_by', user!.id);
+    try {
+      // Check existing creation
+      const { count, error: countError } = await supabase
+        .from('family_trees')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', user!.id);
 
-    if (countError) {
-      toast.error(countError.message);
-      setCreating(false);
-      return;
-    }
+      if (countError) throw countError;
+      if (count && count >= 1) {
+        toast.error(t('You can only create one VanshMala family.', 'आप केवल एक वंशमाला परिवार बना सकते हैं।'));
+        return;
+      }
 
-    if (count && count >= 1) {
-      toast.error(t('You can only create one VanshMala family.', 'आप केवल एक वंशमाला परिवार बना सकते हैं।'));
-      setCreating(false);
-      return;
-    }
-
-    const { data: treeData, error } = await supabase
-      .from('family_trees')
-      .insert({
-        family_name: newTreeName.trim(),
-        gotra: newTreeGotra.trim() || null,
-        created_by: user!.id,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      toast.error(error.message);
-      setCreating(false);
-      return;
-    }
-
-    if (treeData) {
-      // 1. Add creator as family member
-      const { data: memberData, error: memberError } = await supabase
-        .from('family_members')
+      const { data: treeData, error } = await supabase
+        .from('family_trees')
         .insert({
-          tree_id: treeData.id,
-          full_name: profile?.full_name || user!.email?.split('@')[0] || 'Admin',
-          gender: profile?.gender,
-          user_id: user!.id,
-          is_alive: true,
-          generation_level: 1, // Foundational generation
-          gotra: newTreeGotra.trim() || profile?.gotra || null
+          family_name: newTreeName.trim(),
+          gotra: newTreeGotra.trim() || null,
+          created_by: user!.id,
         })
         .select()
         .single();
 
-      if (memberError) {
-        console.error("Failed to add creator as member:", memberError);
-        toast.error(t("Tree created, but failed to add you as a member.", "कुलवृक्ष बना, लेकिन आपको सदस्य के रूप में जोड़ने में विफल रहा।"));
-        // We allow to proceed, user can be added manually or fixed later? 
-        // Ideally we should transaction this or rollback.
-      } else {
-        // 2. Add to tree_memberships as Admin
-        const { error: membershipError } = await supabase
-          .from('tree_memberships')
+      if (error) throw error;
+
+      if (treeData) {
+        // Add creator as member
+        const { data: memberData, error: memberError } = await supabase
+          .from('family_members')
           .insert({
+            tree_id: treeData.id,
+            full_name: profile?.full_name || user!.email?.split('@')[0] || 'Admin',
+            gender: profile?.gender as "male" | "female" | "other" | null,
+            user_id: user!.id,
+            is_alive: true,
+            generation_level: 1,
+            gotra: newTreeGotra.trim() || profile?.gotra || null
+          } as any)
+          .select()
+          .single();
+
+        if (memberError) {
+          toast.error("Tree created but failed to join automatically. Please contact support.");
+        } else {
+          await supabase.from('tree_memberships').insert({
             tree_id: treeData.id,
             user_id: user!.id,
             member_id: memberData.id,
             role: 'admin'
           });
-
-        if (membershipError) {
-          console.error("Failed to add admin membership:", membershipError);
         }
+        toast.success(t('Family tree created!', 'कुलवृक्ष बन गया!'));
+        checkFamilyStatus(); // Refresh to show Feed
       }
 
-      toast.success(t('Family tree created!', 'कुलवृक्ष बन गया!'));
-      setShowCreateTree(false);
-      setNewTreeName('');
-      setNewTreeGotra('');
-      fetchTrees();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setCreating(false);
     }
-    setCreating(false);
   };
 
   const handleJoinTree = async (e: React.FormEvent) => {
@@ -148,273 +188,236 @@ const Dashboard = () => {
     if (!joinFamilyId.trim()) return;
     setCreating(true);
 
-    // Check if user is already in 2 families
-    const { count: membershipCount, error: membershipError } = await supabase
-      .from('tree_memberships')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user!.id);
+    try {
+      // Find tree
+      const { data: tree, error: findError } = await supabase
+        .from('family_trees')
+        .select('id')
+        .eq('family_id', joinFamilyId.trim())
+        .single();
 
-    if (membershipError) {
-      toast.error(membershipError.message);
-      setCreating(false);
-      return;
-    }
-
-    if (membershipCount && membershipCount >= 2) {
-      toast.error(t('You can be part of maximum 2 families (Paternal and Maternal).', 'आप केवल 2 परिवारों (पैतृक और मातृक) का हिस्सा बन सकते हैं।'));
-      setCreating(false);
-      return;
-    }
-
-    // Find tree by family_id
-    const { data: tree, error: findError } = await supabase
-      .from('family_trees')
-      .select('id')
-      .eq('family_id', joinFamilyId.trim())
-      .single();
-
-    if (findError || !tree) {
-      toast.error(t('Family not found. Check the Family ID.', 'परिवार नहीं मिला। परिवार ID जांचें।'));
-      setCreating(false);
-      return;
-    }
-
-    const { error } = await supabase
-      .from('tree_memberships')
-      .insert({
-        tree_id: tree.id,
-        user_id: user!.id,
-        role: 'member',
-      });
-
-    setCreating(false);
-    if (error) {
-      if (error.code === '23505') {
-        toast.error(t('You are already a member of this family.', 'आप पहले से इस परिवार के सदस्य हैं।'));
-      } else {
-        toast.error(error.message);
+      if (findError || !tree) {
+        toast.error(t('Family not found. Check the Family ID.', 'परिवार नहीं मिला। परिवार ID जांचें।'));
+        return;
       }
-    } else {
+
+      // Check existing membership
+      const { data: existing } = await supabase
+        .from('tree_memberships')
+        .select('id')
+        .eq('tree_id', tree.id)
+        .eq('user_id', user!.id)
+        .single();
+
+      if (existing) {
+        toast.error(t('You are already a member of this family.', 'आप पहले से इस परिवार के सदस्य हैं।'));
+        return;
+      }
+
+      // Join (Request logic might be better, but sticking to direct join for now as per prev code)
+      // Note: The previous code just inserted into tree_memberships. 
+      // Realistically this should create a "Pending Request". 
+      // IMPORTANT: For now, I will keep the direct join but likely we need a 'Join Request' flow.
+      // Given "Merge Request" logic exists, maybe this should be similar. 
+      // However, I will follow the previous implementation for direct join but alert if it fails.
+
+      const { error } = await supabase
+        .from('tree_memberships')
+        .insert({
+          tree_id: tree.id,
+          user_id: user!.id,
+          role: 'member', // Default role
+        });
+
+      if (error) throw error;
+
       toast.success(t('Joined family successfully!', 'परिवार से सफलतापूर्वक जुड़ गए!'));
-      setShowJoinTree(false);
-      setJoinFamilyId('');
-      fetchTrees();
+      checkFamilyStatus();
+
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setCreating(false);
     }
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-  };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-24 pb-16">
-        <div className="container mx-auto px-4">
-          {/* Welcome Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-10"
-          >
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground">
-                  {t('Namaste', 'नमस्ते')}, {profile?.full_name || user?.email} 🙏
-                </h1>
-                <p className="font-body text-muted-foreground mt-1">
-                  {t('Vanshmala ID: ', 'वंशमाला ID: ')}
-                  <span className="text-saffron font-semibold">{profile?.vanshmala_id}</span>
-                  {profile?.gotra && (
-                    <span className="ml-3 text-gold-dark">
-                      {t('Gotra: ', 'गोत्र: ')}{profile.gotra}
-                    </span>
-                  )}
-                </p>
-              </div>
-              <button
-                onClick={() => navigate('/settings/profile')}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-foreground hover:bg-accent/10 transition-colors font-body text-sm"
-              >
-                <Settings className="w-4 h-4" />
-                {t('Settings', 'सेटिंग्स')}
-              </button>
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors font-body text-sm"
-              >
-                <LogOut className="w-4 h-4" />
-                {t('Sign Out', 'साइन आउट')}
-              </button>
-            </div>
-          </motion.div>
+  if (loading) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-saffron" />
+      </div>
+    );
+  }
 
-          {/* Trees Section */}
-          <div className="mb-8">
-            <h2 className="font-display text-xl font-semibold text-foreground mb-4">
-              {t('Your Family Trees', 'आपके कुलवृक्ष')}
-            </h2>
-
-            {loadingTrees ? (
-              <div className="text-center py-12">
-                <span className="text-saffron/40 text-2xl animate-pulse">ॐ</span>
-              </div>
-            ) : trees.length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {trees.map((tree) => (
-                  <motion.div
-                    key={tree.id}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="p-5 rounded-2xl bg-card border border-border hover:border-saffron/30 transition-all cursor-pointer shadow-soft"
-                    onClick={() => navigate(`/tree/${tree.id}`)}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-saffron/10 flex items-center justify-center flex-shrink-0">
-                        <TreePine className="w-5 h-5 text-saffron" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="font-display text-lg font-semibold text-foreground truncate">
-                          {tree.family_name}
-                        </h3>
-                        <p className="font-body text-xs text-muted-foreground mt-0.5">
-                          {t('Family ID: ', 'परिवार ID: ')}{tree.family_id}
-                        </p>
-                        {tree.gotra && (
-                          <span className="inline-block mt-2 px-2 py-0.5 rounded-full bg-gold/10 text-gold-dark text-[10px] font-medium">
-                            {t('Gotra: ', 'गोत्र: ')}{tree.gotra}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12 rounded-2xl border-2 border-dashed border-border">
-                <span className="text-saffron/30 text-3xl block mb-3">🕉</span>
-                <p className="font-body text-muted-foreground mb-4">
-                  {t('No family trees yet. Create one or join an existing family!', 'अभी तक कोई कुलवृक्ष नहीं। एक बनाएं या मौजूदा परिवार से जुड़ें!')}
-                </p>
-              </div>
+  // ----------------------------------------------------------------------
+  // VIEW: NO FAMILY (ONBOARDING)
+  // ----------------------------------------------------------------------
+  if (!hasFamily) {
+    return (
+      <div className="container max-w-4xl mx-auto py-12 px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <h1 className="text-4xl font-display font-bold text-saffron-900 mb-4">
+            {t('Welcome to VanshMala', 'वंशमाला में आपका स्वागत है')}
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            {t(
+              'To get started, create a new family tree or join an existing one using a Family ID.',
+              'शुरू करने के लिए, एक नया कुलवृक्ष बनाएं या परिवार आईडी का उपयोग करके मौजूदा में शामिल हों।'
             )}
-          </div>
+          </p>
+        </motion.div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => { setShowCreateTree(true); setShowJoinTree(false); }}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-saffron text-primary-foreground font-medium font-body hover:opacity-90 transition-opacity shadow-saffron"
-            >
-              <Plus className="w-4 h-4" />
-              {t('Create New Vanshmala', 'नई वंशमाला बनाएं')}
-            </button>
-            <button
-              onClick={() => { setShowJoinTree(true); setShowCreateTree(false); }}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-border hover:border-gold/40 font-medium font-body transition-colors"
-            >
-              <Users className="w-4 h-4" />
-              {t('Join Existing Family', 'मौजूदा परिवार से जुड़ें')}
-            </button>
-          </div>
-
-          {/* Create Tree Modal */}
-          {showCreateTree && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 max-w-md">
-              <form onSubmit={handleCreateTree} className="p-6 rounded-2xl bg-card border border-border shadow-elevated space-y-4">
-                <h3 className="font-display text-lg font-semibold text-foreground">
-                  {t('Create New Family Tree', 'नया कुलवृक्ष बनाएं')}
-                </h3>
-                <div>
-                  <label className="block font-body text-sm font-medium text-foreground mb-1.5">
-                    {t('Family Name', 'परिवार का नाम')} *
-                  </label>
-                  <input
-                    type="text"
+        <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+          {/* CREATE CARD */}
+          <Card className="hover:shadow-lg transition-shadow border-saffron/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-saffron" />
+                {t('Start a New Family', 'नया परिवार शुरू करें')}
+              </CardTitle>
+              <CardDescription>
+                {t('Create a new VanshMala for your family lineage.', 'अपने वंश के लिए नई वंशमाला बनाएं।')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleCreateTree} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('Family Name', 'परिवार का नाम')}</label>
+                  <Input
+                    placeholder="e.g. Sharma Parivar"
                     value={newTreeName}
-                    onChange={(e) => setNewTreeName(e.target.value)}
-                    placeholder={t('e.g., Sharma Parivar', 'जैसे, शर्मा परिवार')}
-                    className="w-full px-4 py-3 rounded-xl border border-input bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-saffron/40"
+                    onChange={e => setNewTreeName(e.target.value)}
                     required
                   />
                 </div>
-                <div>
-                  <label className="block font-body text-sm font-medium text-foreground mb-1.5">
-                    {t('Gotra (Optional)', 'गोत्र (वैकल्पिक)')}
-                  </label>
-                  <input
-                    type="text"
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('Gotra', 'गोत्र')} <span className="text-xs text-muted-foreground">(Optional)</span></label>
+                  <Input
+                    placeholder="e.g. Bharadwaj"
                     value={newTreeGotra}
-                    onChange={(e) => setNewTreeGotra(e.target.value)}
-                    placeholder={t('Family gotra', 'पारिवारिक गोत्र')}
-                    className="w-full px-4 py-3 rounded-xl border border-input bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-saffron/40"
+                    onChange={e => setNewTreeGotra(e.target.value)}
                   />
                 </div>
-                <div className="flex gap-3">
-                  <button
-                    type="submit"
-                    disabled={creating}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-saffron text-primary-foreground font-medium font-body hover:opacity-90 transition-opacity shadow-saffron disabled:opacity-50"
-                  >
-                    {creating ? t('Creating...', 'बना रहे हैं...') : t('Create', 'बनाएं')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowCreateTree(false)}
-                    className="px-5 py-2.5 rounded-xl border border-border font-body text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {t('Cancel', 'रद्द करें')}
-                  </button>
-                </div>
+                <Button type="submit" className="w-full bg-gradient-saffron hover:opacity-90" disabled={creating}>
+                  {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : t('Create Family', 'परिवार बनाएं')}
+                </Button>
               </form>
-            </motion.div>
-          )}
+            </CardContent>
+          </Card>
 
-          {/* Join Tree Modal */}
-          {showJoinTree && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 max-w-md">
-              <form onSubmit={handleJoinTree} className="p-6 rounded-2xl bg-card border border-border shadow-elevated space-y-4">
-                <h3 className="font-display text-lg font-semibold text-foreground">
-                  {t('Join Existing Family', 'मौजूदा परिवार से जुड़ें')}
-                </h3>
-                <div>
-                  <label className="block font-body text-sm font-medium text-foreground mb-1.5">
-                    {t('Family ID', 'परिवार ID')} *
-                  </label>
-                  <input
-                    type="text"
+          {/* JOIN CARD */}
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-blue-600" />
+                {t('Join Existing', 'मौजूदा से जुड़ें')}
+              </CardTitle>
+              <CardDescription>
+                {t('Enter Family ID shared by your relative.', 'अपने रिश्तेदार द्वारा साझा की गई परिवार आईडी दर्ज करें।')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleJoinTree} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">{t('Family ID', 'परिवार ID')}</label>
+                  <Input
+                    placeholder="e.g. FAM-123xyz"
                     value={joinFamilyId}
-                    onChange={(e) => setJoinFamilyId(e.target.value)}
-                    placeholder={t('e.g., FAM-a1b2c3d4', 'जैसे, FAM-a1b2c3d4')}
-                    className="w-full px-4 py-3 rounded-xl border border-input bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-saffron/40"
+                    onChange={e => setJoinFamilyId(e.target.value)}
                     required
                   />
                 </div>
-                <div className="flex gap-3">
-                  <button
-                    type="submit"
-                    disabled={creating}
-                    className="px-5 py-2.5 rounded-xl bg-gradient-saffron text-primary-foreground font-medium font-body hover:opacity-90 transition-opacity shadow-saffron disabled:opacity-50"
-                  >
-                    {creating ? t('Joining...', 'जुड़ रहे हैं...') : t('Join', 'जुड़ें')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowJoinTree(false)}
-                    className="px-5 py-2.5 rounded-xl border border-border font-body text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {t('Cancel', 'रद्द करें')}
-                  </button>
+                <div className="h-[72px] flex items-end"> {/* Spacer to align buttons */}
+                  <Button type="submit" variant="outline" className="w-full border-blue-200 hover:bg-blue-50 text-blue-700" disabled={creating}>
+                    {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : t('Join Family', 'परिवार से जुड़ें')}
+                  </Button>
                 </div>
               </form>
-            </motion.div>
-          )}
+            </CardContent>
+          </Card>
         </div>
       </div>
-      <Footer />
+    );
+  }
+
+  // ----------------------------------------------------------------------
+  // VIEW: FAMILY FEED
+  // ----------------------------------------------------------------------
+  return (
+    <div className="container max-w-4xl mx-auto py-8 px-4 flex gap-8">
+      {/* Main Feed Column */}
+      <div className="flex-1 max-w-xl mx-auto">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold font-display">{t('Family Feed', 'पारिवारिक फ़ीड')}</h1>
+          <p className="text-muted-foreground text-sm">{t('Latest updates from your family timeline.', 'आपके परिवार की समयरेखा से नवीनतम अपडेट।')}</p>
+        </div>
+
+        {feedEvents.length === 0 ? (
+          <Card className="text-center py-12 bg-muted/30 border-dashed">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
+                <Users className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h3 className="font-semibold text-lg">{t('No updates yet', 'अभी कोई अपडेट नहीं')}</h3>
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                {t('Timeline events added by your family members will appear here.', 'आपके परिवार के सदस्यों द्वारा जोड़े गए समयरेखा ईवेंट यहां दिखाई देंगे।')}
+              </p>
+              <Button onClick={() => navigate(primaryTreeId ? '/tree/' + primaryTreeId : '/tree')} variant="link" className="text-saffron">
+                {t('Go to Family Tree', 'कुलवृक्ष पर जाएं')}
+              </Button>
+            </div>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {feedEvents.map((event) => (
+              <FeedPost key={event.id} event={event} member={event.member} />
+            ))}
+
+            <div className="text-center py-8 text-sm text-muted-foreground">
+              {t("You're all caught up!", "आप सभी अपडेट देख चुके हैं!")}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Right Sidebar (Desktop Only) - Could contain suggestions, upcoming birthdays etc. */}
+      <div className="hidden lg:block w-80 space-y-6">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">{t('Quick Actions', 'त्वरित कार्रवाई')}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-2">
+            <Button variant="outline" className="justify-start" onClick={() => navigate(primaryTreeId ? '/tree/' + primaryTreeId : '/tree')}>
+              <Users className="mr-2 h-4 w-4" />
+              {t('View Family Tree', 'कुलवृक्ष देखें')}
+            </Button>
+            <Button variant="outline" className="justify-start" onClick={() => navigate('/vault')}>
+              <Loader2 className="mr-2 h-4 w-4" /> {/* Placeholder icon */}
+              {t('Open Legacy Vault', 'विरासत तिजोरी खोलें')}
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-saffron/10 to-transparent border-none">
+          <CardContent className="pt-6">
+            <h4 className="font-display font-bold text-saffron-900 mb-2">{t(' Invite Family', 'परिवार को आमंत्रित करें')}</h4>
+            <p className="text-xs text-muted-foreground mb-4">
+              {t('Grow your tree by inviting relatives.', 'रिश्तेदारों को आमंत्रित करके अपने पेड़ को बढ़ाएं।')}
+            </p>
+            <Button size="sm" className="w-full bg-saffron text-white hover:bg-saffron-600">
+              {t('Invite Now', 'अभी आमंत्रित करें')}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
 
 export default Dashboard;
+

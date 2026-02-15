@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const Register = () => {
   const { t } = useLanguage();
-  const { signUp, user } = useAuth();
+  const { signUp, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [fullName, setFullName] = useState('');
   const [gotra, setGotra] = useState('');
@@ -22,9 +22,14 @@ const Register = () => {
   const [showResend, setShowResend] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
 
-  if (user) {
-    navigate('/dashboard', { replace: true });
-    return null;
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading) {
+    return null; // Or a loading spinner
   }
 
   const handleRegister = async (e: React.FormEvent) => {

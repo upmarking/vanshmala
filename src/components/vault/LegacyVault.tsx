@@ -60,13 +60,13 @@ export const LegacyVault = () => {
     }, [activeTab]);
 
     return (
-        <div className="container mx-auto p-4 space-y-6">
-            <div className="flex justify-between items-center">
+        <div className="container max-w-6xl mx-auto p-4 md:p-8 space-y-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-display font-bold text-saffron-800">{t('Legacy Vault', 'विरासत तिजोरी')}</h1>
-                    <p className="text-muted-foreground">{t('Preserve your voice and blessings for future generations.', 'भावी पीढ़ियों के लिए अपनी आवाज और आशीर्वाद सुरक्षित रखें।')}</p>
+                    <p className="text-muted-foreground mt-1">{t('Preserve your voice and blessings for future generations.', 'भावी पीढ़ियों के लिए अपनी आवाज और आशीर्वाद सुरक्षित रखें।')}</p>
                 </div>
-                <Button onClick={() => setRecordOpen(true)} className="gap-2">
+                <Button onClick={() => setRecordOpen(true)} className="gap-2 bg-gradient-saffron text-white shadow-saffron">
                     <Plus className="w-4 h-4" />
                     {t('Record New Message', 'नया संदेश रिकॉर्ड करें')}
                 </Button>
