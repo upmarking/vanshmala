@@ -1,4 +1,5 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { useAddMember, useSearchProfiles, useTreeMembers } from '@/hooks/useFamilyTree';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from '@/integrations/supabase/client';
 import { Database } from "@/integrations/supabase/types";
 import { Search, User, Check } from 'lucide-react';
 
@@ -26,6 +28,7 @@ interface AddMemberDialogProps {
 
 export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationType, relativeName }: AddMemberDialogProps) => {
     const { t } = useLanguage();
+    const { user } = useAuth();
     const { mutate: addMember, isPending } = useAddMember();
 
     const [activeTab, setActiveTab] = useState("new");
@@ -56,7 +59,7 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
         if (checkResults && checkResults.length > 0 && activeTab === 'new') {
             // Only alert if exact match on email or phone
             const match = checkResults.find(p =>
-                (formData.email && p.email === formData.email) ||
+                (formData.email && (p as any).email === formData.email) ||
                 (formData.phone && p.phone === formData.phone)
             );
 
@@ -120,10 +123,25 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
         }
     }, [isOpen]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.fullName.trim()) {
             toast.error(t('Name is required', 'नाम आवश्यक है'));
+            return;
+        }
+
+        // Check wallet — ₹11 fee
+        const { data: deducted } = await supabase.rpc('deduct_wallet_balance' as any, {
+            p_user_id: user!.id,
+            p_amount: 11,
+            p_description: 'Panjikaran Fees - Add Member',
+            p_description_hi: 'पंजीकरण राशि - सदस्य जोड़ना',
+            p_reference_type: 'add_member',
+            p_reference_id: formData.fullName,
+        });
+
+        if (!deducted) {
+            toast.error(t('Insufficient balance. ₹11 required. Add money to Dhan wallet.', 'अपर्याप्त शेष। ₹11 आवश्यक। धन वॉलेट में पैसे जोड़ें।'));
             return;
         }
 
@@ -155,9 +173,23 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
         );
     };
 
-    const handleLink = () => {
+    const handleLink = async () => {
         if (!selectedProfile) return;
 
+        // Check wallet — ₹11 fee
+        const { data: deducted } = await supabase.rpc('deduct_wallet_balance' as any, {
+            p_user_id: user!.id,
+            p_amount: 11,
+            p_description: 'Panjikaran Fees - Link Member',
+            p_description_hi: 'पंजीकरण राशि - सदस्य लिंक करना',
+            p_reference_type: 'add_member',
+            p_reference_id: selectedProfile.full_name,
+        });
+
+        if (!deducted) {
+            toast.error(t('Insufficient balance. ₹11 required. Add money to Dhan wallet.', 'अपर्याप्त शेष। ₹11 आवश्यक। धन वॉलेट में पैसे जोड़ें।'));
+            return;
+        }
         const memberData = {
             tree_id: treeId,
             full_name: selectedProfile.full_name,
