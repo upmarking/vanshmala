@@ -22,6 +22,7 @@ import ReferAndEarn from "./pages/ReferAndEarn";
 import { LegacyVault } from "./components/vault/LegacyVault";
 import DocumentVault from "./components/documents/DocumentVault";
 import { TagManagerWrapper } from "./components/tags/TagManagerWrapper";
+import WalletPage from "./pages/Wallet";
 
 const queryClient = new QueryClient();
 
@@ -55,7 +56,11 @@ const App = () => (
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/tree" element={<FamilyTree />} />
+              <Route path="/tree" element={
+                <MainLayout>
+                  <FamilyTree />
+                </MainLayout>
+              } />
               <Route path="/settings/profile" element={
                 <ProtectedRoute>
                   <MainLayout>
@@ -102,6 +107,13 @@ const App = () => (
               } />
 
               {/* Public Profile - specific username route */}
+              <Route path="/wallet" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <WalletPage />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
               <Route path="/:username" element={<PublicProfile />} />
 
               <Route path="*" element={<NotFound />} />

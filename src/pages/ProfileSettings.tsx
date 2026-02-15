@@ -196,7 +196,7 @@ const ProfileSettings = () => {
                                 <div className="space-y-2">
                                     <div className="flex justify-between">
                                         <Label>{t('Username', 'उपयोगकर्ता नाम')}</Label>
-                                        <span className="text-xs text-muted-foreground">vanshmala.com/{formData.username || 'username'}</span>
+                                        <span className="text-xs text-muted-foreground">vanshmala.in/{formData.username || 'username'}</span>
                                     </div>
                                     <Input
                                         value={formData.username}

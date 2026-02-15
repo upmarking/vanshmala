@@ -2,7 +2,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import LanguageToggle from './LanguageToggle';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, LogOut, Settings, TreePine, Archive, ChevronDown, Gift, MessageSquare } from 'lucide-react';
+import { User, LogOut, Settings, TreePine, Archive, ChevronDown, Gift, MessageSquare, Wallet } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 const OmIcon = () => (
   <svg viewBox="0 0 100 100" className="w-6 h-6" fill="currentColor">
@@ -24,6 +26,47 @@ const Navbar = () => {
   const { t } = useLanguage();
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const [balance, setBalance] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      const fetchWallet = async () => {
+        const { data } = await supabase
+          .from('wallets')
+          .select('balance')
+          .eq('user_id', user.id)
+          .single();
+
+        if (data) {
+          setBalance(data.balance);
+        }
+      };
+
+      fetchWallet();
+
+      // Real-time subscription for wallet updates
+      const channel = supabase
+        .channel('schema-db-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'wallets',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            setBalance((payload.new as any).balance);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -49,8 +92,8 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6 font-body text-sm font-medium text-muted-foreground">
-          <Link to="/" className="hover:text-accent transition-colors">
-            {t('Home', 'होम')}
+          <Link to={user ? "/dashboard" : "/"} className="hover:text-accent transition-colors">
+            {user ? t('Dashboard', 'डैशबोर्ड') : t('Home', 'होम')}
           </Link>
           {user && (
             <>
@@ -71,6 +114,13 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          {user && (
+            <Link to="/wallet" className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors font-medium text-sm border border-amber-200">
+              <Wallet className="w-4 h-4" />
+              <span className="font-bold">{t('Dhan', 'धन')}</span>
+              <span>₹{balance !== null ? balance.toFixed(2) : '0.00'}</span>
+            </Link>
+          )}
           <LanguageToggle />
 
           {user ? (

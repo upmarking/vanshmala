@@ -1,6 +1,5 @@
 import { useLanguage } from '@/contexts/LanguageContext';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+
 import { Plus, GitMerge } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -179,9 +178,8 @@ const FamilyTree = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-24 pb-16">
+    <div className="bg-background">
+      <div className="py-8 pb-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 relative">
             {/* Merge Requests Button (Admin only ideally, but visible for now) */}
@@ -284,7 +282,6 @@ const FamilyTree = () => {
           </div>
         </div>
       </div>
-      <Footer />
 
       {treeId && (
         <>
