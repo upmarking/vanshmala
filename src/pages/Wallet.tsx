@@ -3,7 +3,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
-import { Wallet, Plus, Send, ArrowDownLeft, ArrowUpRight, Gift, History } from 'lucide-react';
+import { Wallet, Plus, Send, ArrowDownLeft, ArrowUpRight, Gift, History, Tag } from 'lucide-react';
+import GiftCardDialog from '@/components/wallet/GiftCardDialog';
+import DiscountCodeInput from '@/components/wallet/DiscountCodeInput';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -37,10 +39,12 @@ const WalletPage = () => {
   const [loading, setLoading] = useState(true);
   const [showAddMoney, setShowAddMoney] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
+  const [showGiftCard, setShowGiftCard] = useState(false);
   const [addAmount, setAddAmount] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
   const [transferTarget, setTransferTarget] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [appliedDiscount, setAppliedDiscount] = useState<{ amount: number; codeId: string; code: string } | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -90,6 +94,10 @@ const WalletPage = () => {
 
     setProcessing(true);
 
+    // Calculate payment amount (with discount if applied)
+    const payAmount = appliedDiscount ? amount - appliedDiscount.amount : amount;
+    const discountInfo = appliedDiscount ? { ...appliedDiscount } : null;
+
     try {
       // Create Razorpay order via edge function
       const { data: sessionData } = await supabase.auth.getSession();
@@ -103,7 +111,7 @@ const WalletPage = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({ action: 'create_order', amount }),
+          body: JSON.stringify({ action: 'create_order', amount: payAmount > 0 ? payAmount : amount }),
         }
       );
 
@@ -117,7 +125,7 @@ const WalletPage = () => {
 
       const options = {
         key: orderData.key_id,
-        amount: amount * 100,
+        amount: (payAmount > 0 ? payAmount : amount) * 100,
         currency: 'INR',
         name: 'Vanshmala',
         description: t('Add money to Dhan wallet', 'धन वॉलेट में पैसे जोड़ें'),
@@ -136,15 +144,32 @@ const WalletPage = () => {
                 action: 'verify_payment',
                 payment_id: response.razorpay_payment_id,
                 order_id: response.razorpay_order_id,
+                bonus_amount: discountInfo?.amount || 0,
               }),
             }
           );
 
           const verifyData = await verifyRes.json();
           if (verifyData.success) {
+            // If discount was applied, record usage and credit bonus
+            if (discountInfo) {
+              await supabase.from('discount_code_usage' as any).insert({
+                discount_code_id: discountInfo.codeId,
+                user_id: user!.id,
+                amount_added: amount,
+                discount_amount: discountInfo.amount,
+              });
+              // Update discount code usage count
+              await supabase.rpc('validate_discount_code' as any, {
+                p_code: discountInfo.code,
+                p_amount: amount,
+                p_user_id: user!.id,
+              });
+            }
             toast.success(t(`₹${amount} added to wallet!`, `₹${amount} वॉलेट में जोड़े गए!`));
             setShowAddMoney(false);
             setAddAmount('');
+            setAppliedDiscount(null);
             fetchWallet();
             fetchTransactions();
           } else {
@@ -312,6 +337,14 @@ const WalletPage = () => {
           <div className="flex gap-3 mb-8">
             <Button
               variant="outline"
+              onClick={() => setShowGiftCard(true)}
+              className="flex-1 gap-2"
+            >
+              <Gift className="w-4 h-4" />
+              {t('Gift Card', 'गिफ्ट कार्ड')}
+            </Button>
+            <Button
+              variant="outline"
               onClick={() => navigate('/referrals')}
               className="flex-1 gap-2"
             >
@@ -389,10 +422,22 @@ const WalletPage = () => {
             <Input
               type="number"
               value={addAmount}
-              onChange={(e) => setAddAmount(e.target.value)}
+              onChange={(e) => { setAddAmount(e.target.value); setAppliedDiscount(null); }}
               placeholder={t('Enter amount', 'राशि दर्ज करें')}
               min="1"
             />
+            <DiscountCodeInput
+              amount={parseFloat(addAmount) || 0}
+              onDiscountApplied={setAppliedDiscount}
+            />
+            {appliedDiscount && (
+              <div className="text-sm text-muted-foreground">
+                {t('You pay: ', 'आप भुगतान करें: ')}
+                <span className="font-semibold text-foreground">₹{((parseFloat(addAmount) || 0) - appliedDiscount.amount).toFixed(2)}</span>
+                <span className="line-through ml-2">₹{addAmount}</span>
+                {' '}{t('+ bonus ₹', '+ बोनस ₹')}{appliedDiscount.amount.toFixed(2)}
+              </div>
+            )}
             <Button onClick={handleAddMoney} disabled={processing} className="w-full bg-gradient-saffron text-primary-foreground">
               {processing ? t('Processing...', 'प्रोसेस हो रहा है...') : t('Pay with Razorpay', 'Razorpay से भुगतान करें')}
             </Button>
@@ -429,6 +474,14 @@ const WalletPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Gift Card Dialog */}
+      <GiftCardDialog
+        open={showGiftCard}
+        onOpenChange={setShowGiftCard}
+        walletBalance={wallet?.balance || 0}
+        onSuccess={() => { fetchWallet(); fetchTransactions(); }}
+      />
 
       <Footer />
     </div>

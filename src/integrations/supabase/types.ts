@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      discount_code_usage: {
+        Row: {
+          amount_added: number
+          created_at: string
+          discount_amount: number
+          discount_code_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          amount_added: number
+          created_at?: string
+          discount_amount: number
+          discount_code_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          amount_added?: number
+          created_at?: string
+          discount_amount?: number
+          discount_code_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_code_usage_discount_code_id_fkey"
+            columns: ["discount_code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discount_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          current_uses: number
+          description: string | null
+          description_hi: string | null
+          discount_percentage: number
+          id: string
+          is_active: boolean
+          max_discount: number
+          max_uses: number | null
+          min_transaction_value: number
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          current_uses?: number
+          description?: string | null
+          description_hi?: string | null
+          discount_percentage: number
+          id?: string
+          is_active?: boolean
+          max_discount: number
+          max_uses?: number | null
+          min_transaction_value?: number
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          current_uses?: number
+          description?: string | null
+          description_hi?: string | null
+          discount_percentage?: number
+          id?: string
+          is_active?: boolean
+          max_discount?: number
+          max_uses?: number | null
+          min_transaction_value?: number
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           access_level: string | null
@@ -290,6 +376,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      gift_cards: {
+        Row: {
+          amount: number
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_redeemed: boolean
+          redeemed_at: string | null
+          redeemed_by: string | null
+        }
+        Insert: {
+          amount: number
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_redeemed?: boolean
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+        }
+        Update: {
+          amount?: number
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_redeemed?: boolean
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+        }
+        Relationships: []
       }
       legacy_messages: {
         Row: {
@@ -806,6 +928,14 @@ export type Database = {
           p_sender_vanshmala_id: string
         }
         Returns: undefined
+      }
+      redeem_gift_card: {
+        Args: { p_code: string; p_user_id: string }
+        Returns: Json
+      }
+      validate_discount_code: {
+        Args: { p_amount: number; p_code: string; p_user_id: string }
+        Returns: Json
       }
     }
     Enums: {

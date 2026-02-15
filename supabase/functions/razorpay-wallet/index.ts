@@ -31,7 +31,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { action, amount, payment_id, order_id } = body;
+    const { action, amount, payment_id, order_id, bonus_amount } = body;
 
     if (action === 'create_order') {
       // Create Razorpay order
@@ -73,7 +73,9 @@ serve(async (req) => {
       const payment = await paymentResponse.json();
 
       if (payment.status === 'captured' || payment.status === 'authorized') {
-        const creditAmount = payment.amount / 100;
+        const paidAmount = payment.amount / 100;
+        const bonusAmt = typeof bonus_amount === 'number' && bonus_amount > 0 ? bonus_amount : 0;
+        const totalCredit = paidAmount + bonusAmt;
 
         // Get or create wallet
         let { data: wallet } = await supabase
@@ -92,28 +94,35 @@ serve(async (req) => {
         }
 
         if (wallet) {
-          // Credit wallet
+          // Credit wallet with total (paid + bonus)
           await supabase
             .from('wallets')
-            .update({ balance: wallet.balance + creditAmount })
+            .update({ balance: wallet.balance + totalCredit })
             .eq('id', wallet.id);
 
           // Record transaction
+          const desc = bonusAmt > 0
+            ? `Added ₹${totalCredit} via Razorpay (₹${paidAmount} paid + ₹${bonusAmt} bonus)`
+            : `Added ₹${paidAmount} via Razorpay`;
+          const descHi = bonusAmt > 0
+            ? `Razorpay से ₹${totalCredit} जोड़े (₹${paidAmount} भुगतान + ₹${bonusAmt} बोनस)`
+            : `Razorpay से ₹${paidAmount} जोड़े`;
+
           await supabase
             .from('wallet_transactions')
             .insert({
               wallet_id: wallet.id,
               user_id: user.id,
               type: 'credit',
-              amount: creditAmount,
-              description: `Added ₹${creditAmount} via Razorpay`,
-              description_hi: `Razorpay से ₹${creditAmount} जोड़े`,
+              amount: totalCredit,
+              description: desc,
+              description_hi: descHi,
               reference_type: 'razorpay',
               reference_id: payment_id,
             });
         }
 
-        return new Response(JSON.stringify({ success: true, amount: creditAmount }), {
+        return new Response(JSON.stringify({ success: true, amount: totalCredit }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
