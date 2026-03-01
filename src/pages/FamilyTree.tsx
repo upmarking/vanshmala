@@ -1,6 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 
-import { Plus, GitMerge } from 'lucide-react';
+import { Plus, GitMerge, FileText, Tag as TagIcon } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTree, useTreeMembers, useIsTreeAdmin, useUserTrees } from '@/hooks/useFamilyTree';
@@ -183,22 +183,25 @@ const FamilyTree = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 relative">
             {/* Merge Requests Button (Admin only ideally, but visible for now) */}
+            {/* Quick Action Buttons */}
             {treeId && (
-              <div className="absolute top-0 right-0 flex gap-2">
+              <div className="flex flex-wrap justify-center sm:justify-end gap-2 mb-6 sm:absolute sm:top-0 sm:right-0 sm:mb-0">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-2"
+                  className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
                   onClick={() => navigate(`/tree/${treeId}/documents`)}
                 >
+                  <FileText className="w-4 h-4 text-orange-600" />
                   <span className="hidden sm:inline">{t('Documents', 'दस्तावेज़')}</span>
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-2"
+                  className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
                   onClick={() => navigate(`/tree/${treeId}/tags`)}
                 >
+                  <TagIcon className="w-4 h-4 text-orange-600" />
                   <span className="hidden sm:inline">{t('Tags', 'टैग')}</span>
                 </Button>
 
@@ -206,13 +209,13 @@ const FamilyTree = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="gap-2"
+                    className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
                     onClick={() => setMergeListOpen(true)}
                   >
-                    <GitMerge className="w-4 h-4" />
+                    <GitMerge className="w-4 h-4 text-orange-600" />
                     <span className="hidden sm:inline">{t('Merge Requests', 'विलय अनुरोध')}</span>
                     {mergeRequests && mergeRequests.length > 0 && (
-                      <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px]">
+                      <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px] animate-pulse">
                         {mergeRequests.length}
                       </Badge>
                     )}
@@ -254,8 +257,8 @@ const FamilyTree = () => {
             )}
           </div>
 
-          <div className="overflow-x-auto pb-8 min-h-[400px]">
-            <div className="flex justify-center min-w-[700px]">
+          <div className="pb-8 min-h-[400px] flex justify-center overflow-x-hidden">
+            <div className="w-full flex justify-center">
               {isLoading ? (
                 <div className="text-muted-foreground">{t('Loading tree...', 'वंशवृक्ष लोड हो रहा है...')}</div>
               ) : rootNode ? (

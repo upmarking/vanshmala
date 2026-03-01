@@ -244,8 +244,24 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-saffron" />
+      <div className="animate-fade-in-up container max-w-4xl mx-auto py-6 px-4 space-y-4">
+        {/* Mobile skeleton loaders */}
+        <div className="skeleton h-6 w-48 mb-2" />
+        <div className="skeleton h-4 w-64 mb-6" />
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="rounded-2xl border border-border p-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="skeleton h-10 w-10 rounded-full shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="skeleton h-4 w-32" />
+                <div className="skeleton h-3 w-24" />
+              </div>
+            </div>
+            <div className="skeleton h-4 w-full" />
+            <div className="skeleton h-4 w-3/4" />
+            <div className="skeleton h-4 w-1/2" />
+          </div>
+        ))}
       </div>
     );
   }
@@ -255,7 +271,7 @@ const Dashboard = () => {
   // ----------------------------------------------------------------------
   if (!hasFamily) {
     return (
-      <div className="container max-w-4xl mx-auto py-12 px-4">
+      <div className="animate-fade-in-up container max-w-4xl mx-auto py-8 md:py-12 px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -272,7 +288,7 @@ const Dashboard = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 max-w-2xl mx-auto">
           {/* CREATE CARD */}
           <Card className="hover:shadow-lg transition-shadow border-saffron/20">
             <CardHeader>
@@ -349,9 +365,9 @@ const Dashboard = () => {
   // VIEW: FAMILY FEED
   // ----------------------------------------------------------------------
   return (
-    <div className="container max-w-4xl mx-auto py-8 px-4 flex gap-8">
+    <div className="animate-fade-in-up container max-w-4xl mx-auto py-4 md:py-8 px-3 md:px-4 flex gap-8">
       {/* Main Feed Column */}
-      <div className="flex-1 max-w-xl mx-auto">
+      <div className="flex-1 w-full md:max-w-xl md:mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold font-display">{t('Family Feed', 'पारिवारिक फ़ीड')}</h1>
           <p className="text-muted-foreground text-sm">{t('Latest updates from your family timeline.', 'आपके परिवार की समयरेखा से नवीनतम अपडेट।')}</p>

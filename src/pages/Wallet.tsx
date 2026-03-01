@@ -293,190 +293,198 @@ const WalletPage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 max-w-2xl py-8">
-      {/* Wallet Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="p-6 rounded-2xl bg-gradient-saffron text-primary-foreground shadow-saffron mb-8"
-      >
-        <div className="flex items-center gap-3 mb-4">
-          <Wallet className="w-8 h-8" />
-          <div>
-            <h1 className="font-display text-2xl font-bold">{t('Dhan', 'धन')} 💰</h1>
-            <p className="text-sm opacity-80">{t('Your Vanshmala Wallet', 'आपका वंशमाला वॉलेट')}</p>
+    <div className="animate-fade-in-up">
+      {/* Hero Balance Card — full bleed on mobile */}
+      <div className="mx-0 md:container md:mx-auto md:max-w-2xl md:pt-8 md:px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-6 md:rounded-2xl bg-gradient-saffron text-primary-foreground shadow-saffron mb-1 md:mb-8"
+        >
+          <div className="flex items-center gap-3 mb-2 md:mb-4">
+            <Wallet className="w-7 h-7 md:w-8 md:h-8" />
+            <div>
+              <h1 className="font-display text-xl md:text-2xl font-bold">{t('Dhan', 'धन')} 💰</h1>
+              <p className="text-xs md:text-sm opacity-80">{t('Your Vanshmala Wallet', 'आपका वंशमाला वॉलेट')}</p>
+            </div>
           </div>
-        </div>
-        <div className="text-4xl font-bold font-display mb-6">
-          ₹{loading ? '...' : (wallet?.balance || 0).toFixed(2)}
-        </div>
-        <div className="flex gap-3">
-          <Button
-            onClick={() => setShowAddMoney(true)}
-            variant="secondary"
-            className="flex-1 gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            {t('Add Money', 'पैसे जोड़ें')}
-          </Button>
-          <Button
-            onClick={() => setShowTransfer(true)}
-            variant="secondary"
-            className="flex-1 gap-2"
-          >
-            <Send className="w-4 h-4" />
-            {t('Transfer', 'भेजें')}
-          </Button>
-        </div>
-      </motion.div>
+          <div className="text-5xl md:text-4xl font-bold font-display mb-5 tracking-tight">
+            ₹{loading ? '—' : (wallet?.balance || 0).toFixed(2)}
+          </div>
 
-      {/* Quick Links */}
-      <div className="flex gap-3 mb-8">
-        <Button
-          variant="outline"
-          onClick={() => setShowGiftCard(true)}
-          className="flex-1 gap-2"
-        >
-          <Gift className="w-4 h-4" />
-          {t('Gift Card', 'गिफ्ट कार्ड')}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => navigate('/refer')}
-          className="flex-1 gap-2"
-        >
-          <Gift className="w-4 h-4" />
-          {t('Refer & Earn', 'रेफर करें और कमाएं')}
-        </Button>
+          {/* Quick action chips — Android style */}
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+            <button
+              onClick={() => setShowAddMoney(true)}
+              className="flex flex-col items-center gap-1 min-w-[72px] py-2.5 px-3 rounded-2xl bg-white/20 text-primary-foreground active:bg-white/30 transition-colors"
+            >
+              <Plus size={20} />
+              <span className="text-[11px] font-medium whitespace-nowrap">{t('Add', 'जोड़ें')}</span>
+            </button>
+            <button
+              onClick={() => setShowTransfer(true)}
+              className="flex flex-col items-center gap-1 min-w-[72px] py-2.5 px-3 rounded-2xl bg-white/20 text-primary-foreground active:bg-white/30 transition-colors"
+            >
+              <Send size={20} />
+              <span className="text-[11px] font-medium whitespace-nowrap">{t('Send', 'भेजें')}</span>
+            </button>
+            <button
+              onClick={() => setShowGiftCard(true)}
+              className="flex flex-col items-center gap-1 min-w-[72px] py-2.5 px-3 rounded-2xl bg-white/20 text-primary-foreground active:bg-white/30 transition-colors"
+            >
+              <Gift size={20} />
+              <span className="text-[11px] font-medium whitespace-nowrap">{t('Gift', 'गिफ्ट')}</span>
+            </button>
+            <button
+              onClick={() => navigate('/refer')}
+              className="flex flex-col items-center gap-1 min-w-[72px] py-2.5 px-3 rounded-2xl bg-white/20 text-primary-foreground active:bg-white/30 transition-colors"
+            >
+              <ArrowUpRight size={20} />
+              <span className="text-[11px] font-medium whitespace-nowrap">{t('Refer', 'रेफर')}</span>
+            </button>
+          </div>
+        </motion.div>
       </div>
 
       {/* Transaction History */}
-      <div>
-        <h2 className="font-display text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-          <History className="w-5 h-5" />
-          {t('Transaction History', 'लेन-देन इतिहास')}
-        </h2>
+      <div className="container mx-auto px-4 max-w-2xl pb-4">
+        {/* Desktop quick links (hidden on mobile — chips above serve this) */}
+        <div className="hidden md:flex gap-3 mb-6">
+          <Button variant="outline" onClick={() => setShowGiftCard(true)} className="flex-1 gap-2">
+            <Gift className="w-4 h-4" />{t('Gift Card', 'गिफ्ट कार्ड')}
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/refer')} className="flex-1 gap-2">
+            <Gift className="w-4 h-4" />{t('Refer & Earn', 'रेफर करें और कमाएं')}
+          </Button>
+        </div>
 
-        {transactions.length === 0 ? (
-          <div className="text-center py-12 rounded-2xl border-2 border-dashed border-border">
-            <Wallet className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
-            <p className="font-body text-muted-foreground">
-              {t('No transactions yet', 'अभी कोई लेन-देन नहीं')}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {transactions.map((txn) => (
-              <motion.div
-                key={txn.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex items-center justify-between p-4 rounded-xl bg-card border border-border"
-              >
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${txn.type === 'credit' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+        <div>
+          <h2 className="font-display text-lg md:text-xl font-semibold text-foreground mb-3 flex items-center gap-2">
+            <History className="w-5 h-5" />
+            {t('Transaction History', 'लेन-देन इतिहास')}
+          </h2>
+
+          {transactions.length === 0 ? (
+            <div className="text-center py-12 rounded-2xl border-2 border-dashed border-border">
+              <Wallet className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
+              <p className="font-body text-muted-foreground">
+                {t('No transactions yet', 'अभी कोई लेन-देन नहीं')}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {transactions.map((txn) => (
+                <motion.div
+                  key={txn.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-center justify-between py-3.5 px-4 rounded-xl bg-card border border-border min-h-[56px]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${txn.type === 'credit' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                      }`}>
+                      {txn.type === 'credit' ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
+                    </div>
+                    <div>
+                      <p className="font-body text-sm font-medium text-foreground leading-tight">
+                        {t(txn.description, txn.description_hi || txn.description)}
+                      </p>
+                      <p className="font-body text-xs text-muted-foreground">
+                        {formatDate(txn.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`font-display font-semibold text-sm shrink-0 ${txn.type === 'credit' ? 'text-green-600' : 'text-destructive'
                     }`}>
-                    {txn.type === 'credit' ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
-                  </div>
-                  <div>
-                    <p className="font-body text-sm font-medium text-foreground">
-                      {t(txn.description, txn.description_hi || txn.description)}
-                    </p>
-                    <p className="font-body text-xs text-muted-foreground">
-                      {formatDate(txn.created_at)}
-                    </p>
-                  </div>
-                </div>
-                <span className={`font-display font-semibold ${txn.type === 'credit' ? 'text-green-600' : 'text-destructive'
-                  }`}>
-                  {txn.type === 'credit' ? '+' : '-'}₹{txn.amount}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </div>
-
-
-      {/* Add Money Dialog */}
-      <Dialog open={showAddMoney} onOpenChange={setShowAddMoney}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('Add Money', 'पैसे जोड़ें')}</DialogTitle>
-            <DialogDescription>{t('Add funds to your Dhan wallet via Razorpay', 'Razorpay से अपने धन वॉलेट में पैसे जोड़ें')}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div className="flex gap-2">
-              {[100, 500, 1000].map((amt) => (
-                <Button key={amt} variant="outline" size="sm" onClick={() => setAddAmount(String(amt))}>
-                  ₹{amt}
-                </Button>
+                    {txn.type === 'credit' ? '+' : '-'}₹{txn.amount}
+                  </span>
+                </motion.div>
               ))}
             </div>
-            <Input
-              type="number"
-              value={addAmount}
-              onChange={(e) => { setAddAmount(e.target.value); setAppliedDiscount(null); }}
-              placeholder={t('Enter amount', 'राशि दर्ज करें')}
-              min="1"
-            />
-            <DiscountCodeInput
-              amount={parseFloat(addAmount) || 0}
-              onDiscountApplied={setAppliedDiscount}
-            />
-            {appliedDiscount && (
-              <div className="text-sm text-muted-foreground">
-                {t('You pay: ', 'आप भुगतान करें: ')}
-                <span className="font-semibold text-foreground">₹{((parseFloat(addAmount) || 0) - appliedDiscount.amount).toFixed(2)}</span>
-                <span className="line-through ml-2">₹{addAmount}</span>
-                {' '}{t('+ bonus ₹', '+ बोनस ₹')}{appliedDiscount.amount.toFixed(2)}
+          )}
+        </div>
+
+
+        {/* Add Money Dialog */}
+        <Dialog open={showAddMoney} onOpenChange={setShowAddMoney}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('Add Money', 'पैसे जोड़ें')}</DialogTitle>
+              <DialogDescription>{t('Add funds to your Dhan wallet via Razorpay', 'Razorpay से अपने धन वॉलेट में पैसे जोड़ें')}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="flex gap-2">
+                {[100, 500, 1000].map((amt) => (
+                  <Button key={amt} variant="outline" size="sm" onClick={() => setAddAmount(String(amt))}>
+                    ₹{amt}
+                  </Button>
+                ))}
               </div>
-            )}
-            <Button onClick={handleAddMoney} disabled={processing} className="w-full bg-gradient-saffron text-primary-foreground">
-              {processing ? t('Processing...', 'प्रोसेस हो रहा है...') : t('Pay with Razorpay', 'Razorpay से भुगतान करें')}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+              <Input
+                type="number"
+                value={addAmount}
+                onChange={(e) => { setAddAmount(e.target.value); setAppliedDiscount(null); }}
+                placeholder={t('Enter amount', 'राशि दर्ज करें')}
+                min="1"
+              />
+              <DiscountCodeInput
+                amount={parseFloat(addAmount) || 0}
+                onDiscountApplied={setAppliedDiscount}
+              />
+              {appliedDiscount && (
+                <div className="text-sm text-muted-foreground">
+                  {t('You pay: ', 'आप भुगतान करें: ')}
+                  <span className="font-semibold text-foreground">₹{((parseFloat(addAmount) || 0) - appliedDiscount.amount).toFixed(2)}</span>
+                  <span className="line-through ml-2">₹{addAmount}</span>
+                  {' '}{t('+ bonus ₹', '+ बोनस ₹')}{appliedDiscount.amount.toFixed(2)}
+                </div>
+              )}
+              <Button onClick={handleAddMoney} disabled={processing} className="w-full bg-gradient-saffron text-primary-foreground">
+                {processing ? t('Processing...', 'प्रोसेस हो रहा है...') : t('Pay with Razorpay', 'Razorpay से भुगतान करें')}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
-      {/* Transfer Dialog */}
-      <Dialog open={showTransfer} onOpenChange={setShowTransfer}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('Transfer Money', 'पैसे भेजें')}</DialogTitle>
-            <DialogDescription>{t('Send money using Vanshmala ID or Phone Number', 'वंशमाला ID या फ़ोन नंबर से पैसे भेजें')}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <Input
-              value={transferTarget}
-              onChange={(e) => setTransferTarget(e.target.value)}
-              placeholder={t('Vanshmala ID or Phone', 'वंशमाला ID या फ़ोन')}
-            />
-            <Input
-              type="number"
-              value={transferAmount}
-              onChange={(e) => setTransferAmount(e.target.value)}
-              placeholder={t('Amount (₹)', 'राशि (₹)')}
-              min="1"
-            />
-            <p className="text-xs text-muted-foreground">
-              {t('Balance: ', 'शेष: ')}₹{wallet?.balance?.toFixed(2) || '0.00'}
-            </p>
-            <Button onClick={handleTransfer} disabled={processing} className="w-full bg-gradient-saffron text-primary-foreground">
-              {processing ? t('Sending...', 'भेज रहे हैं...') : t('Send', 'भेजें')}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        {/* Transfer Dialog */}
+        <Dialog open={showTransfer} onOpenChange={setShowTransfer}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('Transfer Money', 'पैसे भेजें')}</DialogTitle>
+              <DialogDescription>{t('Send money using Vanshmala ID or Phone Number', 'वंशमाला ID या फ़ोन नंबर से पैसे भेजें')}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <Input
+                value={transferTarget}
+                onChange={(e) => setTransferTarget(e.target.value)}
+                placeholder={t('Vanshmala ID or Phone', 'वंशमाला ID या फ़ोन')}
+              />
+              <Input
+                type="number"
+                value={transferAmount}
+                onChange={(e) => setTransferAmount(e.target.value)}
+                placeholder={t('Amount (₹)', 'राशि (₹)')}
+                min="1"
+              />
+              <p className="text-xs text-muted-foreground">
+                {t('Balance: ', 'शेष: ')}₹{wallet?.balance?.toFixed(2) || '0.00'}
+              </p>
+              <Button onClick={handleTransfer} disabled={processing} className="w-full bg-gradient-saffron text-primary-foreground">
+                {processing ? t('Sending...', 'भेज रहे हैं...') : t('Send', 'भेजें')}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
-      {/* Gift Card Dialog */}
-      <GiftCardDialog
-        open={showGiftCard}
-        onOpenChange={setShowGiftCard}
-        walletBalance={wallet?.balance || 0}
-        onSuccess={() => { fetchWallet(); fetchTransactions(); }}
-      />
+        {/* Gift Card Dialog */}
+        <GiftCardDialog
+          open={showGiftCard}
+          onOpenChange={setShowGiftCard}
+          walletBalance={wallet?.balance || 0}
+          onSuccess={() => { fetchWallet(); fetchTransactions(); }}
+        />
 
+      </div>
     </div>
   );
 };

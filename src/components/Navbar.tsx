@@ -2,7 +2,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import LanguageToggle from './LanguageToggle';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { User, LogOut, Settings, TreePine, Archive, ChevronDown, Gift, MessageSquare, Wallet } from 'lucide-react';
+import { User, LogOut, Settings, TreePine, Archive, ChevronDown, Gift, MessageSquare, Wallet, IdCard, Copy } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -71,7 +72,7 @@ const Navbar = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate('/login');
   };
 
   const getInitials = (name?: string) => {
@@ -154,12 +155,36 @@ const Navbar = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{profile?.full_name || 'User'}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user.email}
-                    </p>
+                <DropdownMenuLabel className="font-normal px-4 py-3">
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-bold text-foreground leading-tight">{profile?.full_name || 'User'}</p>
+                      <p className="text-[11px] font-medium text-muted-foreground leading-none">
+                        {user.email}
+                      </p>
+                    </div>
+
+                    <div
+                      className="relative overflow-hidden group border border-amber-200 bg-gradient-to-br from-amber-50/50 to-orange-50/30 rounded-xl p-2.5 transition-all hover:border-amber-400 hover:shadow-sm active:scale-[0.98] cursor-copy"
+                      onClick={() => {
+                        navigator.clipboard.writeText(profile?.vanshmala_id || '');
+                        toast.success(t('ID Copied', 'ID कॉपी हो गया'));
+                      }}
+                    >
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <IdCard size={14} className="text-amber-600" />
+                            <span className="text-[9px] font-bold text-amber-700/60 uppercase tracking-widest leading-none">Member ID</span>
+                          </div>
+                          <Copy size={11} className="text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <p className="text-sm font-black text-amber-900 font-mono tracking-tight leading-none">
+                          {profile?.vanshmala_id || 'PENDING'}
+                        </p>
+                      </div>
+                      <div className="absolute top-0 right-0 w-16 h-16 bg-amber-200/5 rounded-full -mr-8 -mt-8" />
+                    </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />

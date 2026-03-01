@@ -37,7 +37,7 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
                 className="relative group"
             >
                 <div
-                    className="relative px-5 py-4 rounded-2xl bg-background border-2 border-border hover:border-saffron/40 transition-all cursor-pointer shadow-soft min-w-[180px] text-center"
+                    className="relative px-4 py-3 md:px-5 md:py-4 rounded-2xl bg-background border-2 border-border hover:border-saffron/40 transition-all cursor-pointer shadow-soft min-w-[140px] md:min-w-[180px] text-center"
                     onClick={() => onViewProfile(member)}
                 >
                     {/* Saffron top accent line */}
@@ -120,10 +120,11 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
             {hasChildren && expanded && (
                 <div className="flex flex-col items-center mt-4">
                     <div className="w-px h-6 bg-saffron/20" />
-                    <div className="flex gap-4 relative">
-                        {/* Horizontal connector line for children */}
+                    {/* Mobile: vertical stack. Desktop: horizontal row */}
+                    <div className="flex flex-col md:flex-row gap-4 relative items-center md:items-start">
+                        {/* Horizontal connector line: desktop only */}
                         {member.children!.length > 1 && (
-                            <div className="absolute top-0 left-[50%] -translate-x-1/2 h-px bg-saffron/20 w-[calc(100%-4rem)]" />
+                            <div className="hidden md:block absolute top-0 left-[50%] -translate-x-1/2 h-px bg-saffron/20 w-[calc(100%-4rem)]" />
                         )}
 
                         {member.children!.map((child) => (
