@@ -18,7 +18,10 @@ DocumentVault
 The Idea: Allow users to "Star" or "Pin" up to 3 items from their Vault to their Public Profile.
 Examples: A blurry photo of their ancestral home, a handwritten letter, or a scanned degree.
 Public View: A "Featured Memories" carousel right below the Bio. This turns the profile into a mini-museum rather than just a resume.
-5. "Kinsman" Relationship Context
+
+
+
+//done 5. "Kinsman" Relationship Context
 On Instagram, you see "Followed by..." to understand context. On VanshMala, context is kinship.
 
 The Idea: When User A views User B's profile, dynamically calculate and display the relationship text at the very top.

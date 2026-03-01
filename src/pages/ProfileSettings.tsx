@@ -10,9 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Trash2, Plus, Save, Globe, Lock, Users } from 'lucide-react';
+import { Trash2, Plus, Save, Globe, Lock, Users, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LifeJourneySetupMode } from '@/components/timeline/LifeJourneySetupMode';
 
 const ProfileSettings = () => {
     const { user } = useAuth();
@@ -180,11 +181,15 @@ const ProfileSettings = () => {
             </div>
 
             <Tabs defaultValue="basic" className="w-full space-y-6">
-                <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1">
+                <TabsList className="grid w-full grid-cols-5 bg-muted/50 p-1">
                     <TabsTrigger value="basic">{t('Basic Info', 'मूल जानकारी')}</TabsTrigger>
                     {/* <TabsTrigger value="roots">{t('Roots', 'मूल')}</TabsTrigger> */}
                     <TabsTrigger value="education">{t('Education', 'शिक्षा')}</TabsTrigger>
                     <TabsTrigger value="career">{t('Work', 'कार्य')}</TabsTrigger>
+                    <TabsTrigger value="journey" className="flex items-center gap-1">
+                        <Sparkles className="w-3 h-3" />
+                        {t('Journey', 'यात्रा')}
+                    </TabsTrigger>
                     <TabsTrigger value="privacy">{t('Privacy', 'गोपनीयता')}</TabsTrigger>
                 </TabsList>
 
@@ -452,6 +457,27 @@ const ProfileSettings = () => {
                             <Button variant="outline" className="w-full border-dashed" onClick={addCareer}>
                                 <Plus className="w-4 h-4 mr-2" /> {t('Add Experience', 'अनुभव जोड़ें')}
                             </Button>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* LIFE JOURNEY (TIMELINE MODE) */}
+                <TabsContent value="journey">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Sparkles className="w-5 h-5 text-saffron" />
+                                {t('Life Journey — Timeline Mode', 'जीवन यात्रा — टाइमलाइन मोड')}
+                            </CardTitle>
+                            <CardDescription>
+                                {t(
+                                    'Tell your story through milestones. These appear on your public profile as a beautiful timeline.',
+                                    'मील के पत्थरों के माध्यम से अपनी कहानी बताएं। ये आपकी सार्वजनिक प्रोफ़ाइल पर एक सुंदर टाइमलाइन के रूप में दिखाई देते हैं।'
+                                )}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <LifeJourneySetupMode memberId={member.id} member={member} />
                         </CardContent>
                     </Card>
                 </TabsContent>

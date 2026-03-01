@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
-import { useMemberByUsername, useProfileVerificationStatus } from '@/hooks/useFamilyTree';
+import { useMemberByUsername, useProfileVerificationStatus, useTreeMembers } from '@/hooks/useFamilyTree';
+import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { User, MapPin, Briefcase, GraduationCap, Link as LinkIcon, Users, Heart, BadgeCheck, Landmark, Sparkles } from 'lucide-react';
@@ -7,13 +8,25 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LifeJourneyPublicView } from '@/components/timeline/LifeJourneyPublicView';
+import { calculateKinship } from '@/utils/kinshipUtils';
+import { useMemo } from 'react';
 
 const PublicProfile = () => {
     const { username } = useParams<{ username: string }>();
+    const { user } = useAuth();
     const { data: memberData, isLoading, error } = useMemberByUsername(username || '');
     const member = memberData as any;
     const { data: isVerified } = useProfileVerificationStatus(member?.user_id);
+    const { data: treeData } = useTreeMembers(member?.tree_id || '');
     const { t } = useLanguage();
+
+    const kinship = useMemo(() => {
+        if (!user?.id || !member?.id || !treeData) return null;
+        const sourceMember = treeData.members?.find((m: any) => m.user_id === user.id);
+        if (!sourceMember) return null;
+        return calculateKinship(sourceMember.id, member.id, treeData.members as any, treeData.relationships as any);
+    }, [user?.id, member?.id, treeData]);
 
     if (isLoading) {
         return (
@@ -110,6 +123,11 @@ const PublicProfile = () => {
                         {/* Bio Name & Details */}
                         <div className="space-y-1 text-sm md:text-base">
                             <div className="font-semibold">{member.full_name} {member.full_name_hi && <span className="font-normal text-muted-foreground">({member.full_name_hi})</span>}</div>
+                            {kinship && (
+                                <div className="text-saffron font-medium text-sm md:text-sm bg-saffron/10 inline-block px-3 py-1 rounded-full mt-1 mb-2">
+                                    {kinship.relationText === 'You' ? t("This is your profile", "यह आपकी प्रोफ़ाइल है") : `${t("Your", "आपके")} ${kinship.relationText}`}
+                                </div>
+                            )}
                             {isFieldVisible('bio') && member.bio && (
                                 <p className="whitespace-pre-wrap">{member.bio}</p>
                             )}
@@ -147,7 +165,7 @@ const PublicProfile = () => {
 
                 {/* Content Tabs */}
                 <Tabs defaultValue="about" className="w-full">
-                    <TabsList className="w-full grid grid-cols-4 bg-transparent border-t rounded-none h-12 p-0">
+                    <TabsList className="w-full grid grid-cols-3 bg-transparent border-t rounded-none h-12 p-0">
                         <TabsTrigger
                             value="about"
                             className="rounded-none border-t-2 border-transparent data-[state=active]:border-foreground data-[state=active]:shadow-none bg-transparent"
@@ -157,19 +175,11 @@ const PublicProfile = () => {
                             </span>
                         </TabsTrigger>
                         <TabsTrigger
-                            value="education"
+                            value="journey"
                             className="rounded-none border-t-2 border-transparent data-[state=active]:border-foreground data-[state=active]:shadow-none bg-transparent"
                         >
                             <span className="uppercase text-xs tracking-widest font-semibold flex items-center gap-2">
-                                <GraduationCap className="w-3 h-3" /> <span className="hidden md:inline">{t('EDUCATION', 'शिक्षा')}</span>
-                            </span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="work"
-                            className="rounded-none border-t-2 border-transparent data-[state=active]:border-foreground data-[state=active]:shadow-none bg-transparent"
-                        >
-                            <span className="uppercase text-xs tracking-widest font-semibold flex items-center gap-2">
-                                <Briefcase className="w-3 h-3" /> <span className="hidden md:inline">{t('WORK', 'कार्य')}</span>
+                                <Sparkles className="w-3 h-3" /> <span className="hidden md:inline">{t('LIFE JOURNEY', 'जीवन यात्रा')}</span>
                             </span>
                         </TabsTrigger>
                         <TabsTrigger
@@ -213,59 +223,12 @@ const PublicProfile = () => {
                             </div>
                         </TabsContent>
 
-                        <TabsContent value="education" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            {isFieldVisible('education') && education.length > 0 ? (
-                                <div className="space-y-4">
-                                    {(education as any[]).map((edu, i) => (
-                                        <div key={i} className="flex gap-4 p-4 rounded-xl border bg-card hover:bg-accent/5 transition-colors">
-                                            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center flex-shrink-0">
-                                                <GraduationCap className="w-6 h-6" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-semibold text-lg">{edu.school || edu.institution}</h3>
-                                                <p className="text-muted-foreground">{edu.degree} {edu.field_of_study && `• ${edu.field_of_study}`}</p>
-                                                <p className="text-sm text-muted-foreground/80 mt-1">
-                                                    {edu.start_year} - {edu.end_year || t('Present', 'वर्तमान')}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-12 text-muted-foreground">
-                                    <GraduationCap className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                                    {t('No education information shared', 'कोई शिक्षा जानकारी साझा नहीं की गई')}
-                                </div>
-                            )}
-                        </TabsContent>
-
-                        <TabsContent value="work" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            {isFieldVisible('career') && career.length > 0 ? (
-                                <div className="space-y-4">
-                                    {(career as any[]).map((job, i) => (
-                                        <div key={i} className="flex gap-4 p-4 rounded-xl border bg-card hover:bg-accent/5 transition-colors">
-                                            <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/20 text-green-600 flex items-center justify-center flex-shrink-0">
-                                                <Briefcase className="w-6 h-6" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-semibold text-lg">{job.role || job.title}</h3>
-                                                <p className="text-muted-foreground">{job.company} {job.location && `• ${job.location}`}</p>
-                                                <p className="text-sm text-muted-foreground/80 mt-1">
-                                                    {job.start_date} - {job.end_date || t('Present', 'वर्तमान')}
-                                                </p>
-                                                {job.description && (
-                                                    <p className="text-sm mt-2 text-foreground/80">{job.description}</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-12 text-muted-foreground">
-                                    <Briefcase className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                                    {t('No career information shared', 'कोई करियर जानकारी साझा नहीं की गई')}
-                                </div>
-                            )}
+                        <TabsContent value="journey" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <LifeJourneyPublicView
+                                memberId={member.id}
+                                member={member}
+                                privacy={privacy}
+                            />
                         </TabsContent>
 
                         <TabsContent value="family" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">

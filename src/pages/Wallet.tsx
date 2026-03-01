@@ -102,8 +102,9 @@ const WalletPage = () => {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
 
+      const supabaseBase = import.meta.env.VITE_SUPABASE_URL ?? 'https://api.vanshmala.in';
       const orderRes = await fetch(
-        `https://qngfdcbccnguftxzecwq.supabase.co/functions/v1/razorpay-wallet`,
+        `${supabaseBase}/functions/v1/razorpay-wallet`,
         {
           method: 'POST',
           headers: {
@@ -132,7 +133,7 @@ const WalletPage = () => {
         handler: async function (response: any) {
           // Verify payment server-side
           const verifyRes = await fetch(
-            `https://qngfdcbccnguftxzecwq.supabase.co/functions/v1/razorpay-wallet`,
+            `${supabaseBase}/functions/v1/razorpay-wallet`,
             {
               method: 'POST',
               headers: {

@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { TimelineEvent } from "@/types/schema";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 
@@ -288,5 +289,50 @@ export const useProfileVerificationStatus = (userId: string | undefined) => {
       return data;
     },
     enabled: !!userId,
+  });
+};
+
+export const useTimelineEvents = (memberId: string | undefined) => {
+  return useQuery({
+    queryKey: ['timeline-events', memberId],
+    queryFn: async () => {
+      if (!memberId) return [];
+      const { data, error } = await supabase
+        .from('timeline_events')
+        .select('*')
+        .eq('family_member_id', memberId)
+        .order('date', { ascending: true });
+      if (error) throw error;
+      return (data || []).map(event => ({
+        ...event,
+        media_urls: typeof event.media_urls === 'string' ? JSON.parse(event.media_urls) : (event.media_urls ?? [])
+      })) as TimelineEvent[];
+    },
+    enabled: !!memberId,
+  });
+};
+
+export const useAddTimelineEvent = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (event: {
+      family_member_id: string;
+      title: string;
+      date: string | null;
+      event_type: string;
+      description?: string;
+      created_by?: string | null;
+    }) => {
+      const { data, error } = await supabase
+        .from('timeline_events')
+        .insert({ ...event, media_urls: [] })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['timeline-events', variables.family_member_id] });
+    }
   });
 };
