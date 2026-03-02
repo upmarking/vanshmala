@@ -97,6 +97,18 @@ const PrivacyPolicy = () => {
                 <p>
                     While Vanshmala is meant to document entire family trees, including children, the Service itself is not intended for use by children under the age of 13 unattended. We do not knowingly collect personally identifiable information directly from children under 13 without verifiable parental consent. If we become aware that we have collected Personal Data from a child under 13 without verification of parental consent, we take steps to remove that information from our servers.
                 </p>
+                <div className="bg-primary/5 border border-primary/20 p-6 rounded-lg mt-6">
+                    <h3 className="text-lg font-semibold text-foreground m-0 mb-2">Child Safety Standards & CSAE Policy</h3>
+                    <p className="m-0 text-sm text-muted-foreground mb-4">
+                        We maintain strict zero-tolerance standards against Child Sexual Abuse and Exploitation (CSAE) to protect children globally.
+                    </p>
+                    <Link
+                        to="/child-safety-standards"
+                        className="inline-flex items-center text-sm font-medium text-primary hover:underline"
+                    >
+                        View our complete Child Safety Standards →
+                    </Link>
+                </div>
 
                 <h2 className="text-2xl font-semibold mt-12 mb-6 text-foreground">9. Changes to This Privacy Policy</h2>
                 <p>

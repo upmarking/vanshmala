@@ -27,6 +27,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
 import ContactUs from "./pages/ContactUs";
 import DataDeletionRequest from "./pages/DataDeletionRequest";
+import ChildSafetyStandards from "./pages/ChildSafetyStandards";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/terms-of-use" element={<TermsOfUse />} />
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/data-deletion-request" element={<DataDeletionRequest />} />
+              <Route path="/child-safety-standards" element={<ChildSafetyStandards />} />
 
               {/* Authenticated Routes wrapped in MainLayout */}
               <Route path="/dashboard" element={

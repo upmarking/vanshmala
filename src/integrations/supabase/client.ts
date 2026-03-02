@@ -5,14 +5,14 @@ import type { Database } from './types';
 // All HTTP traffic (auth, rest, storage, functions) is proxied through
 // api.vanshmala.in via Vercel rewrites — the raw supabase.co URL is never
 // visible to users in browser network devtools for these calls.
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL ?? "https://api.vanshmala.in";
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuZ2ZkY2JjY25ndWZ0eHplY3dxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4OTEzMjEsImV4cCI6MjA4NjQ2NzMyMX0.gnMlusI3u02cuszKFFL7Yb_rm1exC7LT8Tev4loSX7E";
+const SUPABASE_URL = "https://api.vanshmala.in";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFuZ2ZkY2JjY25ndWZ0eHplY3dxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA4OTEzMjEsImV4cCI6MjA4NjQ2NzMyMX0.gnMlusI3u02cuszKFFL7Yb_rm1exC7LT8Tev4loSX7E";
 
 // Vercel CANNOT proxy WebSocket (WSS) traffic, so Realtime must connect
 // directly to the raw supabase.co URL. We bypass the SDK's auto-derived WSS
 // URL (which would be wss://api.vanshmala.in/... and would fail) by
 // overriding supabase.realtime.endPoint right after client creation.
-const SUPABASE_RAW_URL = import.meta.env.VITE_SUPABASE_RAW_URL ?? "https://qngfdcbccnguftxzecwq.supabase.co";
+const SUPABASE_RAW_URL = "https://qngfdcbccnguftxzecwq.supabase.co";
 const REALTIME_WSS_URL = SUPABASE_RAW_URL.replace(/^https?:\/\//, (m) =>
   m.startsWith('https') ? 'wss://' : 'ws://'
 ) + '/realtime/v1/websocket';
