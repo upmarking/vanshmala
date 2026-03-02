@@ -173,8 +173,11 @@ export type Database = {
           gotra: string | null
           id: string
           is_alive: boolean | null
+          kuldevi: string | null
+          kuldevta: string | null
           marriage_date: string | null
           migration_info: Json | null
+          mool_niwas: string | null
           phone: string | null
           place_of_birth: string | null
           privacy_settings: Json | null
@@ -182,7 +185,7 @@ export type Database = {
           updated_at: string
           user_id: string | null
           username: string | null
-          vanshmala_id: string
+          vanshmala_id: string | null
         }
         Insert: {
           achievements?: string[] | null
@@ -203,8 +206,11 @@ export type Database = {
           gotra?: string | null
           id?: string
           is_alive?: boolean | null
+          kuldevi?: string | null
+          kuldevta?: string | null
           marriage_date?: string | null
           migration_info?: Json | null
+          mool_niwas?: string | null
           phone?: string | null
           place_of_birth?: string | null
           privacy_settings?: Json | null
@@ -212,7 +218,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           username?: string | null
-          vanshmala_id?: string
+          vanshmala_id?: string | null
         }
         Update: {
           achievements?: string[] | null
@@ -233,8 +239,11 @@ export type Database = {
           gotra?: string | null
           id?: string
           is_alive?: boolean | null
+          kuldevi?: string | null
+          kuldevta?: string | null
           marriage_date?: string | null
           migration_info?: Json | null
+          mool_niwas?: string | null
           phone?: string | null
           place_of_birth?: string | null
           privacy_settings?: Json | null
@@ -242,7 +251,7 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           username?: string | null
-          vanshmala_id?: string
+          vanshmala_id?: string | null
         }
         Relationships: [
           {
@@ -567,13 +576,14 @@ export type Database = {
           created_at: string
           date_of_birth: string | null
           email: string | null
-          father_id: string | null
           full_name: string
           full_name_hi: string | null
           gender: Database["public"]["Enums"]["gender_type"] | null
           gotra: string | null
           id: string
-          mother_id: string | null
+          kuldevi: string | null
+          kuldevta: string | null
+          mool_niwas: string | null
           phone: string | null
           referral_code: string | null
           updated_at: string
@@ -586,13 +596,14 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           email?: string | null
-          father_id?: string | null
           full_name: string
           full_name_hi?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
           gotra?: string | null
           id?: string
-          mother_id?: string | null
+          kuldevi?: string | null
+          kuldevta?: string | null
+          mool_niwas?: string | null
           phone?: string | null
           referral_code?: string | null
           updated_at?: string
@@ -605,35 +616,21 @@ export type Database = {
           created_at?: string
           date_of_birth?: string | null
           email?: string | null
-          father_id?: string | null
           full_name?: string
           full_name_hi?: string | null
           gender?: Database["public"]["Enums"]["gender_type"] | null
           gotra?: string | null
           id?: string
-          mother_id?: string | null
+          kuldevi?: string | null
+          kuldevta?: string | null
+          mool_niwas?: string | null
           phone?: string | null
           referral_code?: string | null
           updated_at?: string
           user_id?: string
           vanshmala_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_father_id_fkey"
-            columns: ["father_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_mother_id_fkey"
-            columns: ["mother_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       referrals: {
         Row: {
@@ -901,6 +898,10 @@ export type Database = {
         Returns: boolean
       }
       generate_vanshmala_id: { Args: never; Returns: string }
+      get_profile_verification_status: {
+        Args: { check_user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
