@@ -1,4 +1,5 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const { t } = useLanguage();
@@ -21,6 +22,19 @@ const Footer = () => {
               '© 2026 वंशमाला। परिवार की विरासत को संजोना — एक परंपरा।'
             )}
           </p>
+          <div className="flex gap-4 mt-2 text-sm opacity-70">
+            <Link to="/contact-us" className="hover:text-saffron transition-colors">
+              {t('Contact Us', 'संपर्क करें')}
+            </Link>
+            <span>|</span>
+            <Link to="/privacy-policy" className="hover:text-saffron transition-colors">
+              {t('Privacy Policy', 'गोपनीयता नीति')}
+            </Link>
+            <span>|</span>
+            <Link to="/terms-of-use" className="hover:text-saffron transition-colors">
+              {t('Terms of Use', 'उपयोग की शर्तें')}
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

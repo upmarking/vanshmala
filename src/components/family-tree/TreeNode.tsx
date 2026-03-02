@@ -27,6 +27,22 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
     const { t } = useLanguage();
     const [expanded, setExpanded] = useState(true);
     const hasChildren = member.children && member.children.length > 0;
+    const isVirtualRoot = member.id === '__virtual_root__';
+
+    // Virtual root: just render children side by side — no card for this node
+    if (isVirtualRoot && hasChildren) {
+        return (
+            <div className="flex flex-col md:flex-row gap-8 items-start justify-center flex-wrap">
+                {member.children!.map((child) => (
+                    <div key={child.id} className="flex flex-col items-center">
+                        <TreeNode member={child} depth={depth} onAddRelative={onAddRelative} onViewProfile={onViewProfile} />
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    const isOrphan = !hasChildren && !(member.parents?.length) && !member.spouse;
 
     return (
         <div className="flex flex-col items-center">
@@ -36,8 +52,17 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
                 transition={{ delay: depth * 0.1 }}
                 className="relative group"
             >
+                {isOrphan && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] font-medium px-2 py-0.5 rounded-full bg-orange-50 text-orange-500 border border-orange-300 whitespace-nowrap z-10">
+                        Unconnected
+                    </div>
+                )}
                 <div
-                    className="relative px-4 py-3 md:px-5 md:py-4 rounded-2xl bg-background border-2 border-border hover:border-saffron/40 transition-all cursor-pointer shadow-soft min-w-[140px] md:min-w-[180px] text-center"
+                    className={`relative px-4 py-3 md:px-5 md:py-4 rounded-2xl bg-background border-2 transition-all cursor-pointer shadow-soft min-w-[140px] md:min-w-[180px] text-center
+                        ${isOrphan
+                            ? 'border-dashed border-orange-300 hover:border-orange-400'
+                            : 'border-border hover:border-saffron/40'
+                        }`}
                     onClick={() => onViewProfile(member)}
                 >
                     {/* Saffron top accent line */}

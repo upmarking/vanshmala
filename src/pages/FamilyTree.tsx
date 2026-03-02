@@ -1,6 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 
-import { Plus, GitMerge, FileText, Tag as TagIcon } from 'lucide-react';
+import { Plus, GitMerge, FileText, Tag as TagIcon, Gift } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTree, useTreeMembers, useIsTreeAdmin, useUserTrees } from '@/hooks/useFamilyTree';
@@ -273,14 +273,23 @@ const FamilyTree = () => {
             </div>
           </div>
 
-          <div className="flex justify-center mt-8">
+
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
             <Button
               variant="outline"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-dashed border-saffron/20 text-muted-foreground hover:border-saffron hover:text-saffron transition-colors font-body h-auto"
+              className="w-full sm:w-auto flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-dashed border-saffron/20 text-muted-foreground hover:border-saffron hover:text-saffron transition-colors font-body h-auto"
               onClick={handleAddMemberGeneric}
             >
               <Plus className="w-5 h-5" />
               {t('Add Member', 'सदस्य जोड़ें')}
+            </Button>
+
+            <Button
+              className="w-full sm:w-auto flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-saffron text-white hover:opacity-90 shadow-lg shadow-saffron/20 transition-all font-bold h-auto border-none"
+              onClick={() => navigate('/refer')}
+            >
+              <Gift className="w-5 h-5" />
+              {t('Invite Family', 'परिवार को आमंत्रित करें')}
             </Button>
           </div>
         </div>

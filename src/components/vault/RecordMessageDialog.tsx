@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Users, User as UserIcon } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserTrees, useTreeMembers } from '@/hooks/useFamilyTree';
 
 interface RecordMessageDialogProps {
     isOpen: boolean;
@@ -25,8 +27,15 @@ export const RecordMessageDialog = ({ isOpen, onClose, onSuccess }: RecordMessag
         message_text: '',
         media_url: '',
         unlock_condition: 'date',
-        unlock_date: ''
+        unlock_date: '',
+        target_family_member_id: ''
     });
+
+    const { user } = useAuth();
+    const { data: userTrees } = useUserTrees(user?.id);
+    const treeId = userTrees?.[0]?.tree_id;
+    const { data: treeData } = useTreeMembers(treeId || '');
+    const members = treeData?.members || [];
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,6 +44,9 @@ export const RecordMessageDialog = ({ isOpen, onClose, onSuccess }: RecordMessag
         try {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('Not authenticated');
+
+            const targetMember = members.find(m => m.id === formData.target_family_member_id);
+            const recipientId = targetMember?.user_id || null;
 
             const { error } = await supabase
                 .from('legacy_messages')
@@ -46,6 +58,8 @@ export const RecordMessageDialog = ({ isOpen, onClose, onSuccess }: RecordMessag
                     media_url: formData.media_url,
                     unlock_condition: formData.unlock_condition,
                     unlock_date: formData.unlock_date ? new Date(formData.unlock_date).toISOString() : null,
+                    recipient_id: recipientId,
+                    target_family_member_id: formData.target_family_member_id || null,
                     is_unlocked: false // Default to locked
                 });
 
@@ -60,7 +74,8 @@ export const RecordMessageDialog = ({ isOpen, onClose, onSuccess }: RecordMessag
                 message_text: '',
                 media_url: '',
                 unlock_condition: 'date',
-                unlock_date: ''
+                unlock_date: '',
+                target_family_member_id: ''
             });
         } catch (error) {
             console.error('Error recording message:', error);
@@ -86,6 +101,39 @@ export const RecordMessageDialog = ({ isOpen, onClose, onSuccess }: RecordMessag
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             placeholder={t('For my grandson on his 18th birthday', 'मेरे पोते के 18वें जन्मदिन के लिए')}
                         />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="recipient">{t('Who is this for?', 'यह किसके लिए है?')}</Label>
+                        <Select
+                            value={formData.target_family_member_id || 'all'}
+                            onValueChange={(val) => setFormData({ ...formData, target_family_member_id: val === 'all' ? '' : val })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">
+                                    <div className="flex items-center gap-2">
+                                        <Users className="w-4 h-4 text-muted-foreground" />
+                                        <span>{t('All Family Members', 'सभी परिवार के सदस्य')}</span>
+                                    </div>
+                                </SelectItem>
+                                {members.filter(m => m.user_id !== user?.id).map((member) => (
+                                    <SelectItem key={member.id} value={member.id}>
+                                        <div className="flex items-center gap-2">
+                                            <UserIcon className="w-4 h-4 text-muted-foreground" />
+                                            <span>{member.full_name}</span>
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <p className="text-[10px] text-muted-foreground leading-tight italic">
+                            {formData.target_family_member_id
+                                ? t('Only this person will see the message in their vault.', 'केवल यही व्यक्ति अपनी तिजोरी में संदेश देख पाएगा।')
+                                : t('Anyone in your family tree will be able to see this.', 'आपके परिवार के पेड़ का कोई भी सदस्य इसे देख पाएगा।')}
+                        </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

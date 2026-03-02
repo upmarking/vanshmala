@@ -5,14 +5,23 @@ import { LegacyMessage } from '@/types/schema';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Lock, Unlock, Play, FileText, Video, Mic, Plus } from 'lucide-react';
+import { Lock, Unlock, Play, FileText, Video, Mic, Plus, Trash2, Users, User as UserIcon } from 'lucide-react';
 import { RecordMessageDialog } from './RecordMessageDialog';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
+
+type LegacyMessageWithRecipient = LegacyMessage & {
+    target_family_member?: {
+        id: string;
+        full_name: string;
+        full_name_hi: string | null;
+    }
+}
 
 export const LegacyVault = () => {
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('received');
-    const [messages, setMessages] = useState<LegacyMessage[]>([]);
+    const [messages, setMessages] = useState<LegacyMessageWithRecipient[]>([]);
     const [loading, setLoading] = useState(true);
     const [recordOpen, setRecordOpen] = useState(false);
 
@@ -22,36 +31,42 @@ export const LegacyVault = () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            let query = supabase.from('legacy_messages').select('*');
+            let query = supabase.from('legacy_messages').select(`
+                *,
+                target_family_member:family_members!legacy_messages_target_family_member_id_fkey(id, full_name, full_name_hi)
+            `);
 
             if (activeTab === 'my_recordings') {
                 query = query.eq('creator_id', user.id);
             } else {
-                // Received messages logic
-                // For MVP: Show public/general messages or targeted ones
-                // Assuming simple RLS allows reading if recipient matches or is public
-                // We filter locally or rely on RLS returning only what's allowed
-                // But for "Locked" ones, we might need to see them but not access content? 
-                // The RLS I wrote hides them if locked. So we might need a separate query or adjust RLS to allow seeing metadata but not content?
-                // For now, let's assume we only see unlocked ones for simplicity, or we adjust RLS later.
-                // Actually, let's just fetch what we can.
-
-                // Wait, the Requirement says "Unlock message when...". This implies the recipient KNOWS there is a message waiting.
-                // So RLS should probably allow reading METADATA (title, unlock_date) but not CONTENT (media_url).
-                // My previous RLS blocked SELECT entirely. 
-                // I will proceed with what I have: users will only see messages once they are unlocked.
-                // I can add a "future" feature to see "Locked Pending Messages" if requested.
-                // For now, let's just show unlocked.
                 query = query.or(`recipient_id.eq.${user.id},recipient_id.is.null`).eq('is_unlocked', true);
             }
 
             const { data, error } = await query;
             if (error) throw error;
-            setMessages(data as LegacyMessage[]);
+            setMessages(data as LegacyMessageWithRecipient[]);
         } catch (error) {
             console.error('Error loading vault:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!window.confirm(t('Are you sure you want to delete this recording?', 'क्या आप इस रिकॉर्डिंग को हटाना चाहते हैं?'))) return;
+
+        try {
+            const { error } = await supabase
+                .from('legacy_messages')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+            toast.success(t('Recording deleted', 'रिकॉर्डिंग हटा दी गई'));
+            fetchMessages();
+        } catch (error) {
+            console.error('Error deleting message:', error);
+            toast.error(t('Failed to delete message', 'संदेश हटाने में विफल'));
         }
     };
 
@@ -101,24 +116,53 @@ export const LegacyVault = () => {
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="pt-4">
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex items-center gap-2 text-sm">
-                                            {msg.is_unlocked ? (
-                                                <span className="text-green-600 flex items-center gap-1">
-                                                    <Unlock className="w-3 h-3" /> {t('Unlocked', 'अनलॉक')}
-                                                </span>
-                                            ) : (
-                                                <span className="text-amber-600 flex items-center gap-1">
-                                                    <Lock className="w-3 h-3" /> {t('Locked until', 'अनलॉक होगा')} {msg.unlock_date}
-                                                </span>
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <div className="flex items-center gap-2 text-sm">
+                                                {msg.is_unlocked ? (
+                                                    <span className="text-green-600 flex items-center gap-1">
+                                                        <Unlock className="w-3 h-3" /> {t('Unlocked', 'अनलॉक')}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-amber-600 flex items-center gap-1">
+                                                        <Lock className="w-3 h-3" /> {t('Locked until', 'अनलॉक होगा')} {msg.unlock_date}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {msg.media_url && (
+                                                <Button variant="ghost" size="sm" asChild>
+                                                    <a href={msg.media_url} target="_blank" rel="noopener noreferrer">
+                                                        <Play className="w-4 h-4 mr-1" /> {t('Play', 'चलाएं')}
+                                                    </a>
+                                                </Button>
                                             )}
                                         </div>
-                                        {msg.media_url && (
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <a href={msg.media_url} target="_blank" rel="noopener noreferrer">
-                                                    <Play className="w-4 h-4 mr-1" /> {t('Play', 'चलाएं')}
-                                                </a>
-                                            </Button>
+
+                                        {activeTab === 'my_recordings' && (
+                                            <div className="flex flex-col gap-2 pt-2 border-t">
+                                                {msg.target_family_member ? (
+                                                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                                        <UserIcon className="w-3 h-3" />
+                                                        {t('For:', 'के लिए:')} {msg.target_family_member.full_name}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                                        <Users className="w-3 h-3" />
+                                                        {t('For: All Family', 'के लिए: सभी परिवार')}
+                                                    </span>
+                                                )}
+
+                                                <div className="flex justify-end mt-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                                                        onClick={() => handleDelete(msg.id)}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
                                 </CardContent>

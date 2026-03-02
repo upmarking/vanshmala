@@ -425,7 +425,11 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground mb-4">
               {t('Grow your tree by inviting relatives.', 'रिश्तेदारों को आमंत्रित करके अपने पेड़ को बढ़ाएं।')}
             </p>
-            <Button size="sm" className="w-full bg-saffron text-white hover:bg-saffron-600">
+            <Button
+              size="sm"
+              className="w-full bg-saffron text-white hover:bg-saffron-600 font-bold"
+              onClick={() => navigate('/refer')}
+            >
               {t('Invite Now', 'अभी आमंत्रित करें')}
             </Button>
           </CardContent>

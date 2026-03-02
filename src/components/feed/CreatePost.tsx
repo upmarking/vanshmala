@@ -15,7 +15,7 @@ interface CreatePostProps {
 }
 
 export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     const [content, setContent] = useState("");
     const [postType, setPostType] = useState<FeedPostType>("post");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,12 +24,19 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
         if (!content.trim()) return;
         if (!user) return;
 
+        // profile.id is the PK in the `profiles` table, which is what
+        // feed_posts.user_id references via its foreign key constraint.
+        if (!profile?.id) {
+            toast.error("Your profile is still loading. Please try again in a moment.");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const { error } = await supabase
                 .from('feed_posts')
                 .insert({
-                    user_id: user.id,
+                    user_id: profile.id,   // FK → profiles.id  (NOT auth user.id)
                     content: content.trim(),
                     post_type: postType
                 });

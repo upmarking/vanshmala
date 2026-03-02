@@ -135,15 +135,16 @@ export const useSearchProfiles = (query: string) => {
     queryFn: async () => {
       if (!query || query.length < 3) return [];
 
-      // Search by phone, email, or vanshmala_id
+      const trimmedQuery = query.trim();
+
+      // Search by phone (exact), email (exact), vanshmala_id (case-insensitive), or full_name (partial)
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .or(`phone.eq.${query},email.eq.${query},vanshmala_id.eq.${query}`)
-        .limit(5);
-
-      // Note: simple OR query. If we want partial match, we need like/ilike.
-      // But usually IDs are exact. Phones are exact.
+        .or(
+          `phone.eq.${trimmedQuery},email.ilike.${trimmedQuery},vanshmala_id.ilike.${trimmedQuery},full_name.ilike.%${trimmedQuery}%`
+        )
+        .limit(10);
 
       if (error) throw error;
       return data as Profile[];
@@ -208,6 +209,70 @@ export const useUpdateMember = () => {
     }
   });
 };
+
+export const useDelinkMember = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ memberId }: { memberId: string }) => {
+      const { error } = await supabase
+        .from('family_members')
+        .delete()
+        .eq('id', memberId);
+
+      if (error) throw error;
+      return memberId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tree-members'] });
+    }
+  });
+};
+
+export const useAddRelationship = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      treeId,
+      fromMemberId,
+      toMemberId,
+      relationship,
+    }: {
+      treeId: string;
+      fromMemberId: string;
+      toMemberId: string;
+      relationship: Database['public']['Enums']['relationship_type'];
+    }) => {
+      const { data, error } = await supabase
+        .from('family_relationships')
+        .insert({ tree_id: treeId, from_member_id: fromMemberId, to_member_id: toMemberId, relationship })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['tree-members', vars.treeId] });
+    },
+  });
+};
+
+export const useRemoveRelationship = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ relationshipId, treeId }: { relationshipId: string; treeId: string }) => {
+      const { error } = await supabase
+        .from('family_relationships')
+        .delete()
+        .eq('id', relationshipId);
+      if (error) throw error;
+      return { relationshipId, treeId };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['tree-members', result.treeId] });
+    },
+  });
+};
+
 
 export const useMemberByUserId = (userId: string | undefined) => {
   return useQuery({
@@ -279,7 +344,7 @@ export const useProfileVerificationStatus = (userId: string | undefined) => {
     queryKey: ['profile-verification', userId],
     queryFn: async () => {
       if (!userId) return false;
-      const { data, error } = await supabase.rpc('get_profile_verification_status', {
+      const { data, error } = await supabase.rpc('get_profile_verification_status' as any, {
         check_user_id: userId
       });
       if (error) {
