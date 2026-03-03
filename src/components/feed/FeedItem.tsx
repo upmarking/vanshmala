@@ -51,9 +51,9 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
     const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
 
     const isOwner = profile?.id === post.user_id;
-    const hasLiked = post.feed_likes?.some(like => like.profile_id === profile?.id) || false;
-    const likesCount = post.feed_likes?.length || 0;
-    const commentsCount = post.feed_comments?.length || 0;
+    const hasLiked = post.likes?.some(like => like.profile_id === profile?.id) || false;
+    const likesCount = post.likes?.length || 0;
+    const commentsCount = post.comments?.length || 0;
 
 
 
@@ -117,28 +117,24 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
         setIsLiking(true);
         try {
             if (hasLiked) {
-                // Unlike
-                const { error } = await supabase
-                    .from('feed_likes')
-                    .delete()
-                    .eq('post_id', post.id)
-                    .eq('profile_id', profile.id);
+                // Unlike via RPC
+                const { error } = await supabase.rpc('remove_feed_like', {
+                    p_post_id: post.id,
+                    p_profile_id: profile.id,
+                });
                 if (error) throw error;
             } else {
-                // Like
-                const { error } = await supabase
-                    .from('feed_likes')
-                    .insert({ post_id: post.id, profile_id: profile.id });
+                // Like via RPC
+                const { error } = await supabase.rpc('add_feed_like', {
+                    p_post_id: post.id,
+                    p_profile_id: profile.id,
+                });
                 if (error) throw error;
             }
             if (onPostChange) onPostChange();
         } catch (error: any) {
             console.error("Error toggling like:", error);
-            if (error.code === '42P01') {
-                toast.error("Database updating... Please apply the feed updates script first.");
-            } else {
-                toast.error("Failed to update like status.");
-            }
+            toast.error("Failed to update like status.");
         } finally {
             setIsLiking(false);
         }
@@ -154,35 +150,31 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
 
         setIsSubmittingComment(true);
         try {
-            const { error } = await supabase
-                .from('feed_comments')
-                .insert({
-                    post_id: post.id,
-                    profile_id: profile.id,
-                    comment: commentText.trim()
-                });
+            const { error } = await supabase.rpc('add_feed_comment', {
+                p_post_id: post.id,
+                p_profile_id: profile.id,
+                p_comment: commentText.trim(),
+            });
 
             if (error) throw error;
             setCommentText("");
             if (onPostChange) onPostChange();
         } catch (error: any) {
             console.error("Error adding comment:", error);
-            if (error.code === '42P01') {
-                toast.error("Database updating... Please apply the feed updates script first.");
-            } else {
-                toast.error("Failed to add comment.");
-            }
+            toast.error("Failed to add comment.");
         } finally {
             setIsSubmittingComment(false);
         }
     };
 
     const handleDeleteComment = async (commentId: string) => {
+        if (!profile?.id) return;
         try {
-            const { error } = await supabase
-                .from('feed_comments')
-                .delete()
-                .eq('id', commentId);
+            const { error } = await supabase.rpc('remove_feed_comment', {
+                p_post_id: post.id,
+                p_comment_id: commentId,
+                p_profile_id: profile.id,
+            });
 
             if (error) throw error;
             toast.success("Comment deleted");
@@ -376,9 +368,9 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                         )}
 
                         {/* Existing Comments */}
-                        {post.feed_comments && post.feed_comments.length > 0 ? (
+                        {post.comments && post.comments.length > 0 ? (
                             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                {post.feed_comments.map(comment => (
+                                {post.comments.map(comment => (
                                     <div key={comment.id} className="flex gap-2.5">
                                         <Avatar className="h-7 w-7 shrink-0 border border-border/50 mt-1">
                                             <AvatarImage src={comment.profiles?.avatar_url || ''} />

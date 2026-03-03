@@ -351,78 +351,6 @@ export type Database = {
         }
         Relationships: []
       }
-      feed_comments: {
-        Row: {
-          id: string
-          post_id: string
-          profile_id: string
-          comment: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          post_id: string
-          profile_id: string
-          comment: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          post_id?: string
-          profile_id?: string
-          comment?: string
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "feed_comments_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "feed_posts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "feed_comments_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      feed_likes: {
-        Row: {
-          post_id: string
-          profile_id: string
-          created_at: string
-        }
-        Insert: {
-          post_id: string
-          profile_id: string
-          created_at?: string
-        }
-        Update: {
-          post_id?: string
-          profile_id?: string
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "feed_likes_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "feed_posts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "feed_likes_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
       feed_posts: {
         Row: {
           content: string
@@ -431,7 +359,9 @@ export type Database = {
           post_type: string
           updated_at: string
           user_id: string
-          visibility?: string | null
+          visibility: string | null
+          likes: Json
+          comments: Json
         }
         Insert: {
           content: string
@@ -441,6 +371,8 @@ export type Database = {
           updated_at?: string
           user_id: string
           visibility?: string | null
+          likes?: Json
+          comments?: Json
         }
         Update: {
           content?: string
@@ -450,6 +382,8 @@ export type Database = {
           updated_at?: string
           user_id?: string
           visibility?: string | null
+          likes?: Json
+          comments?: Json
         }
         Relationships: [
           {
@@ -1036,6 +970,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_feed_like: {
+        Args: { p_post_id: string; p_profile_id: string }
+        Returns: undefined
+      }
+      remove_feed_like: {
+        Args: { p_post_id: string; p_profile_id: string }
+        Returns: undefined
+      }
+      add_feed_comment: {
+        Args: { p_post_id: string; p_profile_id: string; p_comment: string }
+        Returns: string
+      }
+      remove_feed_comment: {
+        Args: { p_post_id: string; p_comment_id: string; p_profile_id: string }
+        Returns: undefined
+      }
       deduct_wallet_balance: {
         Args: {
           p_amount: number

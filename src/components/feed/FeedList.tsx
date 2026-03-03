@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FeedPost } from "@/types/feed";
+import { FeedPost, FeedLike, FeedComment } from "@/types/feed";
 import { FeedItem } from "./FeedItem";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -20,34 +20,20 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
             let query = supabase
                 .from('feed_posts')
                 .select(`
-            id,
-            user_id,
-            content,
-            post_type,
-            visibility,
-            created_at,
-            updated_at,
-            profiles:user_id (
-              full_name,
-              avatar_url
-            ),
-            feed_likes (
-              post_id,
-              profile_id,
-              created_at
-            ),
-            feed_comments (
-              id,
-              post_id,
-              profile_id,
-              comment,
-              created_at,
-              profiles:profile_id (
-                full_name,
-                avatar_url
-              )
-            )
-          `);
+                    id,
+                    user_id,
+                    content,
+                    post_type,
+                    visibility,
+                    likes,
+                    comments,
+                    created_at,
+                    updated_at,
+                    profiles:user_id (
+                        full_name,
+                        avatar_url
+                    )
+                `);
 
             if (filterType !== "all") {
                 query = query.eq('post_type', filterType);
@@ -56,22 +42,53 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
             const { data, error } = await query.order('created_at', { ascending: false });
 
             if (error) throw error;
-            // Sort comments chronologically so newest is at bottom (or top)
-            // Typically older comments are at top and newer at bottom. Default order from supabase might be arbitrary or by PK.
-            // But we will handle data correctly as is.
-            const formattedPosts = (data as unknown as FeedPost[]).map(post => {
-                // sort comments if they exist
-                if (post.feed_comments) {
-                    post.feed_comments.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-                }
-                return post;
-            });
+
+            // Parse JSONB arrays and enrich comments with profile info
+            const formattedPosts: FeedPost[] = await Promise.all(
+                (data as any[]).map(async (post) => {
+                    const rawLikes: FeedLike[] = Array.isArray(post.likes) ? post.likes : [];
+                    const rawComments: FeedComment[] = Array.isArray(post.comments) ? post.comments : [];
+
+                    // Sort comments oldest-first
+                    rawComments.sort((a, b) =>
+                        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                    );
+
+                    // Collect unique profile_ids from comments to batch-fetch profile info
+                    const profileIds = [...new Set(rawComments.map(c => c.profile_id))];
+                    let profileMap: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
+
+                    if (profileIds.length > 0) {
+                        const { data: profileData } = await supabase
+                            .from('profiles')
+                            .select('id, full_name, avatar_url')
+                            .in('id', profileIds);
+
+                        if (profileData) {
+                            profileData.forEach((p: any) => {
+                                profileMap[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url };
+                            });
+                        }
+                    }
+
+                    // Attach profile info to each comment
+                    const enrichedComments: FeedComment[] = rawComments.map(c => ({
+                        ...c,
+                        profiles: profileMap[c.profile_id] ?? { full_name: null, avatar_url: null },
+                    }));
+
+                    return {
+                        ...post,
+                        likes: rawLikes,
+                        comments: enrichedComments,
+                    } as FeedPost;
+                })
+            );
+
             setPosts(formattedPosts);
         } catch (error: any) {
             console.error("Error fetching posts:", error);
-            if (error.code !== '42P01') {
-                toast.error("Failed to load feed");
-            }
+            toast.error("Failed to load feed");
         } finally {
             setIsLoading(false);
         }
