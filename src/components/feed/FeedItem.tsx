@@ -1,12 +1,35 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { FeedPost } from "@/types/feed";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Calendar, Megaphone, Heart, Share2, MoreHorizontal, Trash2, Send, Loader2, MessageSquare } from "lucide-react";
+import { MessageCircle, Calendar, Pin, Heart, Share2, MoreHorizontal, Trash2, Send, Loader2, Globe, Users, Lock, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuPortal,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,40 +47,22 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
     const [commentText, setCommentText] = useState("");
     const [showComments, setShowComments] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
 
     const isOwner = profile?.id === post.user_id;
     const hasLiked = post.feed_likes?.some(like => like.profile_id === profile?.id) || false;
     const likesCount = post.feed_likes?.length || 0;
     const commentsCount = post.feed_comments?.length || 0;
 
-    const getIcon = () => {
-        switch (post.post_type) {
-            case 'invite':
-                return <Calendar className="h-4 w-4 mr-1" />;
-            case 'announcement':
-                return <Megaphone className="h-4 w-4 mr-1" />;
-            default:
-                return <MessageSquare className="h-4 w-4 mr-1" />;
-        }
-    };
 
-    const getBadgeVariant = () => {
-        switch (post.post_type) {
-            case 'invite':
-                return "secondary";
-            case 'announcement':
-                return "destructive";
-            default:
-                return "outline";
-        }
-    };
 
     const getBorderColor = () => {
         switch (post.post_type) {
             case 'invite':
                 return "border-blue-200 bg-blue-50/10";
             case 'announcement':
-                return "border-red-200 bg-red-50/10";
+                return "border-saffron/30 bg-saffron/5";
             default:
                 return "border-border";
         }
@@ -80,6 +85,26 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
             toast.error("Failed to delete post.");
         } finally {
             setIsDeleting(false);
+            setShowDeleteDialog(false);
+        }
+    };
+
+    const handleVisibilityChange = async (newVisibility: string) => {
+        setIsUpdatingVisibility(true);
+        try {
+            const { error } = await supabase
+                .from('feed_posts')
+                .update({ visibility: newVisibility })
+                .eq('id', post.id);
+
+            if (error) throw error;
+            toast.success("Visibility updated successfully");
+            if (onPostChange) onPostChange();
+        } catch (error: any) {
+            console.error("Visibility error:", error);
+            toast.error("An unexpected error occurred while updating visibility.");
+        } finally {
+            setIsUpdatingVisibility(false);
         }
     };
 
@@ -121,7 +146,11 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
 
     const handleCommentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!commentText.trim() || !profile?.id) return;
+        if (!commentText.trim()) return;
+        if (!profile?.id) {
+            toast.error("You must be logged in to comment.");
+            return;
+        }
 
         setIsSubmittingComment(true);
         try {
@@ -148,17 +177,34 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
         }
     };
 
+    const handleDeleteComment = async (commentId: string) => {
+        try {
+            const { error } = await supabase
+                .from('feed_comments')
+                .delete()
+                .eq('id', commentId);
+
+            if (error) throw error;
+            toast.success("Comment deleted");
+            if (onPostChange) onPostChange();
+        } catch (error) {
+            console.error("Error deleting comment:", error);
+            toast.error("Failed to delete comment.");
+        }
+    };
+
     const handleShare = () => {
+        const shareUrl = `${window.location.origin}/post/${post.id}`;
         if (navigator.share) {
             navigator.share({
                 title: 'Check out this post on VanshMala',
                 text: post.content,
-                url: window.location.href, // Or generate a specific deep link
+                url: shareUrl,
             }).catch(console.error);
         } else {
             // Fallback to copy to clipboard
-            navigator.clipboard.writeText(post.content);
-            toast.success("Post text copied to clipboard!");
+            navigator.clipboard.writeText(shareUrl);
+            toast.success("Post link copied to clipboard!");
         }
     }
 
@@ -174,6 +220,14 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                 <div className="flex flex-col flex-1">
                     <div className="flex items-center gap-2">
                         <span className="font-semibold text-sm">{post.profiles?.full_name || 'Unknown User'}</span>
+                        {post.visibility && (
+                            <span className="flex items-center gap-1 text-muted-foreground ml-1">
+                                {post.visibility === 'public' && <Globe className="h-3 w-3" />}
+                                {post.visibility === '3rd_degree' && <Users className="h-3 w-3" />}
+                                {post.visibility === '2nd_degree' && <Users className="h-3 w-3" />}
+                                {post.visibility === '1st_degree' && <Lock className="h-3 w-3" />}
+                            </span>
+                        )}
                     </div>
                     <span className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
@@ -181,11 +235,17 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    {post.post_type !== 'post' && (
-                        <Badge variant={getBadgeVariant()} className="hidden sm:flex items-center capitalize h-6 px-2 text-xs">
-                            {getIcon()}
-                            {post.post_type}
-                        </Badge>
+                    {post.post_type === 'announcement' && (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-saffron/10 text-saffron-700 rounded-full text-xs font-medium border border-saffron/30 shadow-sm self-start mt-1">
+                            <Pin className="h-3 w-3" />
+                            <span>Announcement</span>
+                        </div>
+                    )}
+                    {post.post_type === 'invite' && (
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200 shadow-sm self-start mt-1">
+                            <Calendar className="h-3 w-3" />
+                            <span>Invite</span>
+                        </div>
                     )}
 
                     {isOwner && (
@@ -195,9 +255,44 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                                     <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={handleDelete} disabled={isDeleting} className="text-red-500 focus:text-red-500">
-                                    {isDeleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                            <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        <span>Edit Visibility</span>
+                                    </DropdownMenuSubTrigger>
+                                    <DropdownMenuPortal>
+                                        <DropdownMenuSubContent>
+                                            <DropdownMenuRadioGroup value={post.visibility || '1st_degree'} onValueChange={handleVisibilityChange}>
+                                                <DropdownMenuRadioItem value="1st_degree" disabled={isUpdatingVisibility}>
+                                                    <Lock className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                    Immediate Family
+                                                </DropdownMenuRadioItem>
+                                                <DropdownMenuRadioItem value="2nd_degree" disabled={isUpdatingVisibility}>
+                                                    <Users className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                    Family Tree
+                                                </DropdownMenuRadioItem>
+                                                <DropdownMenuRadioItem value="3rd_degree" disabled={isUpdatingVisibility}>
+                                                    <Users className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                    Extended Family
+                                                </DropdownMenuRadioItem>
+                                                <DropdownMenuRadioItem value="public" disabled={isUpdatingVisibility}>
+                                                    <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                    Public
+                                                </DropdownMenuRadioItem>
+                                            </DropdownMenuRadioGroup>
+                                        </DropdownMenuSubContent>
+                                    </DropdownMenuPortal>
+                                </DropdownMenuSub>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        setShowDeleteDialog(true);
+                                    }}
+                                    className="text-red-500 focus:text-red-500 cursor-pointer"
+                                >
+                                    <Trash2 className="h-4 w-4 mr-2" />
                                     Delete Post
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -236,38 +331,49 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                             {commentsCount > 0 && <span className="text-sm font-medium">{commentsCount}</span>}
                         </Button>
                     </div>
-                    <Button variant="ghost" size="sm" className="px-3 rounded-full text-muted-foreground hover:bg-gray-100" onClick={handleShare}>
-                        <Share2 className="h-5 w-5" />
-                    </Button>
+                    {post.visibility === 'public' && (
+                        <Button variant="ghost" size="sm" className="px-3 rounded-full text-muted-foreground hover:bg-gray-100" onClick={handleShare}>
+                            <Share2 className="h-5 w-5" />
+                        </Button>
+                    )}
                 </div>
 
                 {/* Comments Section */}
                 {showComments && (
                     <div className="w-full bg-muted/20 border-t border-border/50 px-4 py-3 animate-in slide-in-from-top-2 duration-200">
                         {/* Add Comment */}
-                        <form onSubmit={handleCommentSubmit} className="flex gap-2 items-center mb-4">
-                            <Avatar className="h-7 w-7 border border-border">
-                                <AvatarImage src={profile?.avatar_url || ''} />
-                                <AvatarFallback className="bg-primary/10 text-xs">
-                                    {profile?.full_name?.charAt(0)?.toUpperCase()}
-                                </AvatarFallback>
-                            </Avatar>
-                            <Input
-                                placeholder="Write a comment..."
-                                value={commentText}
-                                onChange={(e) => setCommentText(e.target.value)}
-                                className="h-9 rounded-full bg-background border-border/50 text-sm focus-visible:ring-1 focus-visible:ring-saffron/50"
-                            />
-                            <Button
-                                type="submit"
-                                size="icon"
-                                variant="ghost"
-                                className="h-9 w-9 shrink-0 text-saffron hover:bg-saffron/10 hover:text-saffron-600 rounded-full"
-                                disabled={!commentText.trim() || isSubmittingComment}
-                            >
-                                {isSubmittingComment ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                            </Button>
-                        </form>
+                        {profile?.id ? (
+                            <form onSubmit={handleCommentSubmit} className="flex gap-2 items-center mb-4">
+                                <Avatar className="h-7 w-7 border border-border">
+                                    <AvatarImage src={profile?.avatar_url || ''} />
+                                    <AvatarFallback className="bg-primary/10 text-xs">
+                                        {profile?.full_name?.charAt(0)?.toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <Input
+                                    placeholder="Write a comment..."
+                                    value={commentText}
+                                    onChange={(e) => setCommentText(e.target.value)}
+                                    className="h-9 rounded-full bg-background border-border/50 text-sm focus-visible:ring-1 focus-visible:ring-saffron/50"
+                                />
+                                <Button
+                                    type="submit"
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-9 w-9 shrink-0 text-saffron hover:bg-saffron/10 hover:text-saffron-600 rounded-full"
+                                    disabled={!commentText.trim() || isSubmittingComment}
+                                >
+                                    {isSubmittingComment ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                </Button>
+                            </form>
+                        ) : (
+                            <div className="flex items-center justify-between mb-4 p-2 pl-4 bg-background/50 rounded-full border border-border/50">
+                                <span className="text-xs text-muted-foreground italic">Sign in to join the conversation</span>
+                                <Button variant="ghost" size="sm" asChild className="h-7 text-xs text-saffron hover:text-saffron-700 hover:bg-saffron/5 rounded-full">
+                                    <Link to="/login">Sign In</Link>
+                                </Button>
+                            </div>
+                        )}
 
                         {/* Existing Comments */}
                         {post.feed_comments && post.feed_comments.length > 0 ? (
@@ -280,10 +386,21 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                                                 {comment.profiles?.full_name?.charAt(0)?.toUpperCase() || '?'}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <div className="flex flex-col bg-background/60 hover:bg-background/80 transition-colors border border-border/40 rounded-2xl rounded-tl-sm px-3 pt-2 pb-2.5 shadow-sm text-sm break-words flex-1">
-                                            <span className="font-semibold text-xs text-foreground/80 mb-0.5">
-                                                {comment.profiles?.full_name || 'Unknown'}
-                                            </span>
+                                        <div className="flex flex-col bg-background/60 hover:bg-background/80 transition-colors border border-border/40 rounded-2xl rounded-tl-sm px-3 pt-2 pb-2.5 shadow-sm text-sm break-words flex-1 group">
+                                            <div className="flex justify-between items-start mb-0.5">
+                                                <span className="font-semibold text-xs text-foreground/80">
+                                                    {comment.profiles?.full_name || 'Unknown'}
+                                                </span>
+                                                {comment.profile_id === profile?.id && (
+                                                    <button
+                                                        onClick={() => handleDeleteComment(comment.id)}
+                                                        className="text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        title="Delete comment"
+                                                    >
+                                                        <Trash2 className="h-3 w-3" />
+                                                    </button>
+                                                )}
+                                            </div>
                                             <span className="text-foreground/90">{comment.comment}</span>
                                         </div>
                                     </div>
@@ -297,6 +414,31 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                     </div>
                 )}
             </CardFooter>
+
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent className="w-[90vw] max-w-[400px] rounded-xl sm:rounded-lg">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this post?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently remove this post from the feed. This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-col gap-2 sm:flex-row mt-2">
+                        <AlertDialogCancel disabled={isDeleting} className="mt-0">Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleDelete();
+                            }}
+                            disabled={isDeleting}
+                            className="bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
+                        >
+                            {isDeleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </Card>
     );
 };

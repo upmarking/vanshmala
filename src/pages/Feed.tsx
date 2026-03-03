@@ -2,13 +2,15 @@
 import { useState, useRef, useCallback } from "react";
 import { CreatePost } from "@/components/feed/CreatePost";
 import { FeedList } from "@/components/feed/FeedList";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw, Filter } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Feed = () => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [showCreatePost, setShowCreatePost] = useState(false);
+    const [filterType, setFilterType] = useState<string>("all");
     const { t } = useLanguage();
 
     // Pull-to-refresh state
@@ -79,7 +81,25 @@ const Feed = () => {
                         <CreatePost onPostCreated={handlePostCreated} />
                     </div>
 
-                    <FeedList refreshTrigger={refreshTrigger} />
+                    {/* Filter Section */}
+                    <div className="flex justify-end mb-4">
+                        <div className="flex items-center gap-2">
+                            <Filter className="h-4 w-4 text-muted-foreground" />
+                            <Select value={filterType} onValueChange={setFilterType}>
+                                <SelectTrigger className="w-[160px] h-9 bg-background border-border">
+                                    <SelectValue placeholder="All Posts" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Posts</SelectItem>
+                                    <SelectItem value="post">Posts Only</SelectItem>
+                                    <SelectItem value="announcement">Announcements</SelectItem>
+                                    <SelectItem value="invite">Invites</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    <FeedList refreshTrigger={refreshTrigger} filterType={filterType} />
                 </div>
             </div>
 

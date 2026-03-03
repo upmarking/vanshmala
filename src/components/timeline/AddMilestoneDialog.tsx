@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { VisibilityType } from '@/types/feed';
 
 interface AddMilestoneDialogProps {
     isOpen: boolean;
@@ -25,7 +26,8 @@ export const AddMilestoneDialog = ({ isOpen, onClose, memberId, onSuccess }: Add
         date: '',
         event_type: 'other',
         description: '',
-        media_url: '' // Simplified for MVP: single URL input or file upload later
+        media_url: '', // Simplified for MVP: single URL input or file upload later
+        visibility: '1st_degree' as VisibilityType
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -42,7 +44,8 @@ export const AddMilestoneDialog = ({ isOpen, onClose, memberId, onSuccess }: Add
                     event_type: formData.event_type,
                     description: formData.description,
                     media_urls: formData.media_url ? [{ url: formData.media_url, type: 'image' }] : [],
-                    created_by: (await supabase.auth.getUser()).data.user?.id
+                    created_by: (await supabase.auth.getUser()).data.user?.id,
+                    visibility: formData.visibility
                 });
 
             if (error) throw error;
@@ -50,7 +53,7 @@ export const AddMilestoneDialog = ({ isOpen, onClose, memberId, onSuccess }: Add
             toast.success(t('Milestone added successfully', 'पड़ाव सफलतापूर्वक जोड़ा गया'));
             onSuccess();
             onClose();
-            setFormData({ title: '', date: '', event_type: 'other', description: '', media_url: '' });
+            setFormData({ title: '', date: '', event_type: 'other', description: '', media_url: '', visibility: '1st_degree' as VisibilityType });
         } catch (error) {
             console.error('Error adding milestone:', error);
             toast.error(t('Failed to add milestone', 'पड़ाव जोड़ने में विफल'));
@@ -128,6 +131,24 @@ export const AddMilestoneDialog = ({ isOpen, onClose, memberId, onSuccess }: Add
                             onChange={(e) => setFormData({ ...formData, media_url: e.target.value })}
                             placeholder="https://..."
                         />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="visibility">{t('Who can see this?', 'इसे कौन देख सकता है?')}</Label>
+                        <Select
+                            value={formData.visibility}
+                            onValueChange={(val) => setFormData({ ...formData, visibility: val as VisibilityType })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="1st_degree">{t('Immediate Family (Safest)', 'प्रथम स्तर (सबसे सुरक्षित)')}</SelectItem>
+                                <SelectItem value="2nd_degree">{t('Family Tree', 'द्वितीय स्तर')}</SelectItem>
+                                <SelectItem value="3rd_degree">{t('Extended Family', 'तृतीय स्तर')}</SelectItem>
+                                <SelectItem value="public">{t('Public', 'सार्वजनिक')}</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <DialogFooter>

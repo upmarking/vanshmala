@@ -19,6 +19,7 @@ import PublicProfile from "./pages/PublicProfile";
 import ProfileSettings from "./pages/ProfileSettings";
 import Feed from "./pages/Feed";
 import ReferAndEarn from "./pages/ReferAndEarn";
+import SinglePost from "./pages/SinglePost";
 import { LegacyVault } from "./components/vault/LegacyVault";
 import DocumentVault from "./components/documents/DocumentVault";
 import { TagManagerWrapper } from "./components/tags/TagManagerWrapper";
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/contact-us" element={<ContactUs />} />
               <Route path="/data-deletion-request" element={<DataDeletionRequest />} />
               <Route path="/child-safety-standards" element={<ChildSafetyStandards />} />
+              <Route path="/post/:id" element={<SinglePost />} />
 
               {/* Authenticated Routes wrapped in MainLayout */}
               <Route path="/dashboard" element={

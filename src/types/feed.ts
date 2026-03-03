@@ -1,11 +1,13 @@
 
 import { Database } from "@/integrations/supabase/types";
 
-export type FeedPostRow = Database['public']['Tables']['feed_posts']['Row'];
-export type FeedPostInsert = Database['public']['Tables']['feed_posts']['Insert'];
-export type FeedPostUpdate = Database['public']['Tables']['feed_posts']['Update'];
+export type FeedPostRow = Database['public']['Tables']['feed_posts']['Row'] & { visibility?: string };
+export type FeedPostInsert = Database['public']['Tables']['feed_posts']['Insert'] & { visibility?: string };
+export type FeedPostUpdate = Database['public']['Tables']['feed_posts']['Update'] & { visibility?: string };
 
 export type FeedPostType = FeedPostRow['post_type'];
+
+export type VisibilityType = '1st_degree' | '2nd_degree' | '3rd_degree' | 'public';
 
 export interface FeedComment {
     id: string;

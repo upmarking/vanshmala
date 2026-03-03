@@ -8,21 +8,23 @@ import { toast } from "sonner";
 
 interface FeedListProps {
     refreshTrigger: number;
+    filterType?: string;
 }
 
-export const FeedList = ({ refreshTrigger }: FeedListProps) => {
+export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) => {
     const [posts, setPosts] = useState<FeedPost[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchPosts = async () => {
         try {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('feed_posts')
                 .select(`
             id,
             user_id,
             content,
             post_type,
+            visibility,
             created_at,
             updated_at,
             profiles:user_id (
@@ -45,8 +47,13 @@ export const FeedList = ({ refreshTrigger }: FeedListProps) => {
                 avatar_url
               )
             )
-          `)
-                .order('created_at', { ascending: false });
+          `);
+
+            if (filterType !== "all") {
+                query = query.eq('post_type', filterType);
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
 
             if (error) throw error;
             // Sort comments chronologically so newest is at bottom (or top)
@@ -73,7 +80,7 @@ export const FeedList = ({ refreshTrigger }: FeedListProps) => {
     useEffect(() => {
         setIsLoading(true);
         fetchPosts();
-    }, [refreshTrigger]);
+    }, [refreshTrigger, filterType]);
 
     if (isLoading) {
         return (

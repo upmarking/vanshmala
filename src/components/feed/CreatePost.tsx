@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FeedPostType } from "@/types/feed";
+import { FeedPostType, VisibilityType } from "@/types/feed";
 import { toast } from "sonner";
 import { Loader2, Send } from "lucide-react";
 
@@ -18,6 +18,7 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
     const { user, profile } = useAuth();
     const [content, setContent] = useState("");
     const [postType, setPostType] = useState<FeedPostType>("post");
+    const [visibility, setVisibility] = useState<VisibilityType>("1st_degree");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async () => {
@@ -38,7 +39,8 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
                 .insert({
                     user_id: profile.id,   // FK → profiles.id  (NOT auth user.id)
                     content: content.trim(),
-                    post_type: postType
+                    post_type: postType,
+                    visibility: visibility
                 });
 
             if (error) throw error;
@@ -46,6 +48,7 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
             toast.success("Post created successfully!");
             setContent("");
             setPostType("post");
+            setVisibility("1st_degree");
             onPostCreated();
         } catch (error) {
             console.error("Error creating post:", error);
@@ -69,16 +72,29 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
                     className="resize-none"
                 />
                 <div className="flex justify-between items-center">
-                    <Select value={postType} onValueChange={(v) => setPostType(v as FeedPostType)}>
-                        <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="post">Post</SelectItem>
-                            <SelectItem value="invite">Invite</SelectItem>
-                            <SelectItem value="announcement">Announcement</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <div className="flex gap-2">
+                        <Select value={postType} onValueChange={(v) => setPostType(v as FeedPostType)}>
+                            <SelectTrigger className="w-[140px]">
+                                <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="post">Post</SelectItem>
+                                <SelectItem value="invite">Invite</SelectItem>
+                                <SelectItem value="announcement">Announcement</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select value={visibility} onValueChange={(v) => setVisibility(v as VisibilityType)}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Who can see this?" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="1st_degree">Immediate Family (Safest)</SelectItem>
+                                <SelectItem value="2nd_degree">Family Tree</SelectItem>
+                                <SelectItem value="3rd_degree">Extended Family</SelectItem>
+                                <SelectItem value="public">Public</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                     <Button onClick={handleSubmit} disabled={!content.trim() || isSubmitting}>
                         {isSubmitting ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -89,6 +105,6 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
                     </Button>
                 </div>
             </CardContent>
-        </Card>
+        </Card >
     );
 };

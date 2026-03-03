@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageCircle, Share2, MoreHorizontal, Send, Loader2 } from "lucide-react";
+import { Heart, MessageCircle, Share2, MoreHorizontal, Send, Loader2, Trash2, Globe, Users, Lock, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useRef, useCallback } from "react";
@@ -9,6 +9,29 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+    DropdownMenuSub,
+    DropdownMenuSubContent,
+    DropdownMenuSubTrigger,
+    DropdownMenuPortal,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface FeedPostProps {
     event: any;
@@ -17,11 +40,14 @@ interface FeedPostProps {
 }
 
 export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
-    const { profile } = useAuth();
+    const { user, profile } = useAuth();
     const [isLiking, setIsLiking] = useState(false);
     const [isCommenting, setIsCommenting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
     const [commentText, setCommentText] = useState("");
     const [showComments, setShowComments] = useState(false);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
     const commentInputRef = useRef<HTMLInputElement>(null);
 
@@ -119,6 +145,25 @@ export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
         }
     };
 
+    const handleDeleteComment = async (commentId: string) => {
+        try {
+            const { error } = await supabase
+                .from('timeline_comments')
+                .delete()
+                .eq('id', commentId);
+
+            if (error) {
+                toast.error("Failed to delete comment: " + error.message);
+            } else {
+                toast.success("Comment deleted");
+                onPostChange?.();
+            }
+        } catch (error: any) {
+            console.error("Delete comment error:", error);
+            toast.error("An unexpected error occurred while deleting comment");
+        }
+    };
+
     const handleShare = async () => {
         try {
             if (navigator.share) {
@@ -145,6 +190,53 @@ export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
         }
     };
 
+    const isOwner = user?.id === event.created_by;
+
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        try {
+            const { error } = await supabase
+                .from('timeline_events')
+                .delete()
+                .eq('id', event.id);
+
+            if (error) {
+                toast.error("Failed to delete event: " + error.message);
+            } else {
+                toast.success("Event deleted successfully");
+                onPostChange?.();
+            }
+        } catch (error: any) {
+            console.error("Delete error:", error);
+            toast.error("An unexpected error occurred while deleting.");
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteDialog(false);
+        }
+    };
+
+    const handleVisibilityChange = async (newVisibility: string) => {
+        setIsUpdatingVisibility(true);
+        try {
+            const { error } = await supabase
+                .from('timeline_events')
+                .update({ visibility: newVisibility })
+                .eq('id', event.id);
+
+            if (error) {
+                toast.error("Failed to update visibility: " + error.message);
+            } else {
+                toast.success("Visibility updated successfully");
+                onPostChange?.();
+            }
+        } catch (error: any) {
+            console.error("Visibility error:", error);
+            toast.error("An unexpected error occurred while updating visibility.");
+        } finally {
+            setIsUpdatingVisibility(false);
+        }
+    };
+
     return (
         <Card className="mb-6 overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center gap-4 p-4 pb-2">
@@ -156,11 +248,71 @@ export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
                 </Avatar>
                 <div className="flex-1">
                     <h3 className="text-sm font-semibold">{member?.full_name}</h3>
-                    <p className="text-xs text-muted-foreground">{formattedDate}</p>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <span>{formattedDate}</span>
+                        {event.visibility && (
+                            <>
+                                <span>•</span>
+                                <span className="flex items-center gap-1">
+                                    {event.visibility === 'public' && <Globe className="h-3 w-3" />}
+                                    {event.visibility === '3rd_degree' && <Users className="h-3 w-3" />}
+                                    {event.visibility === '2nd_degree' && <Users className="h-3 w-3" />}
+                                    {event.visibility === '1st_degree' && <Lock className="h-3 w-3" />}
+                                </span>
+                            </>
+                        )}
+                    </div>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                </Button>
+                {isOwner && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuSub>
+                                <DropdownMenuSubTrigger>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    <span>Edit Visibility</span>
+                                </DropdownMenuSubTrigger>
+                                <DropdownMenuPortal>
+                                    <DropdownMenuSubContent>
+                                        <DropdownMenuRadioGroup value={event.visibility || '1st_degree'} onValueChange={handleVisibilityChange}>
+                                            <DropdownMenuRadioItem value="1st_degree" disabled={isUpdatingVisibility}>
+                                                <Lock className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                Immediate Family
+                                            </DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="2nd_degree" disabled={isUpdatingVisibility}>
+                                                <Users className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                Family Tree
+                                            </DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="3rd_degree" disabled={isUpdatingVisibility}>
+                                                <Users className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                Extended Family
+                                            </DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="public" disabled={isUpdatingVisibility}>
+                                                <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
+                                                Public
+                                            </DropdownMenuRadioItem>
+                                        </DropdownMenuRadioGroup>
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuPortal>
+                            </DropdownMenuSub>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onSelect={(e) => {
+                                    e.preventDefault();
+                                    setShowDeleteDialog(true);
+                                }}
+                                className="text-red-500 focus:text-red-500 cursor-pointer"
+                            >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                <span>Delete Post</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
             </CardHeader>
 
             <CardContent className="p-0">
@@ -259,14 +411,25 @@ export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
                                                 {getInitials(comment.profiles?.full_name)}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <div className="flex-1 bg-muted/60 p-2.5 rounded-2xl rounded-tl-none">
-                                            <div className="flex justify-between items-baseline mb-0.5">
+                                        <div className="flex-1 bg-muted/60 p-2.5 rounded-2xl rounded-tl-none group">
+                                            <div className="flex justify-between items-start mb-0.5">
                                                 <span className="font-semibold text-xs text-foreground">
                                                     {comment.profiles?.full_name || 'User'}
                                                 </span>
-                                                <span className="text-[10px] text-muted-foreground">
-                                                    {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    {comment.profile_id === profile?.id && (
+                                                        <button
+                                                            onClick={() => handleDeleteComment(comment.id)}
+                                                            className="text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            title="Delete comment"
+                                                        >
+                                                            <Trash2 className="h-3 w-3" />
+                                                        </button>
+                                                    )}
+                                                    <span className="text-[10px] text-muted-foreground">
+                                                        {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                                                    </span>
+                                                </div>
                                             </div>
                                             <p className="text-sm text-foreground/90 break-words">
                                                 {comment.comment}
@@ -313,6 +476,31 @@ export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
                     </div>
                 </div>
             </CardFooter>
+
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent className="w-[90vw] max-w-[400px] rounded-xl sm:rounded-lg">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this event?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently remove this event from your timeline. This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-col gap-2 sm:flex-row mt-2">
+                        <AlertDialogCancel disabled={isDeleting} className="mt-0">Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                handleDelete();
+                            }}
+                            disabled={isDeleting}
+                            className="bg-red-500 text-white hover:bg-red-600 focus:ring-red-500"
+                        >
+                            {isDeleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </Card>
     );
 };
