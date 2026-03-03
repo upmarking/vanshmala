@@ -46,6 +46,35 @@ const WalletPage = () => {
   const [recipientProfile, setRecipientProfile] = useState<{ full_name: string; vanshmala_id: string; user_id: string } | null>(null);
   const [verifyingRecipient, setVerifyingRecipient] = useState(false);
   const [processing, setProcessing] = useState(false);
+
+  // Smart VM-ID input helper
+  const handleTransferTargetChange = (raw: string) => {
+    setRecipientProfile(null);
+    const upper = raw.toUpperCase();
+
+    // Detect if user is typing a VM ID (starts with V or VM)
+    if (upper.startsWith('V')) {
+      // Strip any dashes the user might have typed manually after VM
+      // We'll re-insert the correct dash ourselves
+      let stripped = upper.replace(/-/g, ''); // e.g. 'VM0001' or 'VM'
+
+      if (stripped.startsWith('VM')) {
+        const digits = stripped.slice(2); // everything after 'VM'
+        // Only allow digits after VM-
+        const cleanDigits = digits.replace(/[^0-9]/g, '');
+        if (cleanDigits.length > 0) {
+          setTransferTarget('VM-' + cleanDigits);
+        } else {
+          // User just typed 'VM' or 'VM-' — keep at 'VM-' to invite number entry
+          setTransferTarget('VM-');
+        }
+        return;
+      }
+    }
+
+    // Otherwise (phone number path) — just set raw
+    setTransferTarget(raw);
+  };
   const [appliedDiscount, setAppliedDiscount] = useState<{ amount: number; codeId: string; code: string } | null>(null);
 
   useEffect(() => {
@@ -479,25 +508,40 @@ const WalletPage = () => {
               <DialogDescription>{t('Send money using Vanshmala ID or Phone Number', 'वंशमाला ID या फ़ोन नंबर से पैसे भेजें')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
-              <div className="flex gap-2">
-                <Input
-                  value={transferTarget}
-                  onChange={(e) => {
-                    setTransferTarget(e.target.value);
-                    setRecipientProfile(null);
-                  }}
-                  placeholder={t('Vanshmala ID or Phone', 'वंशमाला ID या फ़ोन')}
-                  className="flex-1"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleVerifyRecipient}
-                  disabled={verifyingRecipient || !transferTarget.trim() || !!recipientProfile}
-                  className="min-w-[80px]"
-                >
-                  {verifyingRecipient ? <Loader2 className="w-4 h-4 animate-spin" /> : t('Verify', 'सत्यापित करें')}
-                </Button>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <Input
+                      value={transferTarget}
+                      onChange={(e) => handleTransferTargetChange(e.target.value)}
+                      placeholder={t('VM-0001 or Phone', 'VM-0001 या फ़ोन')}
+                      className="flex-1 pr-10 font-mono tracking-wide"
+                      // Switch to numeric keyboard when user has typed 'VM-'
+                      inputMode={transferTarget.toUpperCase().startsWith('VM-') ? 'numeric' : 'text'}
+                      autoComplete="off"
+                    />
+                    {transferTarget.toUpperCase().startsWith('VM-') && (
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-700 pointer-events-none">
+                        ID
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleVerifyRecipient}
+                    disabled={verifyingRecipient || !transferTarget.trim() || !!recipientProfile}
+                    className="min-w-[80px]"
+                  >
+                    {verifyingRecipient ? <Loader2 className="w-4 h-4 animate-spin" /> : t('Verify', 'सत्यापित करें')}
+                  </Button>
+                </div>
+                {transferTarget.toUpperCase().startsWith('VM-') && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    {t('Entering Vanshmala ID — just type the number!', 'वंशमाला ID दर्ज कर रहे हैं — बस नंबर टाइप करें!')}
+                  </p>
+                )}
               </div>
 
               {recipientProfile && (

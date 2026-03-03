@@ -68,11 +68,14 @@ const MobileTopBar = () => {
                     {/* Right actions */}
                     {user ? (
                         <div className="flex items-center gap-2">
-                            {/* Wallet chip */}
+                            {/* Wallet chip — tapping opens Wallet page */}
                             {balance !== null && (
-                                <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 border border-amber-200">
+                                <Link
+                                    to="/wallet"
+                                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 border border-amber-200 active:scale-95 transition-transform"
+                                >
                                     <span className="text-xs font-bold text-amber-900">₹{balance.toFixed(0)}</span>
-                                </div>
+                                </Link>
                             )}
 
                             {/* Avatar — opens profile sheet */}

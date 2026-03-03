@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageCircle, Share2, MoreHorizontal, Send, Loader2, Trash2, Globe, Users, Lock, Eye } from "lucide-react";
@@ -67,7 +68,7 @@ export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
 
     const handleLike = useCallback(async () => {
         if (!profile) {
-            toast.error("You must be logged in to like an event");
+            toast.error("You must be logged in to like an event.");
             return;
         }
 
@@ -113,7 +114,7 @@ export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
         if (e) e.preventDefault();
 
         if (!profile) {
-            toast.error("You must be logged in to comment");
+            toast.error("You must be logged in to comment.");
             return;
         }
 
@@ -165,15 +166,16 @@ export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
     };
 
     const handleShare = async () => {
+        const shareUrl = `${window.location.origin}/update/${event.id}`;
         try {
             if (navigator.share) {
                 await navigator.share({
                     title: `Event on VanshMala: ${event.title}`,
                     text: event.description || "Check out this family update on VanshMala!",
-                    url: window.location.href,
+                    url: shareUrl,
                 });
             } else {
-                await navigator.clipboard.writeText(`${event.title} - ${window.location.href}`);
+                await navigator.clipboard.writeText(shareUrl);
                 toast.success('Link copied to clipboard!');
             }
         } catch (error) {
@@ -384,14 +386,16 @@ export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
                             <MessageCircle className="h-5 w-5" />
                         </Button>
                     </div>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="gap-1.5 text-muted-foreground hover:bg-muted"
-                        onClick={handleShare}
-                    >
-                        <Share2 className="h-5 w-5" />
-                    </Button>
+                    {event.visibility === 'public' && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-1.5 text-muted-foreground hover:bg-muted"
+                            onClick={handleShare}
+                        >
+                            <Share2 className="h-5 w-5" />
+                        </Button>
+                    )}
                 </div>
 
                 <AnimatePresence>
@@ -442,39 +446,48 @@ export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
                     )}
                 </AnimatePresence>
 
-                <div className="flex gap-2 items-center w-full px-2 pb-2">
-                    <Avatar className="h-8 w-8 shrink-0">
-                        <AvatarImage src={profile?.avatar_url || ''} />
-                        <AvatarFallback className="bg-muted text-xs">
-                            {getInitials(profile?.full_name || '')}
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 relative flex items-center">
-                        <Input
-                            ref={commentInputRef}
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            placeholder="Add a comment..."
-                            className="w-full bg-muted/50 border-transparent hover:bg-muted focus-visible:ring-1 focus-visible:ring-saffron/50 focus-visible:bg-background pr-10 rounded-full h-9"
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                    e.preventDefault();
-                                    handleComment();
-                                }
-                            }}
-                            disabled={isCommenting}
-                        />
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="absolute right-0 h-9 w-9 text-saffron hover:bg-transparent hover:text-saffron-600 disabled:opacity-50"
-                            onClick={handleComment}
-                            disabled={isCommenting || !commentText.trim()}
-                        >
-                            {isCommenting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                {profile ? (
+                    <div className="flex gap-2 items-center w-full px-2 pb-2">
+                        <Avatar className="h-8 w-8 shrink-0">
+                            <AvatarImage src={profile?.avatar_url || ''} />
+                            <AvatarFallback className="bg-muted text-xs">
+                                {getInitials(profile?.full_name || '')}
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 relative flex items-center">
+                            <Input
+                                ref={commentInputRef}
+                                value={commentText}
+                                onChange={(e) => setCommentText(e.target.value)}
+                                placeholder="Add a comment..."
+                                className="w-full bg-muted/50 border-transparent hover:bg-muted focus-visible:ring-1 focus-visible:ring-saffron/50 focus-visible:bg-background pr-10 rounded-full h-9"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleComment();
+                                    }
+                                }}
+                                disabled={isCommenting}
+                            />
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="absolute right-0 h-9 w-9 text-saffron hover:bg-transparent hover:text-saffron-600 disabled:opacity-50"
+                                onClick={handleComment}
+                                disabled={isCommenting || !commentText.trim()}
+                            >
+                                {isCommenting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-between mx-2 mb-2 p-2 pl-4 bg-background/50 rounded-full border border-border/50">
+                        <span className="text-xs text-muted-foreground italic">Sign in to join the conversation</span>
+                        <Button variant="ghost" size="sm" asChild className="h-7 text-xs text-saffron hover:text-saffron-700 hover:bg-saffron/5 rounded-full">
+                            <Link to="/login">Sign In</Link>
                         </Button>
                     </div>
-                </div>
+                )}
             </CardFooter>
 
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

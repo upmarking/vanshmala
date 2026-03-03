@@ -101,6 +101,21 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
         return () => clearTimeout(timer);
     }, [searchQuery]);
 
+    // Smart VM-ID input handler for the search field
+    const handleSearchQueryChange = (raw: string) => {
+        const upper = raw.toUpperCase();
+        if (upper.startsWith('V')) {
+            const stripped = upper.replace(/-/g, '');
+            if (stripped.startsWith('VM')) {
+                const digits = stripped.slice(2);
+                const cleanDigits = digits.replace(/[^0-9]/g, '');
+                setSearchQuery(cleanDigits.length > 0 ? 'VM-' + cleanDigits : 'VM-');
+                return;
+            }
+        }
+        setSearchQuery(raw);
+    };
+
     // Reset form when opening
     useEffect(() => {
         if (isOpen) {
@@ -387,14 +402,29 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
                                 </div>
                             </div>
 
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                <Input
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder={t('Search by Vanshmala ID or Phone', 'वंशमाला ID या फोन से खोजें')}
-                                    className="pl-9"
-                                />
+                            <div className="space-y-2">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                    <Input
+                                        value={searchQuery}
+                                        onChange={(e) => handleSearchQueryChange(e.target.value)}
+                                        placeholder={t('VM-0001 or Phone', 'VM-0001 या फ़ोन')}
+                                        className="pl-9 pr-10 font-mono tracking-wide"
+                                        inputMode={searchQuery.toUpperCase().startsWith('VM-') ? 'numeric' : 'text'}
+                                        autoComplete="off"
+                                    />
+                                    {searchQuery.toUpperCase().startsWith('VM-') && (
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-amber-600 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-400 px-1.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-700 pointer-events-none">
+                                            ID
+                                        </span>
+                                    )}
+                                </div>
+                                {searchQuery.toUpperCase().startsWith('VM-') && (
+                                    <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                        {t('Entering Vanshmala ID — just type the number!', 'वंशमाला ID दर्ज कर रहे हैं — बस नंबर टाइप करें!')}
+                                    </p>
+                                )}
                             </div>
 
                             {isSearching ? (
@@ -411,10 +441,10 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
                                             <div
                                                 key={profile.id}
                                                 className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${isAlreadyMember
-                                                        ? 'opacity-50 cursor-not-allowed border-dashed'
-                                                        : selectedProfile?.id === profile.id
-                                                            ? 'border-saffron bg-saffron/5 ring-1 ring-saffron cursor-pointer'
-                                                            : 'border-border hover:border-saffron/50 cursor-pointer'
+                                                    ? 'opacity-50 cursor-not-allowed border-dashed'
+                                                    : selectedProfile?.id === profile.id
+                                                        ? 'border-saffron bg-saffron/5 ring-1 ring-saffron cursor-pointer'
+                                                        : 'border-border hover:border-saffron/50 cursor-pointer'
                                                     }`}
                                                 onClick={() => !isAlreadyMember && setSelectedProfile(profile)}
                                             >
