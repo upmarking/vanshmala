@@ -2,7 +2,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { User, ChevronDown, MoreHorizontal, UserPlus } from 'lucide-react';
 import { useState } from 'react';
-import { FamilyTreeNode } from '@/utils/familyTreeUtils';
+import { FamilyTreeNode, getGenerationName } from '@/utils/familyTreeUtils';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -120,9 +120,29 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
                             & {t(member.spouse.full_name, member.spouse.full_name_hi)}
                         </p>
                     )}
-                    <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-saffron/10 text-saffron-deep text-[10px] font-medium font-body">
-                        Gen {member.generation_level}
-                    </span>
+                    {(() => {
+                        const genName = getGenerationName(member.date_of_birth);
+                        if (genName) {
+                            return (
+                                <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full bg-saffron/10 text-saffron-deep text-[10px] font-medium font-body">
+                                    {t(genName, genName)}
+                                </span>
+                            );
+                        }
+                        return (
+                            <div
+                                className="inline-flex mt-1.5 px-2 py-0.5 rounded-full bg-blue-50/80 text-blue-600 border border-blue-200/60 hover:bg-blue-100 cursor-pointer items-center justify-center transition-colors shadow-sm"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onViewProfile(member);
+                                }}
+                            >
+                                <span className="text-[9.5px] font-semibold font-body whitespace-nowrap">
+                                    {t('Set up Date of Birth please', 'कृपया जन्म तिथि सेट करें')}
+                                </span>
+                            </div>
+                        );
+                    })()}
                     <p className="font-body text-[10px] text-muted-foreground mt-1">{member.vanshmala_id}</p>
 
                     {hasChildren && (

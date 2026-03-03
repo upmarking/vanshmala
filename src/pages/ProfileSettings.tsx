@@ -10,10 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Trash2, Plus, Save, Globe, Lock, Users, Sparkles } from 'lucide-react';
+import { Trash2, Plus, Save, Globe, Lock, Users, Sparkles, User, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LifeJourneySetupMode } from '@/components/timeline/LifeJourneySetupMode';
+import { ProfileCompletion } from '@/components/profile/ProfileCompletion';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProfileSettings = () => {
     const { user } = useAuth();
@@ -24,8 +26,23 @@ const ProfileSettings = () => {
     const { mutate: updateMember, isPending } = useUpdateMember();
 
     // Form States
-    const [formData, setFormData] = useState<any>({});
+    const [formData, setFormData] = useState<any>({
+        username: '',
+        full_name: '',
+        full_name_hi: '',
+        bio: '',
+        place_of_birth: '',
+        blood_group: '',
+        marriage_date: '',
+        mool_niwas: '',
+        kuldevi: '',
+        kuldevta: '',
+        date_of_birth: '',
+        gender: '',
+        avatar_url: '',
+    });
     const [privacySettings, setPrivacySettings] = useState<any>({});
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
     useEffect(() => {
         if (member) {
@@ -40,6 +57,8 @@ const ProfileSettings = () => {
                 mool_niwas: member.mool_niwas || '',
                 kuldevi: member.kuldevi || '',
                 kuldevta: member.kuldevta || '',
+                date_of_birth: member.date_of_birth || '',
+                gender: member.gender || '',
                 // Ensure arrays
                 education: Array.isArray(member.education) ? member.education : [],
                 career: Array.isArray(member.career) ? member.career : [],
@@ -54,6 +73,48 @@ const ProfileSettings = () => {
 
     const handlePrivacyChange = (field: string, value: string) => {
         setPrivacySettings((prev: any) => ({ ...prev, [field]: value }));
+    };
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !user || !member) return;
+
+        setIsUploadingAvatar(true);
+        try {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
+
+            // Note: Ensuring you have an 'avatars' bucket in Supabase storage that is publicly accessible
+            const { error: uploadError, data } = await supabase.storage
+                .from('avatars')
+                .upload(fileName, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(fileName);
+
+            // Update local form state immediately to reflect changes
+            setFormData((prev: any) => ({ ...prev, avatar_url: publicUrl }));
+
+            // Automatically save to the database
+            updateMember({
+                memberId: member.id,
+                updates: { avatar_url: publicUrl }
+            }, {
+                onSuccess: () => {
+                    toast.success(t("Profile picture updated", "प्रोफ़ाइल चित्र अपडेट किया गया"));
+                    refetch();
+                }
+            });
+
+        } catch (error: any) {
+            console.error('Avatar upload error:', error);
+            toast.error(t("Failed to upload image", "छवि अपलोड करने में विफल"));
+        } finally {
+            setIsUploadingAvatar(false);
+        }
     };
 
     // Helper for Privacy Selector
@@ -129,6 +190,7 @@ const ProfileSettings = () => {
             privacy_settings: privacySettings,
             // Handle date fields
             marriage_date: formData.marriage_date || null,
+            date_of_birth: formData.date_of_birth || null,
             // Don't send undefined
             username: formData.username || null,
         };
@@ -180,6 +242,10 @@ const ProfileSettings = () => {
                 </Button>
             </div>
 
+            <div className="mb-8">
+                <ProfileCompletion member={member} />
+            </div>
+
             <Tabs defaultValue="basic" className="w-full space-y-6">
                 <TabsList className="grid w-full grid-cols-5 bg-muted/50 p-1">
                     <TabsTrigger value="basic">{t('Basic Info', 'मूल जानकारी')}</TabsTrigger>
@@ -201,6 +267,56 @@ const ProfileSettings = () => {
                             <CardDescription>{t('Update your basic information seen by others.', 'दूसरों द्वारा देखी जाने वाली अपनी मूल जानकारी अपडेट करें।')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
+                            {/* Profile Picture Upload */}
+                            <div className="flex flex-col md:flex-row gap-6 items-start md:items-center p-4 border rounded-xl bg-muted/20">
+                                <div className="w-24 h-24 rounded-full bg-saffron/10 flex items-center justify-center border-4 border-background shadow-md overflow-hidden shrink-0 relative group">
+                                    {formData.avatar_url || member?.avatar_url ? (
+                                        <img src={formData.avatar_url || member?.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <User className="w-10 h-10 text-saffron" />
+                                    )}
+                                    <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Upload className="w-6 h-6 text-white mb-1" />
+                                    </div>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleAvatarUpload}
+                                        disabled={isUploadingAvatar}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                        title={t('Change Profile Picture', 'प्रोफ़ाइल चित्र बदलें')}
+                                    />
+                                    {isUploadingAvatar && (
+                                        <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                                            <Loader2 className="w-6 h-6 animate-spin text-saffron" />
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="space-y-1">
+                                    <h4 className="font-semibold text-lg">{t('Profile Picture', 'प्रोफ़ाइल चित्र')}</h4>
+                                    <p className="text-sm text-muted-foreground">{t('A picture helps your family members recognize you.', 'एक तस्वीर आपके परिवार के सदस्यों को आपको पहचानने में मदद करती है।')}</p>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="mt-2 relative overflow-hidden"
+                                        disabled={isUploadingAvatar}
+                                    >
+                                        {isUploadingAvatar ? (
+                                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {t('Uploading...', 'अपलोड हो रहा है...')}</>
+                                        ) : (
+                                            <><Upload className="w-4 h-4 mr-2" /> {t('Upload New Photo', 'नया फोटो अपलोड करें')}</>
+                                        )}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleAvatarUpload}
+                                            disabled={isUploadingAvatar}
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                        />
+                                    </Button>
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <div className="flex justify-between">
@@ -230,6 +346,37 @@ const ProfileSettings = () => {
                                         value={formData.full_name_hi}
                                         onChange={(e) => handleBasicChange('full_name_hi', e.target.value)}
                                     />
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <Label>{t('Date of Birth', 'जन्म तिथि')}</Label>
+                                        <PrivacySelector field="date_of_birth" />
+                                    </div>
+                                    <Input
+                                        type="date"
+                                        value={formData.date_of_birth}
+                                        onChange={(e) => handleBasicChange('date_of_birth', e.target.value)}
+                                    />
+                                    <p className="text-[10px] text-muted-foreground">We use this to establish your proper Generation Level.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center">
+                                        <Label>{t('Gender', 'लिंग')}</Label>
+                                        <PrivacySelector field="gender" />
+                                    </div>
+                                    <Select
+                                        value={formData.gender || ''}
+                                        onValueChange={(val) => handleBasicChange('gender', val)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder={t('Select gender', 'लिंग चुनें')} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="male">{t('Male', 'पुरुष')}</SelectItem>
+                                            <SelectItem value="female">{t('Female', 'महिला')}</SelectItem>
+                                            <SelectItem value="other">{t('Other', 'अन्य')}</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-center">
@@ -496,7 +643,7 @@ const ProfileSettings = () => {
                                 <Lock className="w-4 h-4 inline mr-2" /> <strong>Private</strong>: Visible only to you.
                             </div>
                             <div className="space-y-4">
-                                {['name', 'bio', 'place_of_birth', 'blood_group', 'marriage_date', 'education', 'career', 'mool_niwas', 'kuldevi'].map(field => (
+                                {['name', 'bio', 'place_of_birth', 'blood_group', 'marriage_date', 'date_of_birth', 'gender', 'education', 'career', 'mool_niwas', 'kuldevi'].map(field => (
                                     <div key={field} className="flex justify-between items-center p-2 border-b last:border-0">
                                         <Label className="capitalize">{field.replace(/_/g, ' ')}</Label>
                                         <PrivacySelector field={field} />

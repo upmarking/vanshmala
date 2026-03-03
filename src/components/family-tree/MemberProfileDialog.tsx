@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TimelineView } from '@/components/timeline/TimelineView';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { FamilyTreeNode } from '@/utils/familyTreeUtils';
+import { FamilyTreeNode, getGenerationName } from '@/utils/familyTreeUtils';
 import { User, GitMerge, Trash2, Link, X, Plus } from 'lucide-react';
 import { useMergeRequests } from '@/hooks/useMergeRequests';
 import { useState, useEffect } from 'react';
@@ -257,7 +257,21 @@ export const MemberProfileDialog = ({ isOpen, onClose, member, treeId }: MemberP
                             </>}
 
                             <div className="text-muted-foreground">{t('Generation', 'पीढ़ी')}</div>
-                            <div className="font-medium text-right">Gen {member.generation_level}</div>
+                            <div className="font-medium text-right">
+                                {(() => {
+                                    const genName = getGenerationName(member.date_of_birth);
+                                    if (genName) return t(genName, genName);
+                                    return (
+                                        <Button
+                                            variant="link"
+                                            className="h-auto p-0 text-blue-600 text-sm font-medium"
+                                            onClick={() => document.querySelector<HTMLButtonElement>('[value="edit"]')?.click()}
+                                        >
+                                            {t('Set up Date of Birth please', 'कृपया जन्म तिथि सेट करें')}
+                                        </Button>
+                                    );
+                                })()}
+                            </div>
                         </div>
 
                         {/* Tags */}

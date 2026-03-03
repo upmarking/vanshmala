@@ -100,6 +100,9 @@ export const buildFamilyTree = (members: Member[], relationships: Relationship[]
         awards: null,
         migration_info: null,
         privacy_settings: null,
+        kuldevi: null,
+        kuldevta: null,
+        mool_niwas: null,
         children: sortedRoots,
         parents: [],
         siblings: [],
@@ -108,3 +111,18 @@ export const buildFamilyTree = (members: Member[], relationships: Relationship[]
     return virtualRoot;
 };
 
+export const getGenerationName = (dateOfBirth: string | null): string | null => {
+    if (!dateOfBirth) return null;
+
+    const year = new Date(dateOfBirth).getFullYear();
+
+    if (year >= 2013) return "Generation Alpha";
+    if (year >= 1997) return "Generation Z";
+    if (year >= 1981) return "Millennial";
+    if (year >= 1965) return "Generation X";
+    if (year >= 1946) return "Baby Boomer";
+    if (year >= 1928) return "Silent Generation";
+    if (year >= 1901) return "Greatest Generation";
+
+    return "Lost Generation"; // or just "Unknown Generation"
+};

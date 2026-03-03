@@ -12,6 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FeedPost } from '@/components/dashboard/FeedPost';
+import { ProfileCompletion } from '@/components/profile/ProfileCompletion';
+import { useMemberByUserId } from '@/hooks/useFamilyTree';
 
 interface FamilyTreeRecord {
   id: string;
@@ -34,6 +36,9 @@ const Dashboard = () => {
   const [newTreeGotra, setNewTreeGotra] = useState('');
   const [joinFamilyId, setJoinFamilyId] = useState('');
   const [primaryTreeId, setPrimaryTreeId] = useState<string | null>(null);
+
+  // Fetch Member Profile
+  const { data: memberProfile } = useMemberByUserId(user?.id);
 
   useEffect(() => {
     checkFamilyStatus();
@@ -58,8 +63,8 @@ const Dashboard = () => {
     }
   };
 
-  const fetchFeed = async () => {
-    setLoading(true);
+  const fetchFeed = async (isRefresh = false) => {
+    if (!isRefresh) setLoading(true);
     try {
       // 1. Get my tree IDs
       const { data: memberships } = await supabase
@@ -68,7 +73,7 @@ const Dashboard = () => {
         .eq('user_id', user!.id);
 
       if (!memberships || memberships.length === 0) {
-        setLoading(false);
+        if (!isRefresh) setLoading(false);
         return;
       };
 
@@ -88,13 +93,31 @@ const Dashboard = () => {
 
       if (memberIds.length === 0) {
         setFeedEvents([]);
-        setLoading(false);
+        if (!isRefresh) setLoading(false);
         return;
       }
 
       const { data: events, error } = await supabase
         .from('timeline_events')
-        .select('*')
+        .select(`
+          *,
+          timeline_likes (
+            event_id,
+            profile_id,
+            created_at
+          ),
+          timeline_comments (
+            id,
+            event_id,
+            profile_id,
+            comment,
+            created_at,
+            profiles:profile_id (
+              full_name,
+              avatar_url
+            )
+          )
+        `)
         .in('family_member_id', memberIds)
         .order('created_at', { ascending: false })
         .limit(50); // Pagination later
@@ -112,7 +135,7 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error fetching feed:", error);
     } finally {
-      setLoading(false);
+      if (!isRefresh) setLoading(false);
     }
   };
 
@@ -369,7 +392,7 @@ const Dashboard = () => {
       {/* Main Feed Column */}
       <div className="flex-1 w-full md:max-w-xl md:mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold font-display">{t('Family Feed', 'पारिवारिक फ़ीड')}</h1>
+          <h1 className="text-2xl font-bold font-display">{t('Recent Update', 'हाल के अपडेट')}</h1>
           <p className="text-muted-foreground text-sm">{t('Latest updates from your family timeline.', 'आपके परिवार की समयरेखा से नवीनतम अपडेट।')}</p>
         </div>
 
@@ -391,7 +414,7 @@ const Dashboard = () => {
         ) : (
           <div className="space-y-6">
             {feedEvents.map((event) => (
-              <FeedPost key={event.id} event={event} member={event.member} />
+              <FeedPost key={event.id} event={event} member={event.member} onPostChange={() => fetchFeed(true)} />
             ))}
 
             <div className="text-center py-8 text-sm text-muted-foreground">
@@ -418,6 +441,13 @@ const Dashboard = () => {
             </Button>
           </CardContent>
         </Card>
+
+        {memberProfile && (
+          <ProfileCompletion
+            member={memberProfile}
+            onCompleteClick={() => navigate('/settings')}
+          />
+        )}
 
         <Card className="bg-gradient-to-br from-saffron/10 to-transparent border-none">
           <CardContent className="pt-6">

@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 
 interface WalletData {
   id: string;
@@ -42,6 +43,8 @@ const WalletPage = () => {
   const [addAmount, setAddAmount] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
   const [transferTarget, setTransferTarget] = useState('');
+  const [recipientProfile, setRecipientProfile] = useState<{ full_name: string; vanshmala_id: string; user_id: string } | null>(null);
+  const [verifyingRecipient, setVerifyingRecipient] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [appliedDiscount, setAppliedDiscount] = useState<{ amount: number; codeId: string; code: string } | null>(null);
 
@@ -57,9 +60,9 @@ const WalletPage = () => {
       .from('wallets')
       .select('*')
       .eq('user_id', user!.id)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code === 'PGRST116') {
+    if (!data && !error) {
       // Wallet doesn't exist, create one
       const { data: newWallet } = await supabase
         .from('wallets')
@@ -195,6 +198,31 @@ const WalletPage = () => {
     setProcessing(false);
   };
 
+  const handleVerifyRecipient = async () => {
+    if (!transferTarget.trim()) {
+      toast.error(t('Enter Vanshmala ID or Phone', 'वंशमाला ID या फ़ोन दर्ज करें'));
+      return;
+    }
+    setVerifyingRecipient(true);
+    setRecipientProfile(null);
+
+    const { data: recipient, error } = await supabase
+      .from('profiles')
+      .select('user_id, full_name, vanshmala_id')
+      .or(`vanshmala_id.eq.${transferTarget.trim()},phone.eq.${transferTarget.trim()}`)
+      .maybeSingle();
+
+    if (error || !recipient) {
+      toast.error(t('Recipient not found', 'प्राप्तकर्ता नहीं मिला'));
+    } else if (recipient.user_id === user!.id) {
+      toast.error(t('Cannot transfer to yourself', 'स्वयं को ट्रांसफर नहीं कर सकते'));
+    } else {
+      setRecipientProfile(recipient);
+      toast.success(t('User verified successfully', 'उपयोगकर्ता सफलतापूर्वक सत्यापित हुआ'));
+    }
+    setVerifyingRecipient(false);
+  };
+
   const handleTransfer = async () => {
     const amount = parseFloat(transferAmount);
     if (!amount || amount < 1) {
@@ -212,17 +240,22 @@ const WalletPage = () => {
 
     setProcessing(true);
 
-    // Find recipient by vanshmala_id or phone
-    const { data: recipient } = await supabase
-      .from('profiles')
-      .select('user_id, full_name, vanshmala_id')
-      .or(`vanshmala_id.eq.${transferTarget.trim()},phone.eq.${transferTarget.trim()}`)
-      .single();
+    let recipient = recipientProfile;
 
+    // If not verified yet, find recipient by vanshmala_id or phone
     if (!recipient) {
-      toast.error(t('Recipient not found', 'प्राप्तकर्ता नहीं मिला'));
-      setProcessing(false);
-      return;
+      const { data } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, vanshmala_id')
+        .or(`vanshmala_id.eq.${transferTarget.trim()},phone.eq.${transferTarget.trim()}`)
+        .maybeSingle();
+
+      if (!data) {
+        toast.error(t('Recipient not found', 'प्राप्तकर्ता नहीं मिला'));
+        setProcessing(false);
+        return;
+      }
+      recipient = data;
     }
 
     if (recipient.user_id === user!.id) {
@@ -231,18 +264,9 @@ const WalletPage = () => {
       return;
     }
 
-    // Get recipient wallet
-    const { data: recipientWallet } = await supabase
-      .from('wallets')
-      .select('id, balance')
-      .eq('user_id', recipient.user_id)
-      .single();
-
-    if (!recipientWallet) {
-      toast.error(t('Recipient wallet not found', 'प्राप्तकर्ता वॉलेट नहीं मिला'));
-      setProcessing(false);
-      return;
-    }
+    // Note: We used to check if the recipient has an active wallet here.
+    // However, the backend `process_wallet_transfer` RPC now automatically creates 
+    // a wallet for the recipient if it doesn't exist, making this transfer seamless.
 
     // Debit sender
     await supabase
@@ -281,6 +305,7 @@ const WalletPage = () => {
     setShowTransfer(false);
     setTransferAmount('');
     setTransferTarget('');
+    setRecipientProfile(null);
     fetchWallet();
     fetchTransactions();
     setProcessing(false);
@@ -454,11 +479,40 @@ const WalletPage = () => {
               <DialogDescription>{t('Send money using Vanshmala ID or Phone Number', 'वंशमाला ID या फ़ोन नंबर से पैसे भेजें')}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-4">
-              <Input
-                value={transferTarget}
-                onChange={(e) => setTransferTarget(e.target.value)}
-                placeholder={t('Vanshmala ID or Phone', 'वंशमाला ID या फ़ोन')}
-              />
+              <div className="flex gap-2">
+                <Input
+                  value={transferTarget}
+                  onChange={(e) => {
+                    setTransferTarget(e.target.value);
+                    setRecipientProfile(null);
+                  }}
+                  placeholder={t('Vanshmala ID or Phone', 'वंशमाला ID या फ़ोन')}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleVerifyRecipient}
+                  disabled={verifyingRecipient || !transferTarget.trim() || !!recipientProfile}
+                  className="min-w-[80px]"
+                >
+                  {verifyingRecipient ? <Loader2 className="w-4 h-4 animate-spin" /> : t('Verify', 'सत्यापित करें')}
+                </Button>
+              </div>
+
+              {recipientProfile && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-green-700 dark:text-green-400"
+                >
+                  <CheckCircle2 className="w-5 h-5 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{recipientProfile.full_name}</p>
+                    <p className="text-xs opacity-80 truncate">{recipientProfile.vanshmala_id}</p>
+                  </div>
+                </motion.div>
+              )}
               <Input
                 type="number"
                 value={transferAmount}
