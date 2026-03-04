@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import MobileProfileSheet from './MobileProfileSheet';
+import { NotificationBell } from '@/components/NotificationBell';
 
 const OmIcon = () => (
     <svg viewBox="0 0 100 100" className="w-5 h-5" fill="currentColor">
@@ -77,6 +78,9 @@ const MobileTopBar = () => {
                                     <span className="text-xs font-bold text-amber-900">₹{balance.toFixed(0)}</span>
                                 </Link>
                             )}
+
+                            {/* Notification Bell */}
+                            <NotificationBell />
 
                             {/* Avatar — opens profile sheet */}
                             <button

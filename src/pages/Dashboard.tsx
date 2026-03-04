@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { Users, Plus, Loader2 } from 'lucide-react';
+import { Users, Plus, Loader2, Copy, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +9,6 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { FeedPost } from '@/components/dashboard/FeedPost';
 import { ProfileCompletion } from '@/components/profile/ProfileCompletion';
@@ -36,6 +35,9 @@ const Dashboard = () => {
   const [newTreeGotra, setNewTreeGotra] = useState('');
   const [joinFamilyId, setJoinFamilyId] = useState('');
   const [primaryTreeId, setPrimaryTreeId] = useState<string | null>(null);
+  const [primaryFamilyId, setPrimaryFamilyId] = useState<string | null>(null);
+  const [primaryFamilyName, setPrimaryFamilyName] = useState<string | null>(null);
+  const [copiedFamilyId, setCopiedFamilyId] = useState(false);
 
   // Fetch Member Profile
   const { data: memberProfile } = useMemberByUserId(user?.id);
@@ -48,13 +50,35 @@ const Dashboard = () => {
     if (!user) return;
     setLoading(true);
 
-    // Check if user is member of any tree
-    const { count, error } = await supabase
+    // Primary check: tree_memberships (the standard path)
+    const { data: memberships, count } = await supabase
       .from('tree_memberships')
-      .select('*', { count: 'exact', head: true })
+      .select('tree_id', { count: 'exact' })
       .eq('user_id', user.id);
 
     if (count && count > 0) {
+      setHasFamily(true);
+      fetchFeed();
+      return;
+    }
+
+    // Secondary safety-net: user may have been added as a family_member
+    // (the trigger should create tree_membership, but race-condition fallback)
+    const { data: memberRows } = await supabase
+      .from('family_members')
+      .select('tree_id')
+      .eq('user_id', user.id)
+      .limit(1);
+
+    if (memberRows && memberRows.length > 0) {
+      // Trigger may have failed — manually ensure membership exists
+      for (const row of memberRows) {
+        await supabase.from('tree_memberships').upsert({
+          tree_id: row.tree_id,
+          user_id: user.id,
+          role: 'member',
+        }, { onConflict: 'tree_id,user_id', ignoreDuplicates: true });
+      }
       setHasFamily(true);
       fetchFeed();
     } else {
@@ -78,7 +102,19 @@ const Dashboard = () => {
       };
 
       const treeIds = memberships.map(m => m.tree_id);
-      if (treeIds.length > 0) setPrimaryTreeId(treeIds[0]);
+      if (treeIds.length > 0) {
+        setPrimaryTreeId(treeIds[0]);
+        // Fetch family_id for sharing
+        const { data: treeInfo } = await supabase
+          .from('family_trees')
+          .select('family_id, family_name')
+          .eq('id', treeIds[0])
+          .single();
+        if (treeInfo) {
+          setPrimaryFamilyId(treeInfo.family_id);
+          setPrimaryFamilyName(treeInfo.family_name);
+        }
+      }
 
       // 2. Get members of these trees (to link events to people)
       const { data: members } = await supabase
@@ -387,6 +423,14 @@ const Dashboard = () => {
   // ----------------------------------------------------------------------
   // VIEW: FAMILY FEED
   // ----------------------------------------------------------------------
+  const handleCopyFamilyId = () => {
+    if (!primaryFamilyId) return;
+    navigator.clipboard.writeText(primaryFamilyId);
+    setCopiedFamilyId(true);
+    toast.success(t('Family ID copied!', 'परिवार ID कॉपी हो गई!'));
+    setTimeout(() => setCopiedFamilyId(false), 2000);
+  };
+
   return (
     <div className="animate-fade-in-up container max-w-4xl mx-auto py-4 md:py-8 px-3 md:px-4 flex gap-8">
       {/* Main Feed Column */}
@@ -394,6 +438,25 @@ const Dashboard = () => {
         <div className="mb-6">
           <h1 className="text-2xl font-bold font-display">{t('Recent Update', 'हाल के अपडेट')}</h1>
           <p className="text-muted-foreground text-sm">{t('Latest updates from your family timeline.', 'आपके परिवार की समयरेखा से नवीनतम अपडेट।')}</p>
+          {/* Family ID chip */}
+          {primaryFamilyId && (
+            <div className="mt-3 inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-full px-3 py-1.5">
+              <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                {primaryFamilyName && <span className="font-semibold">{primaryFamilyName} · </span>}
+                {t('Family ID', 'परिवार ID')}: <span className="font-mono font-bold tracking-wide">{primaryFamilyId}</span>
+              </span>
+              <button
+                onClick={handleCopyFamilyId}
+                className="p-0.5 rounded-full hover:bg-amber-200/60 transition-colors"
+                title={t('Copy Family ID', 'परिवार ID कॉपी करें')}
+              >
+                {copiedFamilyId
+                  ? <Check className="w-3 h-3 text-green-600" />
+                  : <Copy className="w-3 h-3 text-amber-600" />
+                }
+              </button>
+            </div>
+          )}
         </div>
 
         {feedEvents.length === 0 ? (

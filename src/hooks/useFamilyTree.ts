@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { TimelineEvent } from "@/types/schema";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
+import { validateRelationship, getParentIds } from "@/utils/familyRelationUtils";
 
 type FamilyMember = Database['public']['Tables']['family_members']['Row'];
 type FamilyRelationship = Database['public']['Tables']['family_relationships']['Row'];
@@ -65,7 +66,20 @@ export const useAddMember = () => {
       relationToId?: string,
       relationType?: Database['public']['Enums']['relationship_type']
     }) => {
-      // 1. Add the member
+      // ── Step 1: Client-side pre-validation (before wallet deduction) ──
+      if (relationToId && relationType) {
+        const validation = await validateRelationship({
+          relativeId: relationToId,
+          relationType,
+          treeId: memberData.tree_id,
+        });
+
+        if (!validation.ok) {
+          throw new Error(validation.error ?? 'Invalid relationship');
+        }
+      }
+
+      // ── Step 2: Add the member ─────────────────────────────────────────
       const { data: newMember, error: memberError } = await supabase
         .from('family_members')
         .insert(memberData)
@@ -74,39 +88,34 @@ export const useAddMember = () => {
 
       if (memberError) throw memberError;
 
-      // 2. Add relationship if provided
+      // ── Step 3: Create the primary relationship row ────────────────────
       if (relationToId && relationType) {
         let finalFrom = relationToId;
         let finalTo = newMember.id;
         let finalType = relationType;
 
         if (relationType === 'parent') {
-          // Adding a Parent to existing member (relationToId)
-          // So New (Parent) -> Existing (Child)
+          // UI says "add new member as PARENT of relationToId"
+          // Store as: new (parent) → existing (child)
           finalFrom = newMember.id;
           finalTo = relationToId;
           finalType = 'parent';
         } else if (relationType === 'child') {
-          // Adding a Child to existing member (relationToId)
-          // So Existing (Parent) -> New (Child)
+          // UI says "add new member as CHILD of relationToId"
+          // Store as: existing (parent) → new (child)
           finalFrom = relationToId;
           finalTo = newMember.id;
-          finalType = 'parent'; // standardized on 'parent' relationship
+          finalType = 'parent'; // DB uses 'parent' direction
         } else if (relationType === 'spouse') {
+          // Always store with consistent direction: relativeId → newMember
           finalFrom = relationToId;
           finalTo = newMember.id;
           finalType = 'spouse';
         } else if (relationType === 'sibling') {
-          finalFrom = relationToId;
-          finalTo = newMember.id;
+          // Canonical direction: LEAST UUID → GREATEST UUID
+          finalFrom = relationToId < newMember.id ? relationToId : newMember.id;
+          finalTo = relationToId < newMember.id ? newMember.id : relationToId;
           finalType = 'sibling';
-
-          // Also, if the existing sibling has parents, we should link the new sibling to them?
-          // This is complex. For now, just link as sibling.
-          // Ideally, we fetch parents of relationToId and add 'parent' links to newMember.
-          // unique generation ID helps here?
-
-          // For MVP: Just strict sibling link.
         }
 
         const { error: relError } = await supabase
@@ -118,7 +127,38 @@ export const useAddMember = () => {
             relationship: finalType
           });
 
-        if (relError) throw relError;
+        if (relError) {
+          // Map DB-level error codes to user-friendly messages
+          const msg = relError.message ?? '';
+          if (msg.includes('SELF_RELATION')) throw new Error('A member cannot be related to themselves.');
+          if (msg.includes('MAX_PARENTS')) throw new Error('This child already has 2 parents. Cannot add more.');
+          if (msg.includes('MAX_SPOUSE')) throw new Error('This member already has a spouse.');
+          throw relError;
+        }
+
+        // ── Step 4: Sibling — inherit parents from reference sibling ──────
+        // When adding a NEW member as a SIBLING of an existing member,
+        // the new member should also share the same parents. The DB trigger
+        // `after_parent_insert_link_siblings` then auto-creates sibling rows.
+        if (relationType === 'sibling') {
+          const parentIds = await getParentIds(relationToId, memberData.tree_id);
+          for (const parentId of parentIds) {
+            const { error: parentLinkError } = await supabase
+              .from('family_relationships')
+              .insert({
+                tree_id: memberData.tree_id,
+                from_member_id: parentId, // @ts-ignore
+                to_member_id: newMember.id,
+                relationship: 'parent'
+              })
+              .select()
+              .maybeSingle();
+            // Ignore conflict — sibling may already be processed by trigger
+            if (parentLinkError && !parentLinkError.message.includes('unique')) {
+              console.warn('Parent link warning (sibling inherit):', parentLinkError.message);
+            }
+          }
+        }
       }
 
       return newMember;
@@ -128,6 +168,7 @@ export const useAddMember = () => {
     },
   });
 };
+
 
 export const useSearchProfiles = (query: string) => {
   return useQuery({
@@ -399,5 +440,65 @@ export const useAddTimelineEvent = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['timeline-events', variables.family_member_id] });
     }
+  });
+};
+
+export const useNotifications = (userId: string | undefined) => {
+  return useQuery({
+    queryKey: ['notifications', userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const { data, error } = await supabase
+        .from('notifications' as any)
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(30);
+      if (error) throw error;
+      return (data as unknown as Array<{
+        id: string;
+        user_id: string;
+        title: string;
+        body: string | null;
+        link: string | null;
+        is_read: boolean;
+        created_at: string;
+      }>) || [];
+    },
+    enabled: !!userId,
+    refetchInterval: 30_000, // poll every 30 s
+  });
+};
+
+export const useMarkNotificationRead = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, userId }: { id: string; userId: string }) => {
+      const { error } = await supabase
+        .from('notifications' as any)
+        .update({ is_read: true })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['notifications', vars.userId] });
+    },
+  });
+};
+
+export const useMarkAllNotificationsRead = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ userId }: { userId: string }) => {
+      const { error } = await supabase
+        .from('notifications' as any)
+        .update({ is_read: true })
+        .eq('user_id', userId)
+        .eq('is_read', false);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['notifications', vars.userId] });
+    },
   });
 };

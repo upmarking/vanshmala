@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { NotificationBell } from '@/components/NotificationBell';
 
 const OmIcon = () => (
   <svg viewBox="0 0 100 100" className="w-6 h-6" fill="currentColor">
@@ -141,6 +142,9 @@ const Navbar = () => {
             </Link>
           )}
           <LanguageToggle />
+
+          {/* Notification Bell (desktop) */}
+          {user && <NotificationBell />}
 
           {user ? (
             <DropdownMenu>

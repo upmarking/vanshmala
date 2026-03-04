@@ -5,75 +5,182 @@ type Relationship = Database['public']['Tables']['family_relationships']['Row'];
 
 export interface FamilyTreeNode extends Member {
     children?: FamilyTreeNode[];
-    spouse?: Member;
+    spouse?: FamilyTreeNode;
     parents?: Member[];
     siblings?: Member[];
 }
 
-export const buildFamilyTree = (members: Member[], relationships: Relationship[]): FamilyTreeNode | null => {
+/**
+ * Build the visual family tree.
+ *
+ * Key rules:
+ *  - A node may have AT MOST 2 parents.
+ *  - Children are deduplicated: a shared child lives ONLY under the PRIMARY parent
+ *    (male wins; if same/unknown gender → LEAST UUID wins for determinism).
+ *  - Spouses are inferred automatically from co-parenting if no explicit spouse row exists.
+ *  - Root deduplication: if two root nodes are spouses, the "to_member_id" side in the
+ *    spouse relationship is suppressed (it will appear as .spouse on its partner's card).
+ *  - If no explicit direction exists, gender then UUID sort provides a stable primary.
+ */
+export const buildFamilyTree = (
+    members: Member[],
+    relationships: Relationship[]
+): FamilyTreeNode | null => {
     if (!members || members.length === 0) return null;
 
     const memberMap = new Map<string, FamilyTreeNode>();
-
-    // Initialize nodes
-    members.forEach(member => {
-        memberMap.set(member.id, { ...member, children: [], parents: [], siblings: [] });
+    members.forEach(m => {
+        memberMap.set(m.id, { ...m, children: [], parents: [], siblings: [] });
     });
 
-    // Build relationships
+    // ── PASS 1: Spouse links (explicit) ──────────────────────────────────
+    // spousePrimary: from_member_id → to_member_id (the 'from' side is primary)
+    const spousePrimary = new Map<string, string>(); // from → to
+
     relationships.forEach(rel => {
+        if (rel.relationship !== 'spouse') return;
         const fromNode = memberMap.get(rel.from_member_id);
         const toNode = memberMap.get(rel.to_member_id);
-
         if (!fromNode || !toNode) return;
+        fromNode.spouse = toNode;
+        toNode.spouse = fromNode;
+        spousePrimary.set(rel.from_member_id, rel.to_member_id);
+    });
 
-        if (rel.relationship === 'parent') {
-            fromNode.children?.push(toNode);
-            toNode.parents?.push(fromNode);
-        } else if (rel.relationship === 'child') {
-            toNode.children?.push(fromNode);
-            fromNode.parents?.push(toNode);
-        } else if (rel.relationship === 'spouse') {
-            fromNode.spouse = toNode;
-            toNode.spouse = fromNode;
-        } else if (rel.relationship === 'sibling') {
-            fromNode.siblings?.push(toNode);
-            toNode.siblings?.push(fromNode);
+    // ── PASS 2: Parent links + max-2-parents enforcement ─────────────────
+    // primaryParentOf[childId] = primaryParentId
+    const primaryParentOf = new Map<string, string>();
+
+    relationships.forEach(rel => {
+        if (rel.relationship !== 'parent') return;
+        const parentNode = memberMap.get(rel.from_member_id);
+        const childNode = memberMap.get(rel.to_member_id);
+        if (!parentNode || !childNode) return;
+
+        // Max 2 parents
+        if ((childNode.parents?.length ?? 0) >= 2) return;
+
+        childNode.parents?.push(parentNode);
+
+        if (!primaryParentOf.has(childNode.id)) {
+            primaryParentOf.set(childNode.id, parentNode.id);
+        } else {
+            // Already has a primary. Male parent takes priority.
+            // Tiebreaker: LEAST UUID (deterministic).
+            const existingId = primaryParentOf.get(childNode.id)!;
+            const existing = memberMap.get(existingId);
+            const isFatherNew = parentNode.gender === 'male' && existing?.gender !== 'male';
+            if (isFatherNew) {
+                primaryParentOf.set(childNode.id, parentNode.id);
+            }
         }
     });
 
-    // Find all root nodes — members with no parent in the current set
-    const rootNodes = members.filter(m => {
-        const node = memberMap.get(m.id);
-        return (!node?.parents || node.parents.length === 0);
+    // ── PASS 3: Infer spouse from co-parents (if no explicit spouse row) ──
+    // For each child with 2 parents that aren't already spouses, link them.
+    primaryParentOf.forEach((primaryId, childId) => {
+        const childNode = memberMap.get(childId);
+        if (!childNode?.parents || childNode.parents.length < 2) return;
+
+        const p1Id = primaryId;
+        const p2Id = childNode.parents.find(p => p.id !== p1Id)?.id;
+        if (!p2Id) return;
+
+        const p1Node = memberMap.get(p1Id);
+        const p2Node = memberMap.get(p2Id);
+        if (!p1Node || !p2Node) return;
+
+        if (!p1Node.spouse && !p2Node.spouse) {
+            p1Node.spouse = p2Node;
+            p2Node.spouse = p1Node;
+            // Record p1 as primary (mirrors auto-created spouse row direction)
+            spousePrimary.set(p1Id, p2Id);
+        }
     });
 
+    // ── PASS 4: Sibling links ─────────────────────────────────────────────
+    relationships.forEach(rel => {
+        if (rel.relationship !== 'sibling') return;
+        const fromNode = memberMap.get(rel.from_member_id);
+        const toNode = memberMap.get(rel.to_member_id);
+        if (!fromNode || !toNode) return;
+        fromNode.siblings?.push(toNode);
+        toNode.siblings?.push(fromNode);
+    });
+
+    // ── PASS 5: Distribute children to primary parent only ───────────────
+    primaryParentOf.forEach((parentId, childId) => {
+        const parentNode = memberMap.get(parentId);
+        const childNode = memberMap.get(childId);
+        if (!parentNode || !childNode) return;
+        if (!parentNode.children!.find(c => c.id === childId)) {
+            parentNode.children!.push(childNode);
+        }
+    });
+
+    // ── FIND ROOT NODES ───────────────────────────────────────────────────
+    const childIds = new Set(primaryParentOf.keys());
+    const rootNodes = members.filter(m => !childIds.has(m.id));
+
     if (rootNodes.length === 0) {
-        // Fallback: just pick whoever has the lowest generation_level
-        let root = members[0];
-        let minGen = root.generation_level ?? 100;
-        members.forEach(m => {
-            const gen = m.generation_level ?? 100;
-            if (gen < minGen) { minGen = gen; root = m; }
-        });
+        // Fallback: lowest generation_level
+        const root = members.reduce((best, m) =>
+            (m.generation_level ?? 100) < (best.generation_level ?? 100) ? m : best
+        );
         return memberMap.get(root.id) || null;
     }
 
     if (rootNodes.length === 1) {
-        // Single root — return normally
         return memberMap.get(rootNodes[0].id) || null;
     }
 
-    // Multiple roots (disconnected members): sort by generation_level, then name
-    const sortedRoots = rootNodes
-        .sort((a, b) => (a.generation_level ?? 1) - (b.generation_level ?? 1) || a.full_name.localeCompare(b.full_name))
+    // ── SUPPRESS SPOUSE DUPLICATES FROM ROOT LIST ─────────────────────────
+    // For any two root nodes that are spouses:
+    //   Primary = the 'from_member_id' in the spouse relationship.
+    //   If no explicit direction: male first, then LEAST UUID.
+    const rootIdSet = new Set(rootNodes.map(m => m.id));
+    const nonPrimarySpouseIds = new Set<string>();
+
+    rootNodes.forEach(m => {
+        if (nonPrimarySpouseIds.has(m.id)) return; // already suppressed
+        const node = memberMap.get(m.id);
+        const spouseNode = node?.spouse as FamilyTreeNode | undefined;
+        if (!spouseNode || !rootIdSet.has(spouseNode.id)) return;
+
+        // Both are roots and are spouses — pick one as primary
+        const mIsFrom = spousePrimary.has(m.id) && spousePrimary.get(m.id) === spouseNode.id;
+        const spouseIsFrom = spousePrimary.has(spouseNode.id) && spousePrimary.get(spouseNode.id) === m.id;
+
+        let suppressId: string;
+        if (mIsFrom && !spouseIsFrom) {
+            suppressId = spouseNode.id; // m is primary
+        } else if (spouseIsFrom && !mIsFrom) {
+            suppressId = m.id;          // spouse is primary
+        } else {
+            // No clear direction — gender then UUID sort
+            const mFemale = node?.gender === 'female';
+            const spouseFemale = spouseNode.gender === 'female';
+            if (mFemale && !spouseFemale) suppressId = m.id;
+            else if (!mFemale && spouseFemale) suppressId = spouseNode.id;
+            else suppressId = m.id > spouseNode.id ? m.id : spouseNode.id; // LEAST UUID wins
+        }
+        nonPrimarySpouseIds.add(suppressId);
+    });
+
+    const primaryRoots = rootNodes
+        .filter(m => !nonPrimarySpouseIds.has(m.id))
+        .sort((a, b) =>
+            (a.generation_level ?? 1) - (b.generation_level ?? 1) ||
+            a.full_name.localeCompare(b.full_name)
+        )
         .map(m => memberMap.get(m.id)!);
 
-    // Return the first root but attach the others as siblings so the UI can find them
-    // Better: return a virtual container node with all roots as children
+    if (primaryRoots.length === 1) return primaryRoots[0];
+
+    // Virtual root for multiple disconnected subtrees
     const virtualRoot: FamilyTreeNode = {
         id: '__virtual_root__',
-        tree_id: sortedRoots[0].tree_id,
+        tree_id: primaryRoots[0].tree_id,
         full_name: '',
         vanshmala_id: null,
         user_id: null,
@@ -103,7 +210,7 @@ export const buildFamilyTree = (members: Member[], relationships: Relationship[]
         kuldevi: null,
         kuldevta: null,
         mool_niwas: null,
-        children: sortedRoots,
+        children: primaryRoots,
         parents: [],
         siblings: [],
     };
@@ -113,9 +220,7 @@ export const buildFamilyTree = (members: Member[], relationships: Relationship[]
 
 export const getGenerationName = (dateOfBirth: string | null): string | null => {
     if (!dateOfBirth) return null;
-
     const year = new Date(dateOfBirth).getFullYear();
-
     if (year >= 2013) return "Generation Alpha";
     if (year >= 1997) return "Generation Z";
     if (year >= 1981) return "Millennial";
@@ -123,6 +228,5 @@ export const getGenerationName = (dateOfBirth: string | null): string | null => 
     if (year >= 1946) return "Baby Boomer";
     if (year >= 1928) return "Silent Generation";
     if (year >= 1901) return "Greatest Generation";
-
-    return "Lost Generation"; // or just "Unknown Generation"
+    return "Lost Generation";
 };

@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from "@/integrations/supabase/types";
-import { Search, User, Check } from 'lucide-react';
+import { Search, User, Check, AlertCircle, Info } from 'lucide-react';
+import { validateRelationship, getParentCount, getSpouseId, getRelationshipHint } from '@/utils/familyRelationUtils';
 
 type RelationshipType = Database['public']['Enums']['relationship_type'];
 type GenderType = Database['public']['Enums']['gender_type'];
@@ -32,6 +33,12 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
     const { mutate: addMember, isPending } = useAddMember();
 
     const [activeTab, setActiveTab] = useState("new");
+    // Guardrail state
+    const [validationError, setValidationError] = useState<string | null>(null);
+    const [isValidating, setIsValidating] = useState(false);
+    const [parentCount, setParentCount] = useState<number | null>(null);
+    const [existingSpouseId, setExistingSpouseId] = useState<string | null | undefined>(undefined);
+
     const [formData, setFormData] = useState({
         fullName: '',
         fullNameHi: '',
@@ -135,14 +142,70 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
             setSelectedProfile(null);
             setActiveTab("new");
             setCheckQuery('');
+            setValidationError(null);
+            setParentCount(null);
+            setExistingSpouseId(undefined);
         }
     }, [isOpen]);
+
+    // Pre-fetch guardrail data when dialog opens with a relation context
+    useEffect(() => {
+        if (!isOpen || !relativeId || !relationType || !treeId) return;
+
+        const fetchGuardrailData = async () => {
+            try {
+                if (relationType === 'parent') {
+                    // relativeId is the child — check how many parents it has
+                    const count = await getParentCount(relativeId, treeId);
+                    setParentCount(count);
+                    if (count >= 2) {
+                        setValidationError('This member already has 2 parents. Cannot add more.');
+                    }
+                } else if (relationType === 'spouse') {
+                    // relativeId is the member — check if they have a spouse
+                    const spouseId = await getSpouseId(relativeId, treeId);
+                    setExistingSpouseId(spouseId);
+                    if (spouseId) {
+                        setValidationError('This member already has a spouse.');
+                    }
+                }
+            } catch (err) {
+                // Non-blocking — guardrails are also enforced on submit
+                console.warn('Guardrail preflight error:', err);
+            }
+        };
+
+        fetchGuardrailData();
+    }, [isOpen, relativeId, relationType, treeId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.fullName.trim()) {
             toast.error(t('Name is required', 'नाम आवश्यक है'));
             return;
+        }
+
+        // ── Client-side pre-validation (before wallet deduction) ────────
+        if (relativeId && relationType) {
+            setIsValidating(true);
+            setValidationError(null);
+            try {
+                const validation = await validateRelationship({
+                    relativeId,
+                    relationType,
+                    treeId,
+                });
+                if (!validation.ok) {
+                    setValidationError(validation.error ?? t('Invalid relationship', 'अमान्य संबंध'));
+                    setIsValidating(false);
+                    return;
+                }
+            } catch (err: any) {
+                setValidationError(err.message);
+                setIsValidating(false);
+                return;
+            }
+            setIsValidating(false);
         }
 
         // Check wallet — ₹11 fee
@@ -248,6 +311,9 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
         return `${relMap[relationType] || t('Add Member', 'सदस्य जोड़ें')} ${t('to', 'के लिए')} ${relativeName}`;
     };
 
+    // Relationship hint text for UI
+    const relationHint = relationType ? getRelationshipHint(relationType) : null;
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[500px]">
@@ -259,6 +325,29 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
                             "अपने वंशवृक्ष में एक नया व्यक्ति जोड़ें या मौजूदा प्रोफ़ाइल लिंक करें।"
                         )}
                     </DialogDescription>
+
+                    {/* ── Validation Error Banner ─────────────────────── */}
+                    {validationError && (
+                        <div className="flex items-start gap-2 mt-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+                            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                            <span>{validationError}</span>
+                        </div>
+                    )}
+
+                    {/* ── Relationship Hint ────────────────────────────── */}
+                    {relationHint && !validationError && (
+                        <div className="flex items-start gap-2 mt-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 text-blue-700 dark:text-blue-400 text-xs">
+                            <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                            <span>{relationHint}</span>
+                        </div>
+                    )}
+
+                    {/* ── Parent count badge ───────────────────────────── */}
+                    {relationType === 'parent' && parentCount !== null && (
+                        <div className={`text-xs mt-1 font-medium ${parentCount >= 2 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                            Parents: {parentCount}/2
+                        </div>
+                    )}
                 </DialogHeader>
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -489,12 +578,26 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>{t('Cancel', 'रद्द करें')}</Button>
                     {activeTab === 'new' ? (
-                        <Button onClick={handleSubmit} disabled={isPending}>
-                            {isPending ? t('Adding...', 'जोड़ रहे हैं...') : t('Add Member', 'सदस्य जोड़ें')}
+                        <Button
+                            onClick={handleSubmit}
+                            disabled={isPending || isValidating || !!validationError}
+                        >
+                            {isValidating
+                                ? t('Checking...', 'जाँच रहे हैं...')
+                                : isPending
+                                    ? t('Adding...', 'जोड़ रहे हैं...')
+                                    : t('Add Member', 'सदस्य जोड़ें')}
                         </Button>
                     ) : (
-                        <Button onClick={handleLink} disabled={isPending || !selectedProfile || !linkRelationTo || !linkRelationType}>
-                            {isPending ? t('Linking...', 'लिंक हो रहा है...') : t('Link Selected', 'चयनित को लिंक करें')}
+                        <Button
+                            onClick={handleLink}
+                            disabled={isPending || isValidating || !selectedProfile || !linkRelationTo || !linkRelationType}
+                        >
+                            {isValidating
+                                ? t('Checking...', 'जाँच रहे हैं...')
+                                : isPending
+                                    ? t('Linking...', 'लिंक हो रहा है...')
+                                    : t('Link Selected', 'चयनित को लिंक करें')}
                         </Button>
                     )}
                 </DialogFooter>

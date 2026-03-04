@@ -1,6 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 
-import { Plus, GitMerge, FileText, Tag as TagIcon, Gift } from 'lucide-react';
+import { Plus, GitMerge, FileText, Tag as TagIcon, Gift, Copy, Check } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTree, useTreeMembers, useIsTreeAdmin, useUserTrees } from '@/hooks/useFamilyTree';
@@ -50,7 +50,10 @@ const createDummyMember = (id: string, name: string, nameHi: string, gen: number
   awards: null,
   migration_info: null,
   privacy_settings: null,
-  added_by: null
+  added_by: null,
+  kuldevi: null,
+  kuldevta: null,
+  mool_niwas: null,
 });
 
 const FamilyTree = () => {
@@ -89,6 +92,14 @@ const FamilyTree = () => {
   const [selectedProfileMember, setSelectedProfileMember] = useState<FamilyTreeNode | null>(null);
 
   const [mergeListOpen, setMergeListOpen] = useState(false);
+  const [copiedFamilyId, setCopiedFamilyId] = useState(false);
+
+  const handleCopyFamilyId = () => {
+    if (!tree?.family_id) return;
+    navigator.clipboard.writeText(tree.family_id);
+    setCopiedFamilyId(true);
+    setTimeout(() => setCopiedFamilyId(false), 2000);
+  };
 
   const rootNode = useMemo(() => {
     if (!treeId) {
@@ -242,6 +253,26 @@ const FamilyTree = () => {
                       (userTrees && userTrees.length === 0 ? t('You are not part of any family tree yet.', 'आप अभी तक किसी भी कुलवृक्ष का हिस्सा नहीं हैं।') : t('Loading your tree...', 'आपका कुलवृक्ष लोड हो रहा है...'))
                       : t('This is a sample view of how a family tree looks.', 'यह एक उदाहरण है कि वंशवृक्ष कैसा दिखता है।')}
                 </p>
+
+                {/* Family ID badge — visible when on a real tree */}
+                {treeId && tree?.family_id && user && (
+                  <div className="mt-3 inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-full px-3 py-1.5">
+                    <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">
+                      {t('Family ID', 'परिवार ID')}: <span className="font-mono font-bold tracking-wide">{tree.family_id}</span>
+                    </span>
+                    <button
+                      onClick={handleCopyFamilyId}
+                      className="p-0.5 rounded-full hover:bg-amber-200/60 transition-colors"
+                      title={t('Copy to share with family', 'परिवार के साथ शेयर करने के लिए कॉपी करें')}
+                    >
+                      {copiedFamilyId
+                        ? <Check className="w-3 h-3 text-green-600" />
+                        : <Copy className="w-3 h-3 text-amber-600" />
+                      }
+                    </button>
+                  </div>
+                )}
+
                 {user && !treeId && userTrees && userTrees.length === 0 && (
                   <div className="mt-6">
                     <Button onClick={() => navigate('/dashboard')} className="bg-gradient-saffron text-white">
