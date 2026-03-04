@@ -167,6 +167,21 @@ export const buildFamilyTree = (
         nonPrimarySpouseIds.add(suppressId);
     });
 
+    // ── PASS 2: Suppress root whose spouse is a CHILD (non-root) ─────────
+    // Example: Ajay is a child of Shriram (non-root). Rinku is Ajay's spouse
+    // and has no parents of her own (so she becomes a root). Without this,
+    // Rinku renders TWICE: as a standalone root AND as Ajay's spouse card.
+    // Fix: suppress Rinku from roots — she'll appear as Ajay's spouse card.
+    rootNodes.forEach(m => {
+        if (nonPrimarySpouseIds.has(m.id)) return; // already suppressed
+        const node = memberMap.get(m.id);
+        const spouseNode = node?.spouse as FamilyTreeNode | undefined;
+        if (spouseNode && childIds.has(spouseNode.id)) {
+            // Spouse is a child of someone → suppress this root
+            nonPrimarySpouseIds.add(m.id);
+        }
+    });
+
     const primaryRoots = rootNodes
         .filter(m => !nonPrimarySpouseIds.has(m.id))
         .sort((a, b) =>
@@ -175,7 +190,40 @@ export const buildFamilyTree = (
         )
         .map(m => memberMap.get(m.id)!);
 
-    if (primaryRoots.length === 1) return primaryRoots[0];
+    if (primaryRoots.length === 1) {
+        // ── PASS 6: Merge spouse children into displayed primary ──────────
+        // buildFamilyTree puts all children on the MALE (primary) parent.
+        // But if the female parent is rendered as the primary card (e.g. she
+        // is directly a child of a grandparent node and the male is her spouse),
+        // the male's children won't be shown because TreeNode reads member.children.
+        // Fix: for every node, pull the spouse's children into its own children
+        // array so they're always visible regardless of display order.
+        memberMap.forEach(node => {
+            const spouseNode = node.spouse as FamilyTreeNode | undefined;
+            if (!spouseNode?.children?.length) return;
+            spouseNode.children.forEach(spouseChild => {
+                if (!node.children!.find(c => c.id === spouseChild.id)) {
+                    node.children!.push(spouseChild);
+                }
+            });
+            // Clear spouse's children to avoid double-rendering
+            spouseNode.children = [];
+        });
+
+        return primaryRoots[0];
+    }
+
+    // ── PASS 6 (multi-root): same spouse-children merge for virtual root ──
+    memberMap.forEach(node => {
+        const spouseNode = node.spouse as FamilyTreeNode | undefined;
+        if (!spouseNode?.children?.length) return;
+        spouseNode.children.forEach(spouseChild => {
+            if (!node.children!.find(c => c.id === spouseChild.id)) {
+                node.children!.push(spouseChild);
+            }
+        });
+        spouseNode.children = [];
+    });
 
     // Virtual root for multiple disconnected subtrees
     const virtualRoot: FamilyTreeNode = {
