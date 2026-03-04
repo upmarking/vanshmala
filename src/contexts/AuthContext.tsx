@@ -15,6 +15,7 @@ interface Profile {
   avatar_url: string | null;
   bio: string | null;
   referral_code: string | null;
+  language?: string | null;
 }
 
 interface AuthContextType {

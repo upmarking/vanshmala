@@ -231,7 +231,9 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
             gender: formData.gender,
             is_alive: formData.isAlive,
             date_of_birth: formData.birthDate || null,
-            date_of_death: !formData.isAlive ? (formData.deathDate || null) : null
+            date_of_death: !formData.isAlive ? (formData.deathDate || null) : null,
+            email: formData.email || null,
+            phone: formData.phone || null
         };
 
         addMember(
@@ -241,8 +243,38 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
                 relationType: relationType
             },
             {
-                onSuccess: (newMember) => {
+                onSuccess: async (newMember) => {
                     toast.success(t('Member added successfully', 'सदस्य सफलतापूर्वक जोड़ा गया'));
+
+                    // If email is present, check if profile already exists before sending invite
+                    if (formData.email) {
+                        const { data: existingProfile } = await supabase
+                            .from('profiles')
+                            .select('id')
+                            .eq('email', formData.email)
+                            .maybeSingle();
+
+                        if (!existingProfile) {
+                            try {
+                                // Using signInWithOtp as an 'invite' mechanism for public client
+                                await supabase.auth.signInWithOtp({
+                                    email: formData.email,
+                                    options: {
+                                        emailRedirectTo: window.location.origin,
+                                        data: {
+                                            full_name: formData.fullName,
+                                            invited_by: user?.email,
+                                            is_invite: true
+                                        }
+                                    }
+                                });
+                                toast.info(t('Invitation email sent to ' + formData.email, 'आमंत्रण ईमेल ' + formData.email + ' को भेज दिया गया है'));
+                            } catch (inviteErr) {
+                                console.error('Failed to send invite:', inviteErr);
+                            }
+                        }
+                    }
+
                     if (onSuccess) onSuccess(newMember as any);
                     else onClose();
                 },
