@@ -127,9 +127,22 @@ const PersonCard = ({
 export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: TreeNodeProps) => {
     const [expanded, setExpanded] = useState(true);
 
-    // The deduplicated children array lives on the PRIMARY parent's node.
-    // The spouse node's children array should be empty (cleared in buildFamilyTree).
-    const children = member.children || [];
+    const spouse = member.spouse as FamilyTreeNode | undefined;
+
+    // Combine children from both member and spouse, deduplicating by ID
+    const combinedChildrenMap = new Map<string, FamilyTreeNode>();
+
+    (member.children || []).forEach(child => {
+        combinedChildrenMap.set(child.id, child);
+    });
+
+    if (spouse && spouse.children) {
+        spouse.children.forEach(child => {
+            combinedChildrenMap.set(child.id, child);
+        });
+    }
+
+    const children = Array.from(combinedChildrenMap.values());
     const hasChildren = children.length > 0;
     const isVirtualRoot = member.id === '__virtual_root__';
 
@@ -146,7 +159,6 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
         );
     }
 
-    const spouse = member.spouse as FamilyTreeNode | undefined;
     // Determine render order: father (male) first → already ensured by buildFamilyTree
     // The primary member on this node is already the "male / primary" parent.
 

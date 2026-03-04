@@ -25,9 +25,10 @@ interface AddMemberDialogProps {
     relativeId?: string;
     relationType?: RelationshipType;
     relativeName?: string;
+    onSuccess?: (member: FamilyMember) => void;
 }
 
-export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationType, relativeName }: AddMemberDialogProps) => {
+export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationType, relativeName, onSuccess }: AddMemberDialogProps) => {
     const { t } = useLanguage();
     const { user } = useAuth();
     const { mutate: addMember, isPending } = useAddMember();
@@ -240,9 +241,10 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
                 relationType: relationType
             },
             {
-                onSuccess: () => {
+                onSuccess: (newMember) => {
                     toast.success(t('Member added successfully', 'सदस्य सफलतापूर्वक जोड़ा गया'));
-                    onClose();
+                    if (onSuccess) onSuccess(newMember as any);
+                    else onClose();
                 },
                 onError: (error) => {
                     toast.error(t('Failed to add member: ' + error.message, 'सदस्य जोड़ने में विफल: ' + error.message));
@@ -287,9 +289,10 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
                 relationType: linkRelationType
             },
             {
-                onSuccess: () => {
+                onSuccess: (newMember) => {
                     toast.success(t('Member linked successfully', 'सदस्य सफलतापूर्वक लिंक किया गया'));
-                    onClose();
+                    if (onSuccess) onSuccess(newMember as any);
+                    else onClose();
                 },
                 onError: (error) => {
                     toast.error(t('Failed to link member: ' + error.message, 'सदस्य लिंक करने में विफल: ' + error.message));

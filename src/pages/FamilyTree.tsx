@@ -331,6 +331,11 @@ const FamilyTree = () => {
           <AddMemberDialog
             isOpen={addDialogOpen}
             onClose={() => setAddDialogOpen(false)}
+            onSuccess={(newMember) => {
+              setAddDialogOpen(false);
+              setSelectedProfileMember(newMember as any);
+              setProfileDialogOpen(true);
+            }}
             treeId={treeId}
             relativeId={selectedMember?.id}
             relationType={relationType}
