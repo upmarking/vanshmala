@@ -78,6 +78,17 @@ const HeroSection = () => {
             </span>
           </motion.div>
 
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="mb-4"
+          >
+            <span className="text-sm tracking-[0.2em] uppercase text-saffron font-bold">
+              Of the Hindu, By the Hindu, For the Hindu
+            </span>
+          </motion.div>
+
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}

@@ -41,9 +41,10 @@ const Login = () => {
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      navigate('/dashboard', { replace: true });
+      const from = location.state?.from || '/dashboard';
+      navigate(from, { replace: true });
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, location.state]);
 
   if (authLoading) {
     return null;
@@ -71,7 +72,8 @@ const Login = () => {
       }
     } else {
       toast.success(t('Welcome back!', 'वापसी पर स्वागत!'));
-      navigate('/dashboard');
+      const from = location.state?.from || '/dashboard';
+      navigate(from, { replace: true });
     }
   };
 

@@ -13,8 +13,11 @@ const Footer = () => {
         <div className="flex flex-col items-center gap-4">
           {/* Om symbol */}
           <span className="text-saffron/30 text-3xl">ॐ</span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center gap-1">
             <span className="font-display text-lg font-bold">{t('Vanshmala', 'वंशमाला')}</span>
+            <span className="text-xs tracking-widest uppercase text-saffron opacity-80 font-medium">
+              Of the Hindu, By the Hindu, For the Hindu
+            </span>
           </div>
           <p className="font-body text-sm opacity-50 text-center">
             {t(
@@ -22,6 +25,15 @@ const Footer = () => {
               '© 2026 वंशमाला। परिवार की विरासत को संजोना — एक परंपरा।'
             )}
           </p>
+
+          <Link to="/app" className="mt-2 transition-transform hover:scale-105 active:scale-95">
+            <img
+              src="/getitongoogleplay.png"
+              alt="Get it on Google Play"
+              className="h-10 w-auto"
+            />
+          </Link>
+
           <div className="flex gap-4 mt-2 text-sm opacity-70">
             <Link to="/contact-us" className="hover:text-saffron transition-colors">
               {t('Contact Us', 'संपर्क करें')}

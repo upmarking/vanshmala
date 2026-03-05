@@ -25,11 +25,13 @@ import { LegacyVault } from "./components/vault/LegacyVault";
 import DocumentVault from "./components/documents/DocumentVault";
 import { TagManagerWrapper } from "./components/tags/TagManagerWrapper";
 import WalletPage from "./pages/Wallet";
+import OfferPage from "./pages/OfferPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfUse from "./pages/TermsOfUse";
 import ContactUs from "./pages/ContactUs";
 import DataDeletionRequest from "./pages/DataDeletionRequest";
 import ChildSafetyStandards from "./pages/ChildSafetyStandards";
+import AppDownload from "./pages/AppDownload";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +56,7 @@ const App = () => (
               <Route path="/child-safety-standards" element={<ChildSafetyStandards />} />
               <Route path="/post/:id" element={<SinglePost />} />
               <Route path="/update/:id" element={<SingleUpdate />} />
+              <Route path="/app" element={<AppDownload />} />
 
               {/* Authenticated Routes wrapped in MainLayout */}
               <Route path="/dashboard" element={
@@ -127,6 +130,11 @@ const App = () => (
                     <WalletPage />
                   </MainLayout>
                 </ProtectedRoute>
+              } />
+              <Route path="/offer-page" element={
+                <MainLayout>
+                  <OfferPage />
+                </MainLayout>
               } />
               <Route path="/:username" element={<PublicProfile />} />
 
