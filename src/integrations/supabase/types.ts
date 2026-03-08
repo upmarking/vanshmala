@@ -399,6 +399,7 @@ export type Database = {
           id: string
           likes: Json
           post_type: string
+          rsvps: Json
           sub_type: string | null
           updated_at: string
           user_id: string
@@ -413,6 +414,7 @@ export type Database = {
           id?: string
           likes?: Json
           post_type: string
+          rsvps?: Json
           sub_type?: string | null
           updated_at?: string
           user_id: string
@@ -427,6 +429,7 @@ export type Database = {
           id?: string
           likes?: Json
           post_type?: string
+          rsvps?: Json
           sub_type?: string | null
           updated_at?: string
           user_id?: string
@@ -1242,6 +1245,14 @@ export type Database = {
       }
       remove_feed_like: {
         Args: { p_post_id: string; p_profile_id: string }
+        Returns: undefined
+      }
+      remove_feed_rsvp: {
+        Args: { p_post_id: string; p_profile_id: string }
+        Returns: undefined
+      }
+      set_feed_rsvp: {
+        Args: { p_post_id: string; p_profile_id: string; p_status: string }
         Returns: undefined
       }
       validate_discount_code: {
