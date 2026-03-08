@@ -109,6 +109,7 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
                         ...post,
                         likes: rawLikes,
                         comments: enrichedComments,
+                        rsvps: rawRsvps,
                         rewards: rewardMap[post.id] || undefined,
                     } as FeedPost;
                 })
