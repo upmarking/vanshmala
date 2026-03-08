@@ -9,6 +9,9 @@ export type FeedPostType = 'post' | 'invite' | 'announcement';
 
 export type VisibilityType = '1st_degree' | '2nd_degree' | '3rd_degree' | 'public';
 
+export type InviteSubType = 'casual' | 'festival' | 'birthday' | 'marriage';
+export type AnnouncementSubType = 'achievement' | 'celebration' | 'donation';
+
 /** Shape of each element in the JSONB `likes` array on feed_posts */
 export interface FeedLike {
     profile_id: string;
