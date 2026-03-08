@@ -129,6 +129,14 @@ const App = () => (
                 </ProtectedRoute>
               } />
 
+              <Route path="/messages" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Messages />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+
               {/* Public Profile - specific username route */}
               <Route path="/wallet" element={
                 <ProtectedRoute>

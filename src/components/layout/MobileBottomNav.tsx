@@ -14,8 +14,8 @@ const tabs: NavTab[] = [
     { icon: LayoutDashboard, label: 'Home', labelHi: 'होम', route: '/dashboard', exact: true },
     { icon: TreePine, label: 'Tree', labelHi: 'वृक्ष', route: '/tree' },
     { icon: MessageSquare, label: 'Feed', labelHi: 'फ़ीड', route: '/feed', exact: true },
+    { icon: Mail, label: 'Chat', labelHi: 'चैट', route: '/messages', exact: false },
     { icon: Archive, label: 'Vault', labelHi: 'तिजोरी', route: '/vault', exact: true },
-    { icon: User, label: 'Profile', labelHi: 'प्रोफ़ाइल', route: '/settings/profile', exact: true },
 ];
 
 const MobileBottomNav = () => {
