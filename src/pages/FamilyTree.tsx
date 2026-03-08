@@ -282,6 +282,16 @@ const FamilyTree = () => {
                     </Button>
                   </>
                 )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
+                  onClick={() => setRelationFinderOpen(true)}
+                >
+                  <Route className="w-4 h-4 text-orange-600" />
+                  <span className="hidden sm:inline">{t('Find Relation', 'रिश्ता खोजें')}</span>
+                </Button>
+                <ExportTreeButton treeName={tree?.family_name} />
               </div>
             )}
 
