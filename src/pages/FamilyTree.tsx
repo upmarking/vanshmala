@@ -1,6 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 
-import { Plus, GitMerge, FileText, Tag as TagIcon, Gift, Copy, Check, Share2, Sparkles, UserPlus } from 'lucide-react';
+import { Plus, GitMerge, FileText, Tag as TagIcon, Gift, Copy, Check, Share2, Sparkles, UserPlus, Route } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTree, useTreeMembers, useIsTreeAdmin, useUserTrees } from '@/hooks/useFamilyTree';
@@ -13,6 +13,9 @@ import { MergeRequestListDialog } from '@/components/family-tree/MergeRequestLis
 import { ShareTreeDialog } from '@/components/family-tree/ShareTreeDialog';
 import { AIOptimizeDialog } from '@/components/family-tree/AIOptimizeDialog';
 import { LinkRequestsDialog } from '@/components/family-tree/LinkRequestsDialog';
+import { TreeSearchBar } from '@/components/family-tree/TreeSearchBar';
+import { RelationshipFinder } from '@/components/family-tree/RelationshipFinder';
+import { ExportTreeButton } from '@/components/family-tree/ExportTreeButton';
 import { Database } from "@/integrations/supabase/types";
 import { useMergeRequests } from '@/hooks/useMergeRequests';
 import { Badge } from '@/components/ui/badge';
@@ -100,12 +103,25 @@ const FamilyTree = () => {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [aiOptimizeOpen, setAiOptimizeOpen] = useState(false);
   const [linkRequestsOpen, setLinkRequestsOpen] = useState(false);
+  const [relationFinderOpen, setRelationFinderOpen] = useState(false);
   const handleCopyFamilyId = () => {
     if (!tree?.family_id) return;
     navigator.clipboard.writeText(tree.family_id);
     setCopiedFamilyId(true);
     setTimeout(() => setCopiedFamilyId(false), 2000);
   };
+
+  // Helper to find a node in the tree by ID
+  const findNodeInTree = (node: FamilyTreeNode, id: string): FamilyTreeNode | null => {
+    if (node.id === id) return node;
+    if (node.spouse?.id === id) return node.spouse;
+    for (const child of node.children || []) {
+      const found = findNodeInTree(child, id);
+      if (found) return found;
+    }
+    return null;
+  };
+
 
   const rootNode = useMemo(() => {
     if (!treeId) {
@@ -278,6 +294,16 @@ const FamilyTree = () => {
                     </Button>
                   </>
                 )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
+                  onClick={() => setRelationFinderOpen(true)}
+                >
+                  <Route className="w-4 h-4 text-orange-600" />
+                  <span className="hidden sm:inline">{t('Find Relation', 'रिश्ता खोजें')}</span>
+                </Button>
+                <ExportTreeButton treeName={tree?.family_name} />
               </div>
             )}
 
@@ -334,8 +360,24 @@ const FamilyTree = () => {
             )}
           </div>
 
+          {/* Search bar */}
+          {treeId && treeData?.members && treeData.members.length > 0 && (
+            <div className="flex justify-center mb-6">
+              <TreeSearchBar
+                members={treeData.members}
+                onSelect={(member) => {
+                  const node = rootNode ? findNodeInTree(rootNode, member.id) : null;
+                  if (node) {
+                    setSelectedProfileMember(node);
+                    setProfileDialogOpen(true);
+                  }
+                }}
+              />
+            </div>
+          )}
+
           <div className="pb-8 min-h-[400px] overflow-x-auto">
-            <div className="inline-flex min-w-full justify-center px-4 py-2">
+            <div className="inline-flex min-w-full justify-center px-4 py-2" data-tree-export>
               {isLoading ? (
                 <div className="text-muted-foreground">{t('Loading tree...', 'वंशवृक्ष लोड हो रहा है...')}</div>
               ) : rootNode ? (
@@ -417,6 +459,12 @@ const FamilyTree = () => {
             isOpen={linkRequestsOpen}
             onClose={() => setLinkRequestsOpen(false)}
             treeId={treeId}
+          />
+          <RelationshipFinder
+            isOpen={relationFinderOpen}
+            onClose={() => setRelationFinderOpen(false)}
+            members={treeData?.members || []}
+            relationships={treeData?.relationships || []}
           />
         </>
       )}
