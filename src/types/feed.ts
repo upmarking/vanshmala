@@ -41,7 +41,6 @@ export interface RewardCounts {
 
 /** Full feed post as used by the UI, with JSONB arrays parsed to typed arrays */
 export interface FeedPost extends Omit<FeedPostRow, 'likes' | 'comments'> {
-    sub_type?: string | null;
     profiles?: {
         full_name: string | null;
         avatar_url: string | null;
