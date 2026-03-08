@@ -375,7 +375,7 @@ const ChildConnectors = ({
     const STEM_HEIGHT = 28;
     const RAIL_Y = STEM_HEIGHT;
     const DROP_HEIGHT = 20;
-    const SVG_HEIGHT = STEM_HEIGHT + DROP_HEIGHT + 18;
+    const SVG_HEIGHT = STEM_HEIGHT + DROP_HEIGHT + 2;
 
     return (
         <svg className="w-full block" style={{ height: SVG_HEIGHT }} preserveAspectRatio="none">
@@ -399,37 +399,6 @@ const ChildConnectors = ({
                     stroke="url(#stemGrad)" strokeWidth="2" strokeLinecap="round"
                 />
             ))}
-            {/* Dotted sibling connector line with hug emoji */}
-            {lines.length > 1 && lines.slice(0, -1).map((line, i) => {
-                const nextX = lines[i + 1].x;
-                const midX = (line.x + nextX) / 2;
-                // Dotted line slightly below the rail connecting siblings
-                const sibY = RAIL_Y + DROP_HEIGHT + 8;
-                return (
-                    <g key={`sib-${i}`}>
-                        {/* Dotted arc line between siblings */}
-                        <line
-                            x1={line.x}
-                            y1={sibY}
-                            x2={nextX}
-                            y2={sibY}
-                            stroke="#f59e0b"
-                            strokeWidth="1.5"
-                            strokeDasharray="4 3"
-                            strokeLinecap="round"
-                            opacity="0.6"
-                        />
-                        {/* Small hug emoji at center */}
-                        <text
-                            x={midX}
-                            y={sibY}
-                            textAnchor="middle"
-                            dominantBaseline="central"
-                            fontSize="12"
-                        >🤗</text>
-                    </g>
-                );
-            })}
             {/* Small circle at each junction */}
             {lines.map((line, i) => (
                 <circle key={`dot-${i}`} cx={line.x} cy={RAIL_Y} r="2.5" fill="#f59e0b" opacity="0.4" />
@@ -551,20 +520,29 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
                             />
                         </div>
 
-                        {/* Children row */}
+                        {/* Children row with sibling connectors */}
                         <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
                             {children.map((child, idx) => (
-                                <div
-                                    key={child.id}
-                                    ref={(el) => { childRefs.current[idx] = el; }}
-                                    className="flex flex-col items-center"
-                                >
-                                    <TreeNode
-                                        member={child}
-                                        depth={depth + 1}
-                                        onAddRelative={onAddRelative}
-                                        onViewProfile={onViewProfile}
-                                    />
+                                <div key={child.id} className="flex items-start">
+                                    <div
+                                        ref={(el) => { childRefs.current[idx] = el; }}
+                                        className="flex flex-col items-center"
+                                    >
+                                        <TreeNode
+                                            member={child}
+                                            depth={depth + 1}
+                                            onAddRelative={onAddRelative}
+                                            onViewProfile={onViewProfile}
+                                        />
+                                    </div>
+                                    {/* Sibling dotted connector between adjacent children */}
+                                    {idx < children.length - 1 && (
+                                        <div className="hidden md:flex items-center self-center -mx-4 z-10">
+                                            <div className="w-4 h-px border-t-2 border-dashed border-amber-400/60" />
+                                            <span className="text-sm leading-none" title="Siblings">🤗</span>
+                                            <div className="w-4 h-px border-t-2 border-dashed border-amber-400/60" />
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
