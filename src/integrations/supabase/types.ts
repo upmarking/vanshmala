@@ -394,6 +394,8 @@ export type Database = {
           comments: Json
           content: string
           created_at: string
+          event_date: string | null
+          event_time: string | null
           id: string
           likes: Json
           post_type: string
@@ -406,6 +408,8 @@ export type Database = {
           comments?: Json
           content: string
           created_at?: string
+          event_date?: string | null
+          event_time?: string | null
           id?: string
           likes?: Json
           post_type: string
@@ -418,6 +422,8 @@ export type Database = {
           comments?: Json
           content?: string
           created_at?: string
+          event_date?: string | null
+          event_time?: string | null
           id?: string
           likes?: Json
           post_type?: string
