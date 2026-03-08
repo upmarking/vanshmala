@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FeedPostType, VisibilityType } from "@/types/feed";
+import { FeedPostType, VisibilityType, InviteSubType, AnnouncementSubType } from "@/types/feed";
 import { toast } from "sonner";
 import { Loader2, Send } from "lucide-react";
 
@@ -18,6 +18,7 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
     const { user, profile } = useAuth();
     const [content, setContent] = useState("");
     const [postType, setPostType] = useState<FeedPostType>("post");
+    const [subType, setSubType] = useState<string>("");
     const [visibility, setVisibility] = useState<VisibilityType>("1st_degree");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,17 +38,19 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
             const { error } = await supabase
                 .from('feed_posts')
                 .insert({
-                    user_id: profile.id,   // FK → profiles.id  (NOT auth user.id)
+                    user_id: profile.id,
                     content: content.trim(),
                     post_type: postType,
-                    visibility: visibility
-                });
+                    visibility: visibility,
+                    sub_type: subType || null,
+                } as any);
 
             if (error) throw error;
 
             toast.success("Post created successfully!");
             setContent("");
             setPostType("post");
+            setSubType("");
             setVisibility("1st_degree");
             onPostCreated();
         } catch (error) {
@@ -73,7 +76,7 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
                 />
                 <div className="flex justify-between items-center">
                     <div className="flex gap-2">
-                        <Select value={postType} onValueChange={(v) => setPostType(v as FeedPostType)}>
+                        <Select value={postType} onValueChange={(v) => { setPostType(v as FeedPostType); setSubType(""); }}>
                             <SelectTrigger className="w-[140px]">
                                 <SelectValue placeholder="Select type" />
                             </SelectTrigger>
@@ -83,6 +86,34 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
                                 <SelectItem value="announcement">Announcement</SelectItem>
                             </SelectContent>
                         </Select>
+
+                        {postType === "invite" && (
+                            <Select value={subType} onValueChange={setSubType}>
+                                <SelectTrigger className="w-[140px]">
+                                    <SelectValue placeholder="Invite type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="casual">📨 Casual</SelectItem>
+                                    <SelectItem value="festival">🪔 Festival</SelectItem>
+                                    <SelectItem value="birthday">🎂 Birthday</SelectItem>
+                                    <SelectItem value="marriage">🕉 Marriage</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        )}
+
+                        {postType === "announcement" && (
+                            <Select value={subType} onValueChange={setSubType}>
+                                <SelectTrigger className="w-[150px]">
+                                    <SelectValue placeholder="Category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="achievement">🏆 Achievement</SelectItem>
+                                    <SelectItem value="celebration">🎉 Celebration</SelectItem>
+                                    <SelectItem value="donation">🙏 Donation</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        )}
+
                         <Select value={visibility} onValueChange={(v) => setVisibility(v as VisibilityType)}>
                             <SelectTrigger className="w-[180px]">
                                 <SelectValue placeholder="Who can see this?" />
