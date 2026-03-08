@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Calendar, Pin, Heart, Share2, MoreHorizontal, Trash2, Send, Loader2, Globe, Users, Lock, Eye } from "lucide-react";
+import { AnshdaanButton, RewardBadges } from "./AnshdaanButton";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
