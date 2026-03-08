@@ -1,4 +1,5 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import { transliterateToHindi } from '@/utils/transliterate';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,7 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
     const [isValidating, setIsValidating] = useState(false);
     const [parentCount, setParentCount] = useState<number | null>(null);
     const [existingSpouseId, setExistingSpouseId] = useState<string | null | undefined>(undefined);
+    const [hindiManuallyEdited, setHindiManuallyEdited] = useState(false);
 
     const [formData, setFormData] = useState({
         fullName: '',
@@ -143,6 +145,7 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
             setSelectedProfile(null);
             setActiveTab("new");
             setCheckQuery('');
+            setHindiManuallyEdited(false);
             setValidationError(null);
             setParentCount(null);
             setExistingSpouseId(undefined);
@@ -398,7 +401,14 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
                                     <label className="text-sm font-medium">{t('Full Name (English)', 'पूरा नाम (अंग्रेजी)')} *</label>
                                     <Input
                                         value={formData.fullName}
-                                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                        onChange={(e) => {
+                                            const newName = e.target.value;
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                fullName: newName,
+                                                ...(hindiManuallyEdited ? {} : { fullNameHi: transliterateToHindi(newName) }),
+                                            }));
+                                        }}
                                         placeholder="Ramesh Sharma"
                                     />
                                 </div>
@@ -406,7 +416,10 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
                                     <label className="text-sm font-medium">{t('Full Name (Hindi)', 'पूरा नाम (हिंदी)')}</label>
                                     <Input
                                         value={formData.fullNameHi}
-                                        onChange={(e) => setFormData({ ...formData, fullNameHi: e.target.value })}
+                                        onChange={(e) => {
+                                            setHindiManuallyEdited(true);
+                                            setFormData({ ...formData, fullNameHi: e.target.value });
+                                        }}
                                         placeholder="रमेश शर्मा"
                                     />
                                 </div>

@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { LifeJourneyPublicView } from '@/components/timeline/LifeJourneyPublicView';
 import { calculateKinship } from '@/utils/kinshipUtils';
 import { useMemo } from 'react';
+import SEO from '@/components/SEO';
 
 const PublicProfile = () => {
     const { username } = useParams<{ username: string }>();
@@ -81,6 +82,11 @@ const PublicProfile = () => {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            <SEO
+                title={`${member?.full_name || 'User Profile'} | Vanshmala`}
+                description={`View ${member?.full_name || 'this user'}'s family lineage and life journey on Vanshmala.`}
+                ogImage={member?.avatar_url}
+            />
             <Navbar />
             <div className="flex-1 container max-w-4xl mx-auto pt-24 pb-16 px-4">
 

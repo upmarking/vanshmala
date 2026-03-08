@@ -2,6 +2,7 @@ import { Mail, LifeBuoy, Megaphone, Handshake, MapPin } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useLanguage } from '@/contexts/LanguageContext';
+import SEO from '@/components/SEO';
 
 const ContactCard = ({
     icon: Icon,
@@ -58,6 +59,10 @@ const ContactUs = () => {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            <SEO
+                title="Contact Us | Vanshmala Support & Partnerships"
+                description="Get in touch with Vanshmala for support, partnership proposals, or media inquiries. We are here to help you preserve your family legacy."
+            />
             <Navbar />
 
             <main className="flex-1">

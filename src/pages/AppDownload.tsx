@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import SEO from '@/components/SEO';
 
 const AppDownload = () => {
     const { t } = useLanguage();
@@ -10,6 +11,10 @@ const AppDownload = () => {
 
     return (
         <div className="flex items-center justify-center min-h-screen p-8">
+            <SEO
+                title="Download Vanshmala App | Your Family Tree on Mobile"
+                description="Download the Vanshmala app to access your digital family tree anytime, anywhere. Connect with relatives and explore your lineage on the go."
+            />
             <div className="text-center">
                 <h1 className="text-2xl font-bold mb-4">
                     {t('Redirecting to Play Store...', 'प्ले स्टोर पर निर्देशित किया जा रहा है...')}

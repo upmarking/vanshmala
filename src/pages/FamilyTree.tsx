@@ -126,10 +126,18 @@ const FamilyTree = () => {
       f.spouse = m;
       m.spouse = f;
 
-      // 4. Sons
+      // 4. Sons + daughter-in-law
       const s1 = createDummyMember('s1', 'Eldest Son', 'बड़ा बेटा', 4, 'male');
+      const s1w = createDummyMember('s1w', 'Eldest Daughter-in-law', 'बड़ी बहू', 4, 'female');
       const s2 = createDummyMember('s2', 'Middle Son', 'मंझला बेटा', 4, 'male');
       const s3 = createDummyMember('s3', 'Youngest Son', 'छोटा बेटा', 4, 'male');
+
+      // 5. Grandchild
+      const gc = createDummyMember('gc', 'Grandchild', 'पोता', 5, 'male');
+
+      // Spouse links
+      s1.spouse = s1w;
+      s1w.spouse = s1;
 
       // Linking Generations
       // Great Grand -> Grand
@@ -140,6 +148,9 @@ const FamilyTree = () => {
 
       // Father -> Sons
       f.children = [s1, s2, s3];
+
+      // Eldest Son -> Grandchild
+      s1.children = [gc];
 
       return ggf;
     }
@@ -288,8 +299,8 @@ const FamilyTree = () => {
             )}
           </div>
 
-          <div className="pb-8 min-h-[400px] flex justify-center overflow-x-hidden">
-            <div className="w-full flex justify-center">
+          <div className="pb-8 min-h-[400px] overflow-x-auto">
+            <div className="inline-flex min-w-full justify-center px-4 py-2">
               {isLoading ? (
                 <div className="text-muted-foreground">{t('Loading tree...', 'वंशवृक्ष लोड हो रहा है...')}</div>
               ) : rootNode ? (

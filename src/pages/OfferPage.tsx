@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { FileUp, Info, CheckCircle2, Loader2, PlaySquare, LogIn } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 export default function OfferPage() {
     const { user } = useAuth();
@@ -145,6 +146,10 @@ export default function OfferPage() {
 
     return (
         <div className="container max-w-2xl mx-auto py-8 px-4">
+            <SEO
+                title="Special Offer | Claim your ₹500 Reward - Vanshmala"
+                description="Participate in our special offer! Rate our app and claim ₹500 in your Vanshmala wallet."
+            />
             <Card className="border-primary/20 shadow-lg">
                 <CardHeader className="bg-primary/5 pb-8">
                     <CardTitle className="text-3xl font-bold text-primary flex items-center gap-2">

@@ -31,6 +31,8 @@ import TermsOfUse from "./pages/TermsOfUse";
 import ContactUs from "./pages/ContactUs";
 import DataDeletionRequest from "./pages/DataDeletionRequest";
 import ChildSafetyStandards from "./pages/ChildSafetyStandards";
+import BlogListing from "./pages/BlogListing";
+import BlogDetail from "./pages/BlogDetail";
 import AppDownload from "./pages/AppDownload";
 
 const queryClient = new QueryClient();
@@ -56,6 +58,8 @@ const App = () => (
               <Route path="/child-safety-standards" element={<ChildSafetyStandards />} />
               <Route path="/post/:id" element={<SinglePost />} />
               <Route path="/update/:id" element={<SingleUpdate />} />
+              <Route path="/blog" element={<BlogListing />} />
+              <Route path="/blog/:slug" element={<BlogDetail />} />
               <Route path="/app" element={<AppDownload />} />
 
               {/* Authenticated Routes wrapped in MainLayout */}

@@ -1,10 +1,15 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Link } from 'react-router-dom';
+import SEO from '@/components/SEO';
 
 const PrivacyPolicy = () => {
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            <SEO
+                title="Privacy Policy | Vanshmala Data Security"
+                description="Read our Privacy Policy to understand how Vanshmala collects, uses, and protects your personal and family data."
+            />
             <Navbar />
             <main className="flex-1 container mx-auto px-4 pt-32 pb-24 max-w-4xl prose prose-neutral dark:prose-invert prose-headings:font-display prose-p:font-body md:pt-40">
                 <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Privacy Policy</h1>

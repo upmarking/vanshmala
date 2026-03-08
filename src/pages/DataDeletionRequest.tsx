@@ -17,6 +17,7 @@ import {
 import { toast } from 'sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 const DataDeletionRequest = () => {
     const { session, signOut } = useAuth();
@@ -124,6 +125,10 @@ const DataDeletionRequest = () => {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            <SEO
+                title="Data Deletion Request | Manage Your Account - Vanshmala"
+                description="Request the deletion of your account and personal data from Vanshmala. We respect your right to be forgotten."
+            />
             <Navbar />
 
             <main className="flex-1 flex items-center justify-center p-4 pt-32 pb-24">

@@ -1,9 +1,14 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 const TermsOfUse = () => {
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            <SEO
+                title="Terms of Use | Vanshmala Service Agreement"
+                description="Review the Terms of Use for using Vanshmala's services, documenting your family tree, and interacting with our platform."
+            />
             <Navbar />
             <main className="flex-1 container mx-auto px-4 pt-32 pb-24 max-w-4xl prose prose-neutral dark:prose-invert prose-headings:font-display prose-p:font-body md:pt-40">
                 <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Terms of Use</h1>
