@@ -124,8 +124,8 @@ export const AnshdaanButton = ({ post, onPostChange }: AnshdaanButtonProps) => {
                         </AlertDialogTitle>
                         <AlertDialogDescription className="text-center">
                             {t(
-                                `Gift a ${selectedReward?.emoji} ${selectedReward?.label} to ${post.profiles?.full_name || "this user"}? ₹${selectedReward?.amount} will be deducted from your Dhan wallet.`,
-                                `${post.profiles?.full_name || "इस उपयोगकर्ता"} को ${selectedReward?.emoji} ${selectedReward?.labelHi} देंगे? आपके धन वॉलेट से ₹${selectedReward?.amount} कटेगा।`
+                                `₹${selectedReward?.amount} will be deducted from your Dhan wallet and credited directly to ${post.profiles?.full_name || "the post creator"}'s Dhan wallet.`,
+                                `आपके धन वॉलेट से ₹${selectedReward?.amount} कटेगा और सीधे ${post.profiles?.full_name || "पोस्ट बनाने वाले"} के धन वॉलेट में जमा होगा।`
                             )}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
