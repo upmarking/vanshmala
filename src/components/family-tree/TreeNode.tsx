@@ -399,6 +399,21 @@ const ChildConnectors = ({
                     stroke="url(#stemGrad)" strokeWidth="2" strokeLinecap="round"
                 />
             ))}
+            {/* Hug emoji between siblings on the rail */}
+            {lines.length > 1 && lines.slice(0, -1).map((line, i) => {
+                const midX = (line.x + lines[i + 1].x) / 2;
+                return (
+                    <text
+                        key={`hug-${i}`}
+                        x={midX}
+                        y={RAIL_Y + 1}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        fontSize="14"
+                        style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.1))' }}
+                    >🤗</text>
+                );
+            })}
             {/* Small circle at each junction */}
             {lines.map((line, i) => (
                 <circle key={`dot-${i}`} cx={line.x} cy={RAIL_Y} r="2.5" fill="#f59e0b" opacity="0.4" />
