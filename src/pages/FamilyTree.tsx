@@ -111,6 +111,18 @@ const FamilyTree = () => {
     setTimeout(() => setCopiedFamilyId(false), 2000);
   };
 
+  // Helper to find a node in the tree by ID
+  const findNodeInTree = (node: FamilyTreeNode, id: string): FamilyTreeNode | null => {
+    if (node.id === id) return node;
+    if (node.spouse?.id === id) return node.spouse;
+    for (const child of node.children || []) {
+      const found = findNodeInTree(child, id);
+      if (found) return found;
+    }
+    return null;
+  };
+
+
   const rootNode = useMemo(() => {
     if (!treeId) {
       // Hardcoded Demo Tree
