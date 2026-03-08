@@ -234,20 +234,49 @@ const FamilyTree = () => {
                 </Button>
 
                 {isAdmin && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
-                    onClick={() => setMergeListOpen(true)}
-                  >
-                    <GitMerge className="w-4 h-4 text-orange-600" />
-                    <span className="hidden sm:inline">{t('Merge Requests', 'विलय अनुरोध')}</span>
-                    {mergeRequests && mergeRequests.length > 0 && (
-                      <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px] animate-pulse">
-                        {mergeRequests.length}
-                      </Badge>
-                    )}
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
+                      onClick={() => setMergeListOpen(true)}
+                    >
+                      <GitMerge className="w-4 h-4 text-orange-600" />
+                      <span className="hidden sm:inline">{t('Merge Requests', 'विलय अनुरोध')}</span>
+                      {mergeRequests && mergeRequests.length > 0 && (
+                        <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px] animate-pulse">
+                          {mergeRequests.length}
+                        </Badge>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
+                      onClick={() => setLinkRequestsOpen(true)}
+                    >
+                      <UserPlus className="w-4 h-4 text-orange-600" />
+                      <span className="hidden sm:inline">{t('Link Requests', 'लिंक अनुरोध')}</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
+                      onClick={() => setShareDialogOpen(true)}
+                    >
+                      <Share2 className="w-4 h-4 text-orange-600" />
+                      <span className="hidden sm:inline">{t('Share', 'शेयर')}</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
+                      onClick={() => setAiOptimizeOpen(true)}
+                    >
+                      <Sparkles className="w-4 h-4 text-orange-600" />
+                      <span className="hidden sm:inline">{t('AI Optimize', 'AI अनुकूलन')}</span>
+                    </Button>
+                  </>
                 )}
               </div>
             )}
