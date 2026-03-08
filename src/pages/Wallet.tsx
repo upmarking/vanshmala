@@ -85,6 +85,31 @@ const WalletPage = () => {
     if (user) {
       fetchWallet();
       fetchTransactions();
+
+      // Realtime subscription for wallet balance changes
+      const walletChannel = supabase
+        .channel('wallet-realtime')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'wallets', filter: `user_id=eq.${user.id}` },
+          (payload: any) => {
+            if (payload.new) {
+              setWallet(payload.new as WalletData);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'wallet_transactions', filter: `user_id=eq.${user.id}` },
+          () => {
+            fetchTransactions();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(walletChannel);
+      };
     }
   }, [user]);
 
