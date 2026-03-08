@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, TreePine, MessageSquare, Archive, User } from 'lucide-react';
+import { LayoutDashboard, TreePine, MessageSquare, Archive, Mail } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface NavTab {
