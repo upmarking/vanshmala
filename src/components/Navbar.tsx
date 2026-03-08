@@ -48,24 +48,20 @@ const Navbar = () => {
 
       fetchWallet();
 
-      // Real-time subscription for wallet updates
       const channel = supabase
-        .channel('schema-db-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'wallets',
-            filter: `user_id=eq.${user.id}`,
-          },
-          (payload) => {
-            setBalance((payload.new as any).balance);
-          }
-        )
+        .channel('navbar-wallet')
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'wallets',
+          filter: `user_id=eq.${user.id}`,
+        }, (payload) => {
+          if (payload.new) setBalance((payload.new as any).balance);
+        })
         .subscribe();
 
+      const pollId = setInterval(fetchWallet, 5000);
+
       return () => {
+        clearInterval(pollId);
         supabase.removeChannel(channel);
       };
     }
