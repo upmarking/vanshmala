@@ -1,12 +1,16 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, CalendarPlus, Clock, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
 
 interface InviteCardProps {
   subType: string;
   content: string;
   authorName?: string;
+  eventDate?: string | null;
+  eventTime?: string | null;
 }
 
 const themes = {
@@ -64,9 +68,66 @@ const themes = {
   },
 };
 
-export const InviteCard = ({ subType, content, authorName }: InviteCardProps) => {
+function generateCalendarUrl(type: 'google' | 'ics', title: string, content: string, eventDate: string, eventTime?: string | null) {
+  const dateObj = new Date(eventDate + 'T' + (eventTime || '00:00') + ':00');
+  const endDate = new Date(dateObj.getTime() + 2 * 60 * 60 * 1000); // 2hr duration
+
+  const formatGoogleDate = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+
+  if (type === 'google') {
+    const params = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: title,
+      details: content,
+      dates: `${formatGoogleDate(dateObj)}/${formatGoogleDate(endDate)}`,
+    });
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
+  }
+
+  // ICS file
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//VanshMala//Event//EN',
+    'BEGIN:VEVENT',
+    `DTSTART:${formatGoogleDate(dateObj)}`,
+    `DTEND:${formatGoogleDate(endDate)}`,
+    `SUMMARY:${title}`,
+    `DESCRIPTION:${content.replace(/\n/g, '\\n')}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n');
+
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  return URL.createObjectURL(blob);
+}
+
+export const InviteCard = ({ subType, content, authorName, eventDate, eventTime }: InviteCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const theme = themes[subType as keyof typeof themes] || themes.casual;
+
+  const handleAddToCalendar = (e: React.MouseEvent, type: 'google' | 'ics') => {
+    e.stopPropagation();
+    if (!eventDate) return;
+
+    const title = `${theme.label} - VanshMala`;
+    const url = generateCalendarUrl(type, title, content, eventDate, eventTime);
+
+    if (type === 'google') {
+      window.open(url, '_blank');
+    } else {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'event.ics';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const formattedDate = eventDate ? format(new Date(eventDate + 'T00:00:00'), 'PPP') : null;
+  const formattedTime = eventTime
+    ? format(new Date(`2000-01-01T${eventTime}`), 'h:mm a')
+    : null;
 
   return (
     <div className="px-4 pb-3">
@@ -77,7 +138,6 @@ export const InviteCard = ({ subType, content, authorName }: InviteCardProps) =>
       >
         {/* Collapsed tile */}
         <div className={`relative ${theme.collapsed} px-5 py-4`}>
-          {/* Decorative corners for marriage */}
           {subType === "marriage" && (
             <>
               <span className="absolute top-1 left-2 text-[hsl(42,78%,75%)] text-lg opacity-60">❈</span>
@@ -87,7 +147,6 @@ export const InviteCard = ({ subType, content, authorName }: InviteCardProps) =>
             </>
           )}
 
-          {/* Birthday confetti dots */}
           {subType === "birthday" && (
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               {[...Array(8)].map((_, i) => (
@@ -116,12 +175,20 @@ export const InviteCard = ({ subType, content, authorName }: InviteCardProps) =>
                 </p>
               </div>
             </div>
-            <motion.div
-              animate={{ rotate: isExpanded ? 180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronDown className={`h-5 w-5 ${theme.textColor} opacity-70`} />
-            </motion.div>
+            <div className="flex items-center gap-2">
+              {formattedDate && (
+                <div className={`text-right ${theme.textColor} opacity-90`}>
+                  <p className="text-xs font-medium">{formattedDate}</p>
+                  {formattedTime && <p className="text-[10px] opacity-80">{formattedTime}</p>}
+                </div>
+              )}
+              <motion.div
+                animate={{ rotate: isExpanded ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown className={`h-5 w-5 ${theme.textColor} opacity-70`} />
+              </motion.div>
+            </div>
           </div>
 
           {!isExpanded && (
@@ -146,9 +213,50 @@ export const InviteCard = ({ subType, content, authorName }: InviteCardProps) =>
                   {theme.headerText}
                 </p>
                 <div className="w-12 mx-auto border-t border-current opacity-20 mb-3" />
+
+                {/* Event date/time display */}
+                {formattedDate && (
+                  <div className={`flex items-center justify-center gap-4 mb-3 ${theme.expandedText}`}>
+                    <span className="flex items-center gap-1.5 text-xs font-medium opacity-80">
+                      <CalendarPlus className="h-3.5 w-3.5" />
+                      {formattedDate}
+                    </span>
+                    {formattedTime && (
+                      <span className="flex items-center gap-1.5 text-xs font-medium opacity-80">
+                        <Clock className="h-3.5 w-3.5" />
+                        {formattedTime}
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 <p className={`text-sm whitespace-pre-wrap leading-relaxed ${theme.expandedText}`}>
                   {content}
                 </p>
+
+                {/* Add to Calendar buttons */}
+                {eventDate && (
+                  <div className="flex gap-2 mt-4 justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs gap-1.5 rounded-full border-primary/30 hover:bg-primary/5"
+                      onClick={(e) => handleAddToCalendar(e, 'google')}
+                    >
+                      <CalendarPlus className="h-3.5 w-3.5" />
+                      Google Calendar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs gap-1.5 rounded-full border-primary/30 hover:bg-primary/5"
+                      onClick={(e) => handleAddToCalendar(e, 'ics')}
+                    >
+                      <CalendarPlus className="h-3.5 w-3.5" />
+                      Download .ics
+                    </Button>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
