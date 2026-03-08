@@ -2,9 +2,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { motion } from 'framer-motion';
-import { Wallet, Plus, Send, ArrowDownLeft, ArrowUpRight, Gift, History, Tag } from 'lucide-react';
+import { Wallet, Plus, Send, ArrowDownLeft, ArrowUpRight, Gift, History, Tag, QrCode, ScanLine } from 'lucide-react';
 import GiftCardDialog from '@/components/wallet/GiftCardDialog';
 import DiscountCodeInput from '@/components/wallet/DiscountCodeInput';
+import MyQRDialog from '@/components/wallet/MyQRDialog';
+import ScanQRDialog from '@/components/wallet/ScanQRDialog';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
