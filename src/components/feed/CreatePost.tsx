@@ -50,6 +50,7 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
             toast.success("Post created successfully!");
             setContent("");
             setPostType("post");
+            setSubType("");
             setVisibility("1st_degree");
             onPostCreated();
         } catch (error) {
