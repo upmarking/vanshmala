@@ -394,6 +394,20 @@ const WalletPage = () => {
               <span className="text-[11px] font-medium whitespace-nowrap">{t('Gift', 'गिफ्ट')}</span>
             </button>
             <button
+              onClick={() => setShowMyQR(true)}
+              className="flex flex-col items-center gap-1 min-w-[72px] py-2.5 px-3 rounded-2xl bg-white/20 text-primary-foreground active:bg-white/30 transition-colors"
+            >
+              <QrCode size={20} />
+              <span className="text-[11px] font-medium whitespace-nowrap">{t('My QR', 'मेरा QR')}</span>
+            </button>
+            <button
+              onClick={() => setShowScanQR(true)}
+              className="flex flex-col items-center gap-1 min-w-[72px] py-2.5 px-3 rounded-2xl bg-white/20 text-primary-foreground active:bg-white/30 transition-colors"
+            >
+              <ScanLine size={20} />
+              <span className="text-[11px] font-medium whitespace-nowrap">{t('Scan', 'स्कैन')}</span>
+            </button>
+            <button
               onClick={() => navigate('/refer')}
               className="flex flex-col items-center gap-1 min-w-[72px] py-2.5 px-3 rounded-2xl bg-white/20 text-primary-foreground active:bg-white/30 transition-colors"
             >
