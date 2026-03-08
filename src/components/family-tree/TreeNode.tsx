@@ -399,19 +399,35 @@ const ChildConnectors = ({
                     stroke="url(#stemGrad)" strokeWidth="2" strokeLinecap="round"
                 />
             ))}
-            {/* Hug emoji between siblings on the rail */}
+            {/* Dotted sibling connector line with hug emoji */}
             {lines.length > 1 && lines.slice(0, -1).map((line, i) => {
-                const midX = (line.x + lines[i + 1].x) / 2;
+                const nextX = lines[i + 1].x;
+                const midX = (line.x + nextX) / 2;
+                // Dotted line slightly below the rail connecting siblings
+                const sibY = RAIL_Y + DROP_HEIGHT + 8;
                 return (
-                    <text
-                        key={`hug-${i}`}
-                        x={midX}
-                        y={RAIL_Y + 1}
-                        textAnchor="middle"
-                        dominantBaseline="central"
-                        fontSize="14"
-                        style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.1))' }}
-                    >🤗</text>
+                    <g key={`sib-${i}`}>
+                        {/* Dotted arc line between siblings */}
+                        <line
+                            x1={line.x}
+                            y1={sibY}
+                            x2={nextX}
+                            y2={sibY}
+                            stroke="#f59e0b"
+                            strokeWidth="1.5"
+                            strokeDasharray="4 3"
+                            strokeLinecap="round"
+                            opacity="0.6"
+                        />
+                        {/* Small hug emoji at center */}
+                        <text
+                            x={midX}
+                            y={sibY}
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            fontSize="12"
+                        >🤗</text>
+                    </g>
                 );
             })}
             {/* Small circle at each junction */}
