@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Share2, UserPlus, TreesIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 
 const PublicTree = () => {
   const { token } = useParams<{ token: string }>();
