@@ -34,7 +34,7 @@ import ChildSafetyStandards from "./pages/ChildSafetyStandards";
 import BlogListing from "./pages/BlogListing";
 import BlogDetail from "./pages/BlogDetail";
 import AppDownload from "./pages/AppDownload";
-
+import PublicTree from "./pages/PublicTree";
 const queryClient = new QueryClient();
 
 const App = () => (
