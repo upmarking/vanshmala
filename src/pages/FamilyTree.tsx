@@ -13,6 +13,9 @@ import { MergeRequestListDialog } from '@/components/family-tree/MergeRequestLis
 import { ShareTreeDialog } from '@/components/family-tree/ShareTreeDialog';
 import { AIOptimizeDialog } from '@/components/family-tree/AIOptimizeDialog';
 import { LinkRequestsDialog } from '@/components/family-tree/LinkRequestsDialog';
+import { TreeSearchBar } from '@/components/family-tree/TreeSearchBar';
+import { RelationshipFinder } from '@/components/family-tree/RelationshipFinder';
+import { ExportTreeButton } from '@/components/family-tree/ExportTreeButton';
 import { Database } from "@/integrations/supabase/types";
 import { useMergeRequests } from '@/hooks/useMergeRequests';
 import { Badge } from '@/components/ui/badge';
