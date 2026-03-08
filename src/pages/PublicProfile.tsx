@@ -344,8 +344,23 @@ const PublicProfile = () => {
                 </Tabs>
             </div>
             <Footer />
+            {member && (
+                <AddRelativeDialog
+                    isOpen={showAddRelative}
+                    onClose={() => setShowAddRelative(false)}
+                    targetMember={{
+                        id: member.id,
+                        full_name: member.full_name,
+                        tree_id: member.tree_id,
+                        user_id: member.user_id,
+                    }}
+                />
+            )}
         </div>
     );
+};
+
+export default PublicProfile;
 };
 
 export default PublicProfile;
