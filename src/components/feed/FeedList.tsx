@@ -24,6 +24,7 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
                     user_id,
                     content,
                     post_type,
+                    sub_type,
                     visibility,
                     likes,
                     comments,
