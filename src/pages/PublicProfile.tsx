@@ -53,7 +53,7 @@ const PublicProfile = () => {
             toast.error(t('Please login to add as relative', 'रिश्तेदार के रूप में जोड़ने के लिए लॉगिन करें'));
             return;
         }
-        toast.info(t('Add relative feature coming soon!', 'रिश्तेदार जोड़ने की सुविधा जल्द आ रही है!'));
+        setShowAddRelative(true);
     };
 
     if (isLoading) {
