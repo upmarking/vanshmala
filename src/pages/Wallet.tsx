@@ -2,9 +2,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { motion } from 'framer-motion';
-import { Wallet, Plus, Send, ArrowDownLeft, ArrowUpRight, Gift, History, Tag } from 'lucide-react';
+import { Wallet, Plus, Send, ArrowDownLeft, ArrowUpRight, Gift, History, Tag, QrCode, ScanLine } from 'lucide-react';
 import GiftCardDialog from '@/components/wallet/GiftCardDialog';
 import DiscountCodeInput from '@/components/wallet/DiscountCodeInput';
+import MyQRDialog from '@/components/wallet/MyQRDialog';
+import ScanQRDialog from '@/components/wallet/ScanQRDialog';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -46,6 +48,8 @@ const WalletPage = () => {
   const [recipientProfile, setRecipientProfile] = useState<{ full_name: string; vanshmala_id: string; user_id: string } | null>(null);
   const [verifyingRecipient, setVerifyingRecipient] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [showMyQR, setShowMyQR] = useState(false);
+  const [showScanQR, setShowScanQR] = useState(false);
 
   // Smart VM-ID input helper
   const handleTransferTargetChange = (raw: string) => {
@@ -390,6 +394,20 @@ const WalletPage = () => {
               <span className="text-[11px] font-medium whitespace-nowrap">{t('Gift', 'गिफ्ट')}</span>
             </button>
             <button
+              onClick={() => setShowMyQR(true)}
+              className="flex flex-col items-center gap-1 min-w-[72px] py-2.5 px-3 rounded-2xl bg-white/20 text-primary-foreground active:bg-white/30 transition-colors"
+            >
+              <QrCode size={20} />
+              <span className="text-[11px] font-medium whitespace-nowrap">{t('My QR', 'मेरा QR')}</span>
+            </button>
+            <button
+              onClick={() => setShowScanQR(true)}
+              className="flex flex-col items-center gap-1 min-w-[72px] py-2.5 px-3 rounded-2xl bg-white/20 text-primary-foreground active:bg-white/30 transition-colors"
+            >
+              <ScanLine size={20} />
+              <span className="text-[11px] font-medium whitespace-nowrap">{t('Scan', 'स्कैन')}</span>
+            </button>
+            <button
               onClick={() => navigate('/refer')}
               className="flex flex-col items-center gap-1 min-w-[72px] py-2.5 px-3 rounded-2xl bg-white/20 text-primary-foreground active:bg-white/30 transition-colors"
             >
@@ -580,6 +598,30 @@ const WalletPage = () => {
           onOpenChange={setShowGiftCard}
           walletBalance={wallet?.balance || 0}
           onSuccess={() => { fetchWallet(); fetchTransactions(); }}
+        />
+        {/* My QR Dialog */}
+        <MyQRDialog open={showMyQR} onOpenChange={setShowMyQR} />
+
+        {/* Scan QR Dialog */}
+        <ScanQRDialog
+          open={showScanQR}
+          onOpenChange={setShowScanQR}
+          onScanResult={(vanshmalaId, name) => {
+            setTransferTarget(vanshmalaId);
+            setRecipientProfile(null);
+            setShowTransfer(true);
+            // Auto-verify after a tick
+            setTimeout(async () => {
+              const { data: recipient } = await supabase
+                .from('profiles')
+                .select('user_id, full_name, vanshmala_id')
+                .eq('vanshmala_id', vanshmalaId)
+                .maybeSingle();
+              if (recipient && recipient.user_id !== user!.id) {
+                setRecipientProfile(recipient);
+              }
+            }, 100);
+          }}
         />
 
       </div>
