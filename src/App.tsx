@@ -35,6 +35,7 @@ import BlogListing from "./pages/BlogListing";
 import BlogDetail from "./pages/BlogDetail";
 import AppDownload from "./pages/AppDownload";
 import PublicTree from "./pages/PublicTree";
+import Messages from "./pages/Messages";
 const queryClient = new QueryClient();
 
 const App = () => (
