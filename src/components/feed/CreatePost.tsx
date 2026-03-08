@@ -18,6 +18,7 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
     const { user, profile } = useAuth();
     const [content, setContent] = useState("");
     const [postType, setPostType] = useState<FeedPostType>("post");
+    const [subType, setSubType] = useState<string>("");
     const [visibility, setVisibility] = useState<VisibilityType>("1st_degree");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
