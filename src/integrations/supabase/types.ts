@@ -1175,6 +1175,10 @@ export type Database = {
         Args: { p_post_id: string; p_profile_id: string }
         Returns: undefined
       }
+      add_feed_reaction: {
+        Args: { p_post_id: string; p_profile_id: string; p_reaction: string }
+        Returns: undefined
+      }
       check_feed_visibility: {
         Args: { author_id: string; viewer_id: string; vis: string }
         Returns: boolean
@@ -1244,6 +1248,10 @@ export type Database = {
         Returns: undefined
       }
       remove_feed_like: {
+        Args: { p_post_id: string; p_profile_id: string }
+        Returns: undefined
+      }
+      remove_feed_reaction: {
         Args: { p_post_id: string; p_profile_id: string }
         Returns: undefined
       }
