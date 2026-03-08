@@ -297,9 +297,23 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
             </CardHeader>
 
             <CardContent className="p-0">
-                <div className="px-4 pb-3">
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{post.content}</p>
-                </div>
+                {post.post_type === 'invite' && (post as any).sub_type ? (
+                    <InviteCard
+                        subType={(post as any).sub_type}
+                        content={post.content}
+                        authorName={post.profiles?.full_name || undefined}
+                    />
+                ) : post.post_type === 'announcement' && (post as any).sub_type ? (
+                    <AnnouncementCard
+                        subType={(post as any).sub_type}
+                        content={post.content}
+                        authorName={post.profiles?.full_name || undefined}
+                    />
+                ) : (
+                    <div className="px-4 pb-3">
+                        <p className="text-sm whitespace-pre-wrap leading-relaxed">{post.content}</p>
+                    </div>
+                )}
                 <RewardBadges rewards={post.rewards} />
             </CardContent>
 
