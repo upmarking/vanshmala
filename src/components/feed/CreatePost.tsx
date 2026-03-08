@@ -38,11 +38,12 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
             const { error } = await supabase
                 .from('feed_posts')
                 .insert({
-                    user_id: profile.id,   // FK → profiles.id  (NOT auth user.id)
+                    user_id: profile.id,
                     content: content.trim(),
                     post_type: postType,
-                    visibility: visibility
-                });
+                    visibility: visibility,
+                    sub_type: subType || null,
+                } as any);
 
             if (error) throw error;
 
