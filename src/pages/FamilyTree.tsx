@@ -54,6 +54,7 @@ const createDummyMember = (id: string, name: string, nameHi: string, gen: number
   kuldevi: null,
   kuldevta: null,
   mool_niwas: null,
+  email: null,
 });
 
 const FamilyTree = () => {
