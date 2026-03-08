@@ -75,6 +75,7 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
                 (data as any[]).map(async (post) => {
                     const rawLikes: FeedLike[] = Array.isArray(post.likes) ? post.likes : [];
                     const rawComments: FeedComment[] = Array.isArray(post.comments) ? post.comments : [];
+                    const rawRsvps: FeedRsvp[] = Array.isArray(post.rsvps) ? post.rsvps : [];
 
                     // Sort comments oldest-first
                     rawComments.sort((a, b) =>
