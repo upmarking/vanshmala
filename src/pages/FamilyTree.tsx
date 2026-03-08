@@ -103,6 +103,7 @@ const FamilyTree = () => {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [aiOptimizeOpen, setAiOptimizeOpen] = useState(false);
   const [linkRequestsOpen, setLinkRequestsOpen] = useState(false);
+  const [relationFinderOpen, setRelationFinderOpen] = useState(false);
   const handleCopyFamilyId = () => {
     if (!tree?.family_id) return;
     navigator.clipboard.writeText(tree.family_id);
