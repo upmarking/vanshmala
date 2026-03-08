@@ -520,20 +520,29 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
                             />
                         </div>
 
-                        {/* Children row */}
+                        {/* Children row with sibling connectors */}
                         <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
                             {children.map((child, idx) => (
-                                <div
-                                    key={child.id}
-                                    ref={(el) => { childRefs.current[idx] = el; }}
-                                    className="flex flex-col items-center"
-                                >
-                                    <TreeNode
-                                        member={child}
-                                        depth={depth + 1}
-                                        onAddRelative={onAddRelative}
-                                        onViewProfile={onViewProfile}
-                                    />
+                                <div key={child.id} className="flex items-start">
+                                    <div
+                                        ref={(el) => { childRefs.current[idx] = el; }}
+                                        className="flex flex-col items-center"
+                                    >
+                                        <TreeNode
+                                            member={child}
+                                            depth={depth + 1}
+                                            onAddRelative={onAddRelative}
+                                            onViewProfile={onViewProfile}
+                                        />
+                                    </div>
+                                    {/* Sibling dotted connector between adjacent children */}
+                                    {idx < children.length - 1 && (
+                                        <div className="hidden md:flex items-center self-center -mx-4 z-10">
+                                            <div className="w-4 h-px border-t-2 border-dashed border-amber-400/60" />
+                                            <span className="text-sm leading-none" title="Siblings">🤗</span>
+                                            <div className="w-4 h-px border-t-2 border-dashed border-amber-400/60" />
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
