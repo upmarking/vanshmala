@@ -1,9 +1,12 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, CalendarPlus, Clock, MapPin } from "lucide-react";
+import { ChevronDown, CalendarPlus, Clock, Check, HelpCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { FeedRsvp } from "@/types/feed";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface InviteCardProps {
   subType: string;
@@ -11,6 +14,10 @@ interface InviteCardProps {
   authorName?: string;
   eventDate?: string | null;
   eventTime?: string | null;
+  postId: string;
+  rsvps: FeedRsvp[];
+  profileId: string | null;
+  onPostChange?: () => void;
 }
 
 const themes = {
@@ -68,9 +75,11 @@ const themes = {
   },
 };
 
+type RsvpStatus = 'accept' | 'maybe' | 'decline';
+
 function generateCalendarUrl(type: 'google' | 'ics', title: string, content: string, eventDate: string, eventTime?: string | null) {
   const dateObj = new Date(eventDate + 'T' + (eventTime || '00:00') + ':00');
-  const endDate = new Date(dateObj.getTime() + 2 * 60 * 60 * 1000); // 2hr duration
+  const endDate = new Date(dateObj.getTime() + 2 * 60 * 60 * 1000);
 
   const formatGoogleDate = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 
@@ -84,7 +93,6 @@ function generateCalendarUrl(type: 'google' | 'ics', title: string, content: str
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   }
 
-  // ICS file
   const icsContent = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -102,17 +110,53 @@ function generateCalendarUrl(type: 'google' | 'ics', title: string, content: str
   return URL.createObjectURL(blob);
 }
 
-export const InviteCard = ({ subType, content, authorName, eventDate, eventTime }: InviteCardProps) => {
+export const InviteCard = ({ subType, content, authorName, eventDate, eventTime, postId, rsvps, profileId, onPostChange }: InviteCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isRsvpLoading, setIsRsvpLoading] = useState(false);
   const theme = themes[subType as keyof typeof themes] || themes.casual;
+
+  const myRsvp = profileId ? rsvps.find(r => r.profile_id === profileId)?.status : null;
+  const acceptCount = rsvps.filter(r => r.status === 'accept').length;
+  const maybeCount = rsvps.filter(r => r.status === 'maybe').length;
+  const declineCount = rsvps.filter(r => r.status === 'decline').length;
+
+  const handleRsvp = async (e: React.MouseEvent, status: RsvpStatus) => {
+    e.stopPropagation();
+    if (!profileId) {
+      toast.error("You must be logged in to RSVP.");
+      return;
+    }
+    setIsRsvpLoading(true);
+    try {
+      if (myRsvp === status) {
+        // Toggle off
+        const { error } = await supabase.rpc('remove_feed_rsvp', {
+          p_post_id: postId,
+          p_profile_id: profileId,
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.rpc('set_feed_rsvp', {
+          p_post_id: postId,
+          p_profile_id: profileId,
+          p_status: status,
+        });
+        if (error) throw error;
+      }
+      onPostChange?.();
+    } catch (error) {
+      console.error("RSVP error:", error);
+      toast.error("Failed to update RSVP.");
+    } finally {
+      setIsRsvpLoading(false);
+    }
+  };
 
   const handleAddToCalendar = (e: React.MouseEvent, type: 'google' | 'ics') => {
     e.stopPropagation();
     if (!eventDate) return;
-
     const title = `${theme.label} - VanshMala`;
     const url = generateCalendarUrl(type, title, content, eventDate, eventTime);
-
     if (type === 'google') {
       window.open(url, '_blank');
     } else {
@@ -125,9 +169,13 @@ export const InviteCard = ({ subType, content, authorName, eventDate, eventTime 
   };
 
   const formattedDate = eventDate ? format(new Date(eventDate + 'T00:00:00'), 'PPP') : null;
-  const formattedTime = eventTime
-    ? format(new Date(`2000-01-01T${eventTime}`), 'h:mm a')
-    : null;
+  const formattedTime = eventTime ? format(new Date(`2000-01-01T${eventTime}`), 'h:mm a') : null;
+
+  const rsvpButtons: { status: RsvpStatus; icon: React.ReactNode; label: string; activeClass: string }[] = [
+    { status: 'accept', icon: <Check className="h-3.5 w-3.5" />, label: 'Accept', activeClass: 'bg-green-500 text-white border-green-500 hover:bg-green-600' },
+    { status: 'maybe', icon: <HelpCircle className="h-3.5 w-3.5" />, label: 'Maybe', activeClass: 'bg-amber-500 text-white border-amber-500 hover:bg-amber-600' },
+    { status: 'decline', icon: <X className="h-3.5 w-3.5" />, label: 'Decline', activeClass: 'bg-red-500 text-white border-red-500 hover:bg-red-600' },
+  ];
 
   return (
     <div className="px-4 pb-3">
@@ -191,11 +239,19 @@ export const InviteCard = ({ subType, content, authorName, eventDate, eventTime 
             </div>
           </div>
 
-          {!isExpanded && (
+          {/* RSVP summary on collapsed view */}
+          {!isExpanded && (acceptCount + maybeCount > 0) ? (
+            <p className={`text-xs ${theme.textColor} opacity-70 mt-2 text-center`}>
+              {acceptCount > 0 && `${acceptCount} Attending`}
+              {acceptCount > 0 && maybeCount > 0 && ' · '}
+              {maybeCount > 0 && `${maybeCount} Maybe`}
+              {' · Tap to view'}
+            </p>
+          ) : !isExpanded ? (
             <p className={`text-xs ${theme.textColor} opacity-60 mt-2 text-center`}>
               Tap to view {theme.decorLeft} {theme.decorRight}
             </p>
-          )}
+          ) : null}
         </div>
 
         {/* Expanded content */}
@@ -214,7 +270,6 @@ export const InviteCard = ({ subType, content, authorName, eventDate, eventTime 
                 </p>
                 <div className="w-12 mx-auto border-t border-current opacity-20 mb-3" />
 
-                {/* Event date/time display */}
                 {formattedDate && (
                   <div className={`flex items-center justify-center gap-4 mb-3 ${theme.expandedText}`}>
                     <span className="flex items-center gap-1.5 text-xs font-medium opacity-80">
@@ -233,6 +288,39 @@ export const InviteCard = ({ subType, content, authorName, eventDate, eventTime 
                 <p className={`text-sm whitespace-pre-wrap leading-relaxed ${theme.expandedText}`}>
                   {content}
                 </p>
+
+                {/* RSVP Section */}
+                <div className="mt-4 pt-3 border-t border-current/10">
+                  {/* RSVP Counts */}
+                  {(acceptCount + maybeCount + declineCount) > 0 && (
+                    <div className={`flex items-center justify-center gap-3 mb-3 text-xs font-medium ${theme.expandedText} opacity-70`}>
+                      {acceptCount > 0 && <span className="flex items-center gap-1"><Check className="h-3 w-3 text-green-600" />{acceptCount} Attending</span>}
+                      {maybeCount > 0 && <span className="flex items-center gap-1"><HelpCircle className="h-3 w-3 text-amber-600" />{maybeCount} Maybe</span>}
+                      {declineCount > 0 && <span className="flex items-center gap-1"><X className="h-3 w-3 text-red-600" />{declineCount} Declined</span>}
+                    </div>
+                  )}
+
+                  {/* RSVP Buttons */}
+                  <div className="flex gap-2 justify-center">
+                    {rsvpButtons.map(({ status, icon, label, activeClass }) => (
+                      <Button
+                        key={status}
+                        variant="outline"
+                        size="sm"
+                        className={`text-xs gap-1.5 rounded-full transition-all ${
+                          myRsvp === status
+                            ? activeClass
+                            : 'border-border/50 hover:bg-muted/50'
+                        }`}
+                        onClick={(e) => handleRsvp(e, status)}
+                        disabled={isRsvpLoading}
+                      >
+                        {icon}
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
 
                 {/* Add to Calendar buttons */}
                 {eventDate && (

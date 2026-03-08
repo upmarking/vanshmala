@@ -18,6 +18,13 @@ export interface FeedLike {
     created_at: string;
 }
 
+/** Shape of each element in the JSONB `rsvps` array on feed_posts */
+export interface FeedRsvp {
+    profile_id: string;
+    status: 'accept' | 'maybe' | 'decline';
+    created_at: string;
+}
+
 /** Shape of each element in the JSONB `comments` array on feed_posts */
 export interface FeedComment {
     id: string;
@@ -40,12 +47,13 @@ export interface RewardCounts {
 }
 
 /** Full feed post as used by the UI, with JSONB arrays parsed to typed arrays */
-export interface FeedPost extends Omit<FeedPostRow, 'likes' | 'comments'> {
+export interface FeedPost extends Omit<FeedPostRow, 'likes' | 'comments' | 'rsvps'> {
     profiles?: {
         full_name: string | null;
         avatar_url: string | null;
     } | null;
     likes: FeedLike[];
     comments: FeedComment[];
+    rsvps: FeedRsvp[];
     rewards?: RewardCounts;
 }

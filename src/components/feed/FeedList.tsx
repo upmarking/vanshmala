@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FeedPost, FeedLike, FeedComment, RewardCounts } from "@/types/feed";
+import { FeedPost, FeedLike, FeedComment, FeedRsvp, RewardCounts } from "@/types/feed";
 import { FeedItem } from "./FeedItem";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
                     visibility,
                     likes,
                     comments,
+                    rsvps,
                     created_at,
                     updated_at,
                     profiles:user_id (
@@ -74,6 +75,7 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
                 (data as any[]).map(async (post) => {
                     const rawLikes: FeedLike[] = Array.isArray(post.likes) ? post.likes : [];
                     const rawComments: FeedComment[] = Array.isArray(post.comments) ? post.comments : [];
+                    const rawRsvps: FeedRsvp[] = Array.isArray(post.rsvps) ? post.rsvps : [];
 
                     // Sort comments oldest-first
                     rawComments.sort((a, b) =>
@@ -107,6 +109,7 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
                         ...post,
                         likes: rawLikes,
                         comments: enrichedComments,
+                        rsvps: rawRsvps,
                         rewards: rewardMap[post.id] || undefined,
                     } as FeedPost;
                 })
