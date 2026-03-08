@@ -4,11 +4,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { FeedPostType, VisibilityType, InviteSubType, AnnouncementSubType } from "@/types/feed";
 import { toast } from "sonner";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, CalendarIcon, Clock } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface CreatePostProps {
     onPostCreated: () => void;
@@ -20,14 +25,14 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
     const [postType, setPostType] = useState<FeedPostType>("post");
     const [subType, setSubType] = useState<string>("");
     const [visibility, setVisibility] = useState<VisibilityType>("1st_degree");
+    const [eventDate, setEventDate] = useState<Date | undefined>();
+    const [eventTime, setEventTime] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async () => {
         if (!content.trim()) return;
         if (!user) return;
 
-        // profile.id is the PK in the `profiles` table, which is what
-        // feed_posts.user_id references via its foreign key constraint.
         if (!profile?.id) {
             toast.error("Your profile is still loading. Please try again in a moment.");
             return;
@@ -43,6 +48,8 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
                     post_type: postType,
                     visibility: visibility,
                     sub_type: subType || null,
+                    event_date: postType === 'invite' && eventDate ? format(eventDate, 'yyyy-MM-dd') : null,
+                    event_time: postType === 'invite' && eventTime ? eventTime : null,
                 } as any);
 
             if (error) throw error;
@@ -51,6 +58,8 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
             setContent("");
             setPostType("post");
             setSubType("");
+            setEventDate(undefined);
+            setEventTime("");
             setVisibility("1st_degree");
             onPostCreated();
         } catch (error) {
@@ -74,9 +83,50 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
                     rows={3}
                     className="resize-none"
                 />
-                <div className="flex justify-between items-center">
-                    <div className="flex gap-2">
-                        <Select value={postType} onValueChange={(v) => { setPostType(v as FeedPostType); setSubType(""); }}>
+
+                {/* Date & Time pickers for invites */}
+                {postType === "invite" && (
+                    <div className="flex gap-2 flex-wrap">
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    className={cn(
+                                        "w-[180px] justify-start text-left font-normal",
+                                        !eventDate && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {eventDate ? format(eventDate, "PPP") : "Event date"}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                    mode="single"
+                                    selected={eventDate}
+                                    onSelect={setEventDate}
+                                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                                    initialFocus
+                                    className={cn("p-3 pointer-events-auto")}
+                                />
+                            </PopoverContent>
+                        </Popover>
+                        <div className="relative">
+                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                type="time"
+                                value={eventTime}
+                                onChange={(e) => setEventTime(e.target.value)}
+                                className="w-[140px] pl-9"
+                                placeholder="Event time"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex flex-wrap justify-between items-center gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                        <Select value={postType} onValueChange={(v) => { setPostType(v as FeedPostType); setSubType(""); setEventDate(undefined); setEventTime(""); }}>
                             <SelectTrigger className="w-[140px]">
                                 <SelectValue placeholder="Select type" />
                             </SelectTrigger>
@@ -136,6 +186,6 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
                     </Button>
                 </div>
             </CardContent>
-        </Card >
+        </Card>
     );
 };

@@ -302,6 +302,8 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                         subType={(post as any).sub_type}
                         content={post.content}
                         authorName={post.profiles?.full_name || undefined}
+                        eventDate={(post as any).event_date || null}
+                        eventTime={(post as any).event_time || null}
                     />
                 ) : post.post_type === 'announcement' && (post as any).sub_type ? (
                     <AnnouncementCard
