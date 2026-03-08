@@ -460,6 +460,12 @@ const FamilyTree = () => {
             onClose={() => setLinkRequestsOpen(false)}
             treeId={treeId}
           />
+          <RelationshipFinder
+            isOpen={relationFinderOpen}
+            onClose={() => setRelationFinderOpen(false)}
+            members={treeData?.members || []}
+            relationships={treeData?.relationships || []}
+          />
         </>
       )}
     </div>
