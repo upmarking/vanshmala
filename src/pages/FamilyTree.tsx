@@ -97,7 +97,9 @@ const FamilyTree = () => {
 
   const [mergeListOpen, setMergeListOpen] = useState(false);
   const [copiedFamilyId, setCopiedFamilyId] = useState(false);
-
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [aiOptimizeOpen, setAiOptimizeOpen] = useState(false);
+  const [linkRequestsOpen, setLinkRequestsOpen] = useState(false);
   const handleCopyFamilyId = () => {
     if (!tree?.family_id) return;
     navigator.clipboard.writeText(tree.family_id);
