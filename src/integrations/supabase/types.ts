@@ -358,6 +358,7 @@ export type Database = {
           gotra: string | null
           id: string
           kuldevi: string | null
+          public_share_token: string | null
           updated_at: string
         }
         Insert: {
@@ -370,6 +371,7 @@ export type Database = {
           gotra?: string | null
           id?: string
           kuldevi?: string | null
+          public_share_token?: string | null
           updated_at?: string
         }
         Update: {
@@ -382,6 +384,7 @@ export type Database = {
           gotra?: string | null
           id?: string
           kuldevi?: string | null
+          public_share_token?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -902,6 +905,82 @@ export type Database = {
           },
         ]
       }
+      tree_link_requests: {
+        Row: {
+          admin_notes: string | null
+          ai_confidence: number | null
+          ai_reasoning: string | null
+          ai_suggested_parent_id: string | null
+          ai_suggested_relationship: string | null
+          created_at: string
+          full_name: string
+          id: string
+          relationship_claim: string | null
+          requester_user_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          target_member_id: string | null
+          tree_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          ai_confidence?: number | null
+          ai_reasoning?: string | null
+          ai_suggested_parent_id?: string | null
+          ai_suggested_relationship?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          relationship_claim?: string | null
+          requester_user_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_member_id?: string | null
+          tree_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          ai_confidence?: number | null
+          ai_reasoning?: string | null
+          ai_suggested_parent_id?: string | null
+          ai_suggested_relationship?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          relationship_claim?: string | null
+          requester_user_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          target_member_id?: string | null
+          tree_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_link_requests_ai_suggested_parent_id_fkey"
+            columns: ["ai_suggested_parent_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_link_requests_target_member_id_fkey"
+            columns: ["target_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_link_requests_tree_id_fkey"
+            columns: ["tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tree_memberships: {
         Row: {
           id: string
@@ -1062,6 +1141,10 @@ export type Database = {
         Returns: boolean
       }
       generate_vanshmala_id: { Args: never; Returns: string }
+      get_or_create_share_token: {
+        Args: { p_tree_id: string }
+        Returns: string
+      }
       get_profile_verification_status: {
         Args: { check_user_id: string }
         Returns: boolean

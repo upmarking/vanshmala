@@ -34,7 +34,7 @@ import ChildSafetyStandards from "./pages/ChildSafetyStandards";
 import BlogListing from "./pages/BlogListing";
 import BlogDetail from "./pages/BlogDetail";
 import AppDownload from "./pages/AppDownload";
-
+import PublicTree from "./pages/PublicTree";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -61,6 +61,7 @@ const App = () => (
               <Route path="/blog" element={<BlogListing />} />
               <Route path="/blog/:slug" element={<BlogDetail />} />
               <Route path="/app" element={<AppDownload />} />
+              <Route path="/shared-tree/:token" element={<PublicTree />} />
 
               {/* Authenticated Routes wrapped in MainLayout */}
               <Route path="/dashboard" element={

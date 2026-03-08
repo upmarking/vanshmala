@@ -229,6 +229,7 @@ export const buildFamilyTree = (
         kuldevi: null,
         kuldevta: null,
         mool_niwas: null,
+        email: null,
         children: primaryRoots,
         parents: [],
         siblings: [],

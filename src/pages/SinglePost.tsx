@@ -58,8 +58,8 @@ const SinglePost = () => {
 
             if (data) {
                 const formattedPost = data as unknown as FeedPost;
-                if (formattedPost.feed_comments) {
-                    formattedPost.feed_comments.sort((a, b) =>
+                if (formattedPost.comments) {
+                    formattedPost.comments.sort((a, b) =>
                         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
                     );
                 }

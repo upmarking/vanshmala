@@ -1,6 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 
-import { Plus, GitMerge, FileText, Tag as TagIcon, Gift, Copy, Check } from 'lucide-react';
+import { Plus, GitMerge, FileText, Tag as TagIcon, Gift, Copy, Check, Share2, Sparkles, UserPlus } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTree, useTreeMembers, useIsTreeAdmin, useUserTrees } from '@/hooks/useFamilyTree';
@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button';
 import { AddMemberDialog } from '@/components/family-tree/AddMemberDialog';
 import { MemberProfileDialog } from '@/components/family-tree/MemberProfileDialog';
 import { MergeRequestListDialog } from '@/components/family-tree/MergeRequestListDialog';
+import { ShareTreeDialog } from '@/components/family-tree/ShareTreeDialog';
+import { AIOptimizeDialog } from '@/components/family-tree/AIOptimizeDialog';
+import { LinkRequestsDialog } from '@/components/family-tree/LinkRequestsDialog';
 import { Database } from "@/integrations/supabase/types";
 import { useMergeRequests } from '@/hooks/useMergeRequests';
 import { Badge } from '@/components/ui/badge';
@@ -54,6 +57,7 @@ const createDummyMember = (id: string, name: string, nameHi: string, gen: number
   kuldevi: null,
   kuldevta: null,
   mool_niwas: null,
+  email: null,
 });
 
 const FamilyTree = () => {
@@ -93,7 +97,9 @@ const FamilyTree = () => {
 
   const [mergeListOpen, setMergeListOpen] = useState(false);
   const [copiedFamilyId, setCopiedFamilyId] = useState(false);
-
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [aiOptimizeOpen, setAiOptimizeOpen] = useState(false);
+  const [linkRequestsOpen, setLinkRequestsOpen] = useState(false);
   const handleCopyFamilyId = () => {
     if (!tree?.family_id) return;
     navigator.clipboard.writeText(tree.family_id);
@@ -228,20 +234,49 @@ const FamilyTree = () => {
                 </Button>
 
                 {isAdmin && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
-                    onClick={() => setMergeListOpen(true)}
-                  >
-                    <GitMerge className="w-4 h-4 text-orange-600" />
-                    <span className="hidden sm:inline">{t('Merge Requests', 'विलय अनुरोध')}</span>
-                    {mergeRequests && mergeRequests.length > 0 && (
-                      <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px] animate-pulse">
-                        {mergeRequests.length}
-                      </Badge>
-                    )}
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
+                      onClick={() => setMergeListOpen(true)}
+                    >
+                      <GitMerge className="w-4 h-4 text-orange-600" />
+                      <span className="hidden sm:inline">{t('Merge Requests', 'विलय अनुरोध')}</span>
+                      {mergeRequests && mergeRequests.length > 0 && (
+                        <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center rounded-full text-[10px] animate-pulse">
+                          {mergeRequests.length}
+                        </Badge>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
+                      onClick={() => setLinkRequestsOpen(true)}
+                    >
+                      <UserPlus className="w-4 h-4 text-orange-600" />
+                      <span className="hidden sm:inline">{t('Link Requests', 'लिंक अनुरोध')}</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
+                      onClick={() => setShareDialogOpen(true)}
+                    >
+                      <Share2 className="w-4 h-4 text-orange-600" />
+                      <span className="hidden sm:inline">{t('Share', 'शेयर')}</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-9 px-3 gap-2 rounded-xl border-border/60 bg-background/50 backdrop-blur-sm"
+                      onClick={() => setAiOptimizeOpen(true)}
+                    >
+                      <Sparkles className="w-4 h-4 text-orange-600" />
+                      <span className="hidden sm:inline">{t('AI Optimize', 'AI अनुकूलन')}</span>
+                    </Button>
+                  </>
                 )}
               </div>
             )}
@@ -363,6 +398,24 @@ const FamilyTree = () => {
           <MergeRequestListDialog
             isOpen={mergeListOpen}
             onClose={() => setMergeListOpen(false)}
+            treeId={treeId}
+          />
+
+          <ShareTreeDialog
+            isOpen={shareDialogOpen}
+            onClose={() => setShareDialogOpen(false)}
+            treeId={treeId}
+          />
+
+          <AIOptimizeDialog
+            isOpen={aiOptimizeOpen}
+            onClose={() => setAiOptimizeOpen(false)}
+            treeId={treeId}
+          />
+
+          <LinkRequestsDialog
+            isOpen={linkRequestsOpen}
+            onClose={() => setLinkRequestsOpen(false)}
             treeId={treeId}
           />
         </>
