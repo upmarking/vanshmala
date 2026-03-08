@@ -47,7 +47,7 @@ export interface RewardCounts {
 }
 
 /** Full feed post as used by the UI, with JSONB arrays parsed to typed arrays */
-export interface FeedPost extends Omit<FeedPostRow, 'likes' | 'comments'> {
+export interface FeedPost extends Omit<FeedPostRow, 'likes' | 'comments' | 'rsvps'> {
     profiles?: {
         full_name: string | null;
         avatar_url: string | null;
