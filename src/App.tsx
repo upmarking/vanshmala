@@ -35,6 +35,7 @@ import BlogListing from "./pages/BlogListing";
 import BlogDetail from "./pages/BlogDetail";
 import AppDownload from "./pages/AppDownload";
 import PublicTree from "./pages/PublicTree";
+import Messages from "./pages/Messages";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -124,6 +125,14 @@ const App = () => (
                     <div className="container mx-auto py-8">
                       <TagManagerWrapper />
                     </div>
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+
+              <Route path="/messages" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Messages />
                   </MainLayout>
                 </ProtectedRoute>
               } />
