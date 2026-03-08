@@ -25,6 +25,7 @@ const PublicProfile = () => {
     const { data: feedPosts, refetch: refetchPosts } = useUserFeedPosts(member?.user_id);
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('about');
+    const [showAddRelative, setShowAddRelative] = useState(false);
 
     const kinship = useMemo(() => {
         if (!user?.id || !member?.id || !treeData) return null;
