@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FeedPost, FeedLike, FeedComment, RewardCounts } from "@/types/feed";
+import { FeedPost, FeedLike, FeedComment, FeedRsvp, RewardCounts } from "@/types/feed";
 import { FeedItem } from "./FeedItem";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
