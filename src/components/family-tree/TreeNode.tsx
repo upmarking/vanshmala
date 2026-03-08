@@ -535,14 +535,6 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
                                             onViewProfile={onViewProfile}
                                         />
                                     </div>
-                                    {/* Sibling dotted connector between adjacent children */}
-                                    {idx < children.length - 1 && (
-                                        <div className="hidden md:flex items-center self-center -mx-4 z-10">
-                                            <div className="w-4 h-px border-t-2 border-dashed border-amber-400/60" />
-                                            <span className="text-sm leading-none" title="Siblings">🤗</span>
-                                            <div className="w-4 h-px border-t-2 border-dashed border-amber-400/60" />
-                                        </div>
-                                    )}
                                 </div>
                             ))}
                         </div>
