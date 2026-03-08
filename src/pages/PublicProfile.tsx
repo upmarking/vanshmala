@@ -361,6 +361,3 @@ const PublicProfile = () => {
 };
 
 export default PublicProfile;
-};
-
-export default PublicProfile;
