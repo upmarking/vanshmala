@@ -12,10 +12,14 @@ export type VisibilityType = '1st_degree' | '2nd_degree' | '3rd_degree' | 'publi
 export type InviteSubType = 'casual' | 'festival' | 'birthday' | 'marriage';
 export type AnnouncementSubType = 'achievement' | 'celebration' | 'donation';
 
+export type ReactionType = 'heart' | 'pray' | 'celebrate' | 'sad';
+
 /** Shape of each element in the JSONB `likes` array on feed_posts */
 export interface FeedLike {
     profile_id: string;
     created_at: string;
+    /** Reaction type — absent on legacy entries, treated as 'heart' */
+    reaction?: ReactionType;
 }
 
 /** Shape of each element in the JSONB `rsvps` array on feed_posts */
