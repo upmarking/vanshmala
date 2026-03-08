@@ -658,6 +658,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"] | null
           gotra: string | null
           id: string
+          is_verified: boolean
           kuldevi: string | null
           kuldevta: string | null
           language: string | null
@@ -679,6 +680,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           gotra?: string | null
           id?: string
+          is_verified?: boolean
           kuldevi?: string | null
           kuldevta?: string | null
           language?: string | null
@@ -700,6 +702,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           gotra?: string | null
           id?: string
+          is_verified?: boolean
           kuldevi?: string | null
           kuldevta?: string | null
           language?: string | null
