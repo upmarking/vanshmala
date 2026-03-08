@@ -1,13 +1,15 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { FeedPost } from "@/types/feed";
+import { FeedPost, ReactionType } from "@/types/feed";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Calendar, Pin, Heart, Share2, MoreHorizontal, Trash2, Send, Loader2, Globe, Users, Lock, Eye } from "lucide-react";
+import { MessageCircle, Calendar, Pin, Share2, MoreHorizontal, Trash2, Send, Loader2, Globe, Users, Lock, Eye, Pencil, X, Check } from "lucide-react";
 import { AnshdaanButton, RewardBadges } from "./AnshdaanButton";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { InviteCard } from "./InviteCard";
 import { AnnouncementCard } from "./AnnouncementCard";
 import {
@@ -38,6 +40,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+const REACTIONS: { type: ReactionType; emoji: string; label: string }[] = [
+    { type: 'heart', emoji: '❤️', label: 'Love' },
+    { type: 'pray', emoji: '🙏', label: 'Pray' },
+    { type: 'celebrate', emoji: '🎉', label: 'Celebrate' },
+    { type: 'sad', emoji: '😢', label: 'Sad' },
+];
+
 interface FeedItemProps {
     post: FeedPost;
     onPostChange?: () => void;
@@ -46,19 +55,32 @@ interface FeedItemProps {
 export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
     const { profile } = useAuth();
     const [isDeleting, setIsDeleting] = useState(false);
-    const [isLiking, setIsLiking] = useState(false);
+    const [isReacting, setIsReacting] = useState(false);
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
     const [commentText, setCommentText] = useState("");
     const [showComments, setShowComments] = useState(false);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editContent, setEditContent] = useState(post.content);
+    const [isSavingEdit, setIsSavingEdit] = useState(false);
 
     const isOwner = profile?.id === post.user_id;
-    const hasLiked = post.likes?.some(like => like.profile_id === profile?.id) || false;
-    const likesCount = post.likes?.length || 0;
+
+    // Reaction helpers
+    const myReaction = post.likes?.find(l => l.profile_id === profile?.id);
+    const myReactionType: ReactionType | null = myReaction ? (myReaction.reaction || 'heart') : null;
+
+    const reactionCounts: Partial<Record<ReactionType, number>> = {};
+    (post.likes || []).forEach(l => {
+        const r: ReactionType = l.reaction || 'heart';
+        reactionCounts[r] = (reactionCounts[r] || 0) + 1;
+    });
+    const totalReactions = post.likes?.length || 0;
     const commentsCount = post.comments?.length || 0;
 
-
+    const isEdited = post.updated_at && post.created_at &&
+        new Date(post.updated_at).getTime() - new Date(post.created_at).getTime() > 1000;
 
     const getBorderColor = () => {
         switch (post.post_type) {
@@ -111,35 +133,57 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
         }
     };
 
-    const handleLikeToggle = async () => {
+    const handleReaction = async (reactionType: ReactionType) => {
         if (!profile?.id) {
-            toast.error("You must be logged in to like a post.");
+            toast.error("You must be logged in to react.");
             return;
         }
 
-        setIsLiking(true);
+        setIsReacting(true);
         try {
-            if (hasLiked) {
-                // Unlike via RPC
-                const { error } = await supabase.rpc('remove_feed_like', {
+            if (myReactionType === reactionType) {
+                // Toggle off — remove reaction
+                const { error } = await supabase.rpc('remove_feed_reaction', {
                     p_post_id: post.id,
                     p_profile_id: profile.id,
                 });
                 if (error) throw error;
             } else {
-                // Like via RPC
-                const { error } = await supabase.rpc('add_feed_like', {
+                // Add / change reaction
+                const { error } = await supabase.rpc('add_feed_reaction', {
                     p_post_id: post.id,
                     p_profile_id: profile.id,
+                    p_reaction: reactionType,
                 });
                 if (error) throw error;
             }
             if (onPostChange) onPostChange();
         } catch (error: any) {
-            console.error("Error toggling like:", error);
-            toast.error("Failed to update like status.");
+            console.error("Error toggling reaction:", error);
+            toast.error("Failed to update reaction.");
         } finally {
-            setIsLiking(false);
+            setIsReacting(false);
+        }
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editContent.trim()) return;
+        setIsSavingEdit(true);
+        try {
+            const { error } = await supabase
+                .from('feed_posts')
+                .update({ content: editContent.trim() })
+                .eq('id', post.id);
+
+            if (error) throw error;
+            toast.success("Post updated");
+            setIsEditing(false);
+            if (onPostChange) onPostChange();
+        } catch (error: any) {
+            console.error("Error editing post:", error);
+            toast.error("Failed to update post.");
+        } finally {
+            setIsSavingEdit(false);
         }
     };
 
@@ -197,11 +241,13 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                 url: shareUrl,
             }).catch(console.error);
         } else {
-            // Fallback to copy to clipboard
             navigator.clipboard.writeText(shareUrl);
             toast.success("Post link copied to clipboard!");
         }
     }
+
+    // Build reaction summary chips
+    const reactionSummary = REACTIONS.filter(r => (reactionCounts[r.type] || 0) > 0);
 
     return (
         <Card className={`mb-6 overflow-hidden border-none shadow-sm hover:shadow-md transition-shadow ${getBorderColor()}`}>
@@ -226,6 +272,7 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                     </div>
                     <span className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                        {isEdited && <span className="ml-1 italic">(edited)</span>}
                     </span>
                 </div>
 
@@ -251,6 +298,15 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem
+                                    onSelect={() => {
+                                        setEditContent(post.content);
+                                        setIsEditing(true);
+                                    }}
+                                >
+                                    <Pencil className="h-4 w-4 mr-2" />
+                                    Edit Post
+                                </DropdownMenuItem>
                                 <DropdownMenuSub>
                                     <DropdownMenuSubTrigger>
                                         <Eye className="mr-2 h-4 w-4" />
@@ -300,7 +356,7 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                 {post.post_type === 'invite' && (post as any).sub_type ? (
                     <InviteCard
                         subType={(post as any).sub_type}
-                        content={post.content}
+                        content={isEditing ? undefined : post.content}
                         authorName={post.profiles?.full_name || undefined}
                         eventDate={(post as any).event_date || null}
                         eventTime={(post as any).event_time || null}
@@ -315,6 +371,33 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                         content={post.content}
                         authorName={post.profiles?.full_name || undefined}
                     />
+                ) : isEditing ? (
+                    <div className="px-4 pb-3 space-y-2">
+                        <Textarea
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                            className="min-h-[80px] text-sm"
+                            autoFocus
+                        />
+                        <div className="flex gap-2 justify-end">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsEditing(false)}
+                                disabled={isSavingEdit}
+                            >
+                                <X className="h-4 w-4 mr-1" /> Cancel
+                            </Button>
+                            <Button
+                                size="sm"
+                                onClick={handleSaveEdit}
+                                disabled={isSavingEdit || !editContent.trim()}
+                            >
+                                {isSavingEdit ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}
+                                Save
+                            </Button>
+                        </div>
+                    </div>
                 ) : (
                     <div className="px-4 pb-3">
                         <p className="text-sm whitespace-pre-wrap leading-relaxed">{post.content}</p>
@@ -324,19 +407,35 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
             </CardContent>
 
             <CardFooter className="flex flex-col p-0">
+                {/* Reaction summary */}
+                {reactionSummary.length > 0 && (
+                    <div className="w-full flex items-center gap-1.5 px-4 pt-1.5 pb-0.5 text-xs text-muted-foreground">
+                        {reactionSummary.map(r => (
+                            <span key={r.type} className="inline-flex items-center gap-0.5">
+                                <span>{r.emoji}</span>
+                                <span className="font-medium">{reactionCounts[r.type]}</span>
+                            </span>
+                        ))}
+                    </div>
+                )}
+
                 {/* Actions row */}
                 <div className="w-full flex items-center justify-between px-2 py-1 border-t border-border/50">
-                    <div className="flex gap-1">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className={`gap-1.5 px-3 rounded-full hover:bg-red-50 hover:text-red-500 ${hasLiked ? 'text-red-500' : 'text-muted-foreground'}`}
-                            onClick={handleLikeToggle}
-                            disabled={isLiking}
-                        >
-                            <Heart className={`h-5 w-5 ${hasLiked ? 'fill-current' : ''}`} />
-                            {likesCount > 0 && <span className="text-sm font-medium">{likesCount}</span>}
-                        </Button>
+                    <div className="flex gap-0.5">
+                        {/* Emoji reaction buttons */}
+                        {REACTIONS.map(r => (
+                            <Button
+                                key={r.type}
+                                variant="ghost"
+                                size="sm"
+                                className={`px-2 rounded-full text-base transition-transform hover:scale-110 ${myReactionType === r.type ? 'bg-primary/10 ring-1 ring-primary/30 scale-105' : 'opacity-70 hover:opacity-100'}`}
+                                onClick={() => handleReaction(r.type)}
+                                disabled={isReacting}
+                                title={r.label}
+                            >
+                                {r.emoji}
+                            </Button>
+                        ))}
                         <Button
                             variant="ghost"
                             size="sm"
