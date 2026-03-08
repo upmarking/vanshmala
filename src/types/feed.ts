@@ -18,6 +18,13 @@ export interface FeedLike {
     created_at: string;
 }
 
+/** Shape of each element in the JSONB `rsvps` array on feed_posts */
+export interface FeedRsvp {
+    profile_id: string;
+    status: 'accept' | 'maybe' | 'decline';
+    created_at: string;
+}
+
 /** Shape of each element in the JSONB `comments` array on feed_posts */
 export interface FeedComment {
     id: string;
