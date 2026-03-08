@@ -324,6 +324,7 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                             <MessageCircle className="h-5 w-5" />
                             {commentsCount > 0 && <span className="text-sm font-medium">{commentsCount}</span>}
                         </Button>
+                        <AnshdaanButton post={post} onPostChange={onPostChange} />
                     </div>
                     {post.visibility === 'public' && (
                         <Button variant="ghost" size="sm" className="px-3 rounded-full text-muted-foreground hover:bg-gray-100" onClick={handleShare}>
