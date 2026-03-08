@@ -599,6 +599,30 @@ const WalletPage = () => {
           walletBalance={wallet?.balance || 0}
           onSuccess={() => { fetchWallet(); fetchTransactions(); }}
         />
+        {/* My QR Dialog */}
+        <MyQRDialog open={showMyQR} onOpenChange={setShowMyQR} />
+
+        {/* Scan QR Dialog */}
+        <ScanQRDialog
+          open={showScanQR}
+          onOpenChange={setShowScanQR}
+          onScanResult={(vanshmalaId, name) => {
+            setTransferTarget(vanshmalaId);
+            setRecipientProfile(null);
+            setShowTransfer(true);
+            // Auto-verify after a tick
+            setTimeout(async () => {
+              const { data: recipient } = await supabase
+                .from('profiles')
+                .select('user_id, full_name, vanshmala_id')
+                .eq('vanshmala_id', vanshmalaId)
+                .maybeSingle();
+              if (recipient && recipient.user_id !== user!.id) {
+                setRecipientProfile(recipient);
+              }
+            }, 100);
+          }}
+        />
 
       </div>
     </div>
