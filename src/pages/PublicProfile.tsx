@@ -14,6 +14,7 @@ import { useMemo, useState } from 'react';
 import SEO from '@/components/SEO';
 import { FeedItem } from '@/components/feed/FeedItem';
 import { toast } from 'sonner';
+import AddRelativeDialog from '@/components/profile/AddRelativeDialog';
 
 const PublicProfile = () => {
     const { username } = useParams<{ username: string }>();
@@ -24,6 +25,7 @@ const PublicProfile = () => {
     const { data: feedPosts, refetch: refetchPosts } = useUserFeedPosts(member?.user_id);
     const { t } = useLanguage();
     const [activeTab, setActiveTab] = useState('about');
+    const [showAddRelative, setShowAddRelative] = useState(false);
 
     const kinship = useMemo(() => {
         if (!user?.id || !member?.id || !treeData) return null;
@@ -51,7 +53,7 @@ const PublicProfile = () => {
             toast.error(t('Please login to add as relative', 'रिश्तेदार के रूप में जोड़ने के लिए लॉगिन करें'));
             return;
         }
-        toast.info(t('Add relative feature coming soon!', 'रिश्तेदार जोड़ने की सुविधा जल्द आ रही है!'));
+        setShowAddRelative(true);
     };
 
     if (isLoading) {
@@ -342,6 +344,18 @@ const PublicProfile = () => {
                 </Tabs>
             </div>
             <Footer />
+            {member && (
+                <AddRelativeDialog
+                    isOpen={showAddRelative}
+                    onClose={() => setShowAddRelative(false)}
+                    targetMember={{
+                        id: member.id,
+                        full_name: member.full_name,
+                        tree_id: member.tree_id,
+                        user_id: member.user_id,
+                    }}
+                />
+            )}
         </div>
     );
 };
