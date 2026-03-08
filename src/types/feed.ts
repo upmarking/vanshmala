@@ -54,5 +54,6 @@ export interface FeedPost extends Omit<FeedPostRow, 'likes' | 'comments'> {
     } | null;
     likes: FeedLike[];
     comments: FeedComment[];
+    rsvps: FeedRsvp[];
     rewards?: RewardCounts;
 }
