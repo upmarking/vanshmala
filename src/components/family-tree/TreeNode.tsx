@@ -375,7 +375,7 @@ const ChildConnectors = ({
     const STEM_HEIGHT = 28;
     const RAIL_Y = STEM_HEIGHT;
     const DROP_HEIGHT = 20;
-    const SVG_HEIGHT = STEM_HEIGHT + DROP_HEIGHT + 2;
+    const SVG_HEIGHT = STEM_HEIGHT + DROP_HEIGHT + 18;
 
     return (
         <svg className="w-full block" style={{ height: SVG_HEIGHT }} preserveAspectRatio="none">
