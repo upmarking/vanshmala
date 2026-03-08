@@ -30,6 +30,7 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
                     visibility,
                     likes,
                     comments,
+                    rsvps,
                     created_at,
                     updated_at,
                     profiles:user_id (
