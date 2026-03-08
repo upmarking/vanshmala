@@ -28,6 +28,14 @@ export interface FeedComment {
     };
 }
 
+/** Reward contribution counts per type */
+export interface RewardCounts {
+    leaf: number;
+    rose: number;
+    diamond: number;
+    star: number;
+}
+
 /** Full feed post as used by the UI, with JSONB arrays parsed to typed arrays */
 export interface FeedPost extends Omit<FeedPostRow, 'likes' | 'comments'> {
     profiles?: {
@@ -36,4 +44,5 @@ export interface FeedPost extends Omit<FeedPostRow, 'likes' | 'comments'> {
     } | null;
     likes: FeedLike[];
     comments: FeedComment[];
+    rewards?: RewardCounts;
 }

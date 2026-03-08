@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Calendar, Pin, Heart, Share2, MoreHorizontal, Trash2, Send, Loader2, Globe, Users, Lock, Eye } from "lucide-react";
+import { AnshdaanButton, RewardBadges } from "./AnshdaanButton";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -297,6 +298,7 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                 <div className="px-4 pb-3">
                     <p className="text-sm whitespace-pre-wrap leading-relaxed">{post.content}</p>
                 </div>
+                <RewardBadges rewards={post.rewards} />
             </CardContent>
 
             <CardFooter className="flex flex-col p-0">
@@ -322,6 +324,7 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                             <MessageCircle className="h-5 w-5" />
                             {commentsCount > 0 && <span className="text-sm font-medium">{commentsCount}</span>}
                         </Button>
+                        <AnshdaanButton post={post} onPostChange={onPostChange} />
                     </div>
                     {post.visibility === 'public' && (
                         <Button variant="ghost" size="sm" className="px-3 rounded-full text-muted-foreground hover:bg-gray-100" onClick={handleShare}>

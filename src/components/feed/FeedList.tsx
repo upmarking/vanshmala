@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { FeedPost, FeedLike, FeedComment } from "@/types/feed";
+import { FeedPost, FeedLike, FeedComment, RewardCounts } from "@/types/feed";
 import { FeedItem } from "./FeedItem";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -44,6 +44,29 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
             if (error) throw error;
 
             // Parse JSONB arrays and enrich comments with profile info
+            const postIds = (data as any[]).map(p => p.id);
+
+            // Batch-fetch reward counts for all posts
+            let rewardMap: Record<string, RewardCounts> = {};
+            if (postIds.length > 0) {
+                const { data: contribs } = await supabase
+                    .from('post_contributions')
+                    .select('post_id, reward_type')
+                    .in('post_id', postIds);
+
+                if (contribs) {
+                    contribs.forEach((c: any) => {
+                        if (!rewardMap[c.post_id]) {
+                            rewardMap[c.post_id] = { leaf: 0, rose: 0, diamond: 0, star: 0 };
+                        }
+                        const rt = c.reward_type as keyof RewardCounts;
+                        if (rt in rewardMap[c.post_id]) {
+                            rewardMap[c.post_id][rt]++;
+                        }
+                    });
+                }
+            }
+
             const formattedPosts: FeedPost[] = await Promise.all(
                 (data as any[]).map(async (post) => {
                     const rawLikes: FeedLike[] = Array.isArray(post.likes) ? post.likes : [];
@@ -81,6 +104,7 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
                         ...post,
                         likes: rawLikes,
                         comments: enrichedComments,
+                        rewards: rewardMap[post.id] || undefined,
                     } as FeedPost;
                 })
             );

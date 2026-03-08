@@ -613,6 +613,41 @@ export type Database = {
         }
         Relationships: []
       }
+      post_contributions: {
+        Row: {
+          amount: number
+          contributor_profile_id: string
+          created_at: string
+          id: string
+          post_id: string
+          reward_type: string
+        }
+        Insert: {
+          amount: number
+          contributor_profile_id: string
+          created_at?: string
+          id?: string
+          post_id: string
+          reward_type: string
+        }
+        Update: {
+          amount?: number
+          contributor_profile_id?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          reward_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_contributions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_tags: {
         Row: {
           created_at: string
@@ -1166,6 +1201,14 @@ export type Database = {
       is_tree_member: {
         Args: { _tree_id: string; _user_id: string }
         Returns: boolean
+      }
+      process_post_contribution: {
+        Args: {
+          p_contributor_profile_id: string
+          p_post_id: string
+          p_reward_type: string
+        }
+        Returns: undefined
       }
       process_referrer_reward: {
         Args: { p_user_id: string }
