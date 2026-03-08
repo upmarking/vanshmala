@@ -397,6 +397,7 @@ export type Database = {
           id: string
           likes: Json
           post_type: string
+          sub_type: string | null
           updated_at: string
           user_id: string
           visibility: string | null
@@ -408,6 +409,7 @@ export type Database = {
           id?: string
           likes?: Json
           post_type: string
+          sub_type?: string | null
           updated_at?: string
           user_id: string
           visibility?: string | null
@@ -419,6 +421,7 @@ export type Database = {
           id?: string
           likes?: Json
           post_type?: string
+          sub_type?: string | null
           updated_at?: string
           user_id?: string
           visibility?: string | null

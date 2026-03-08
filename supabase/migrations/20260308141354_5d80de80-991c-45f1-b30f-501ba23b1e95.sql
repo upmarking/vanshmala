@@ -1,0 +1,1 @@
+ALTER TABLE public.feed_posts ADD COLUMN sub_type text DEFAULT NULL;
