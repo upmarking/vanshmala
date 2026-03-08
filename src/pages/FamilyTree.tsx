@@ -400,6 +400,24 @@ const FamilyTree = () => {
             onClose={() => setMergeListOpen(false)}
             treeId={treeId}
           />
+
+          <ShareTreeDialog
+            isOpen={shareDialogOpen}
+            onClose={() => setShareDialogOpen(false)}
+            treeId={treeId}
+          />
+
+          <AIOptimizeDialog
+            isOpen={aiOptimizeOpen}
+            onClose={() => setAiOptimizeOpen(false)}
+            treeId={treeId}
+          />
+
+          <LinkRequestsDialog
+            isOpen={linkRequestsOpen}
+            onClose={() => setLinkRequestsOpen(false)}
+            treeId={treeId}
+          />
         </>
       )}
     </div>
