@@ -348,8 +348,24 @@ const FamilyTree = () => {
             )}
           </div>
 
+          {/* Search bar */}
+          {treeId && treeData?.members && treeData.members.length > 0 && (
+            <div className="flex justify-center mb-6">
+              <TreeSearchBar
+                members={treeData.members}
+                onSelect={(member) => {
+                  const node = rootNode ? findNodeInTree(rootNode, member.id) : null;
+                  if (node) {
+                    setSelectedProfileMember(node);
+                    setProfileDialogOpen(true);
+                  }
+                }}
+              />
+            </div>
+          )}
+
           <div className="pb-8 min-h-[400px] overflow-x-auto">
-            <div className="inline-flex min-w-full justify-center px-4 py-2">
+            <div className="inline-flex min-w-full justify-center px-4 py-2" data-tree-export>
               {isLoading ? (
                 <div className="text-muted-foreground">{t('Loading tree...', 'वंशवृक्ष लोड हो रहा है...')}</div>
               ) : rootNode ? (
