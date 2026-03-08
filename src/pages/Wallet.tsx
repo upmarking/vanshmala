@@ -82,35 +82,43 @@ const WalletPage = () => {
   const [appliedDiscount, setAppliedDiscount] = useState<{ amount: number; codeId: string; code: string } | null>(null);
 
   useEffect(() => {
-    if (user) {
+    if (!user) return;
+
+    fetchWallet();
+    fetchTransactions();
+
+    // Realtime subscription for wallet balance changes
+    const walletChannel = supabase
+      .channel('wallet-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'wallets', filter: `user_id=eq.${user.id}` },
+        (payload: any) => {
+          if (payload.new) {
+            setWallet(payload.new as WalletData);
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'wallet_transactions', filter: `user_id=eq.${user.id}` },
+        () => {
+          fetchTransactions();
+          fetchWallet();
+        }
+      )
+      .subscribe();
+
+    // Fallback polling every 5s to catch updates missed by realtime
+    const pollId = setInterval(() => {
       fetchWallet();
       fetchTransactions();
+    }, 5000);
 
-      // Realtime subscription for wallet balance changes
-      const walletChannel = supabase
-        .channel('wallet-realtime')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'wallets', filter: `user_id=eq.${user.id}` },
-          (payload: any) => {
-            if (payload.new) {
-              setWallet(payload.new as WalletData);
-            }
-          }
-        )
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'wallet_transactions', filter: `user_id=eq.${user.id}` },
-          () => {
-            fetchTransactions();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(walletChannel);
-      };
-    }
+    return () => {
+      clearInterval(pollId);
+      supabase.removeChannel(walletChannel);
+    };
   }, [user]);
 
   const fetchWallet = async () => {
