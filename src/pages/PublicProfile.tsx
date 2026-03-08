@@ -14,6 +14,7 @@ import { useMemo, useState } from 'react';
 import SEO from '@/components/SEO';
 import { FeedItem } from '@/components/feed/FeedItem';
 import { toast } from 'sonner';
+import AddRelativeDialog from '@/components/profile/AddRelativeDialog';
 
 const PublicProfile = () => {
     const { username } = useParams<{ username: string }>();
