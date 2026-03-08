@@ -298,6 +298,7 @@ export const FeedItem = ({ post, onPostChange }: FeedItemProps) => {
                 <div className="px-4 pb-3">
                     <p className="text-sm whitespace-pre-wrap leading-relaxed">{post.content}</p>
                 </div>
+                <RewardBadges rewards={post.rewards} />
             </CardContent>
 
             <CardFooter className="flex flex-col p-0">
