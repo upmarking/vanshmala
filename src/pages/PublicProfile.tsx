@@ -1,26 +1,29 @@
-import { useParams } from 'react-router-dom';
-import { useMemberByUsername, useProfileVerificationStatus, useTreeMembers } from '@/hooks/useFamilyTree';
+import { useParams, Link } from 'react-router-dom';
+import { useMemberByUsername, useUserFeedPosts, useTreeMembers } from '@/hooks/useFamilyTree';
 import { useAuth } from '@/contexts/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { User, MapPin, Briefcase, GraduationCap, Link as LinkIcon, Users, Heart, BadgeCheck, Landmark, Sparkles } from 'lucide-react';
+import { User, MapPin, Briefcase, Heart, BadgeCheck, Landmark, Sparkles, MessageCircle, UserPlus, Copy, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { LifeJourneyPublicView } from '@/components/timeline/LifeJourneyPublicView';
 import { calculateKinship } from '@/utils/kinshipUtils';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import SEO from '@/components/SEO';
+import { FeedItem } from '@/components/feed/FeedItem';
+import { toast } from 'sonner';
 
 const PublicProfile = () => {
     const { username } = useParams<{ username: string }>();
     const { user } = useAuth();
     const { data: memberData, isLoading, error } = useMemberByUsername(username || '');
     const member = memberData as any;
-    const { data: isVerified } = useProfileVerificationStatus(member?.user_id);
     const { data: treeData } = useTreeMembers(member?.tree_id || '');
+    const { data: feedPosts, refetch: refetchPosts } = useUserFeedPosts(member?.user_id);
     const { t } = useLanguage();
+    const [activeTab, setActiveTab] = useState('about');
 
     const kinship = useMemo(() => {
         if (!user?.id || !member?.id || !treeData) return null;
@@ -28,6 +31,28 @@ const PublicProfile = () => {
         if (!sourceMember) return null;
         return calculateKinship(sourceMember.id, member.id, treeData.members as any, treeData.relationships as any);
     }, [user?.id, member?.id, treeData]);
+
+    const handleShare = () => {
+        const url = `${window.location.origin}/${member?.username}`;
+        if (navigator.share) {
+            navigator.share({ title: `${member?.full_name} on Vanshmala`, url }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(url);
+            toast.success(t('Profile link copied!', 'प्रोफ़ाइल लिंक कॉपी हो गया!'));
+        }
+    };
+
+    const handleMessage = () => {
+        toast.info(t('Messaging coming soon!', 'मैसेजिंग जल्द आ रहा है!'));
+    };
+
+    const handleAddRelative = () => {
+        if (!user) {
+            toast.error(t('Please login to add as relative', 'रिश्तेदार के रूप में जोड़ने के लिए लॉगिन करें'));
+            return;
+        }
+        toast.info(t('Add relative feature coming soon!', 'रिश्तेदार जोड़ने की सुविधा जल्द आ रही है!'));
+    };
 
     if (isLoading) {
         return (
@@ -63,20 +88,17 @@ const PublicProfile = () => {
         );
     }
 
-    // Parse JSON fields safely
     const education = Array.isArray(member.education) ? member.education : [];
     const career = Array.isArray(member.career) ? member.career : [];
     const privacy = (member.privacy_settings as any) || {};
+    const isVerified = member.is_verified === true;
+    const vanshmalaId = member.vanshmala_id;
+    const isOwnProfile = user?.id === member.user_id;
+    const postsCount = feedPosts?.length || 0;
 
     const isFieldVisible = (field: string) => {
-        // Implement privacy logic here. 
-        // For now, assuming public view:
-        // if privacy[field] === 'private' -> return false
-        // if privacy[field] === 'family' -> return false (unless logged in & family - TODO)
-        // default -> true or check specific defaults
         const setting = privacy[field];
         if (setting === 'private') return false;
-        // if (setting === 'family') return isFamily; 
         return true;
     };
 
@@ -90,9 +112,8 @@ const PublicProfile = () => {
             <Navbar />
             <div className="flex-1 container max-w-4xl mx-auto pt-24 pb-16 px-4">
 
-                {/* Header Section (Instagram Style) */}
+                {/* Header Section */}
                 <header className="flex flex-col md:flex-row gap-6 md:gap-12 items-center md:items-start mb-12">
-                    {/* Avatar */}
                     <div className="flex-shrink-0">
                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-full p-1 bg-gradient-to-tr from-saffron to-purple-500">
                             <div className="w-full h-full rounded-full border-4 border-background overflow-hidden bg-muted flex items-center justify-center">
@@ -105,32 +126,69 @@ const PublicProfile = () => {
                         </div>
                     </div>
 
-                    {/* Info */}
-                    <div className="flex-1 text-center md:text-left space-y-4">
-                        <div className="flex flex-col md:flex-row items-center gap-4">
+                    <div className="flex-1 text-center md:text-left space-y-3">
+                        <div className="flex flex-col md:flex-row items-center gap-3">
                             <h1 className="text-2xl md:text-3xl font-light flex items-center gap-2">
                                 {member.username}
-                                {isVerified && <BadgeCheck className="w-6 h-6 text-blue-500" />}
+                                {isVerified && <BadgeCheck className="w-6 h-6 text-blue-500 fill-blue-500" />}
                             </h1>
-                            {/* Actions */}
-                            <div className="flex gap-2">
-                                <Button variant="secondary" size="sm" className="font-semibold px-6">{t('Message', 'संदेश')}</Button>
-                                <Button variant="secondary" size="sm"><User className="w-4 h-4" /></Button>
-                            </div>
+                            {/* Action Buttons */}
+                            {!isOwnProfile && (
+                                <div className="flex gap-2">
+                                    <Button variant="secondary" size="sm" className="font-semibold px-5 gap-1.5" onClick={handleMessage}>
+                                        <MessageCircle className="w-4 h-4" />
+                                        {t('Message', 'संदेश')}
+                                    </Button>
+                                    <Button variant="secondary" size="sm" className="gap-1.5" onClick={handleAddRelative}>
+                                        <UserPlus className="w-4 h-4" />
+                                        {t('Add Relative', 'रिश्तेदार जोड़ें')}
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleShare}>
+                                        <Share2 className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            )}
+                            {isOwnProfile && (
+                                <div className="flex gap-2">
+                                    <Button variant="outline" size="sm" asChild>
+                                        <Link to="/settings/profile">{t('Edit Profile', 'प्रोफ़ाइल संपादित करें')}</Link>
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-9 w-9" onClick={handleShare}>
+                                        <Share2 className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Stats - Placeholder logic */}
+                        {/* Stats */}
                         <div className="flex justify-center md:justify-start gap-8 text-sm md:text-base border-y md:border-none py-4 md:py-0 border-border/40">
-                            <div className="flex md:gap-1"><span className="font-semibold">0</span> {t('posts', 'पोस्ट')}</div>
-                            <div className="flex md:gap-1"><span className="font-semibold">0</span> {t('relatives', 'रिश्तेदार')}</div>
+                            <button onClick={() => setActiveTab('posts')} className="flex md:gap-1 hover:opacity-70 transition-opacity">
+                                <span className="font-semibold">{postsCount}</span> {t('posts', 'पोस्ट')}
+                            </button>
+                            <button onClick={() => setActiveTab('family')} className="flex md:gap-1 hover:opacity-70 transition-opacity">
+                                <span className="font-semibold">{treeData?.members?.length || 0}</span> {t('relatives', 'रिश्तेदार')}
+                            </button>
                             <div className="flex md:gap-1"><span className="font-semibold">{member.generation_level || 0}</span> {t('gen', 'पीढ़ी')}</div>
                         </div>
 
-                        {/* Bio Name & Details */}
+                        {/* Bio / Name / Details */}
                         <div className="space-y-1 text-sm md:text-base">
-                            <div className="font-semibold">{member.full_name} {member.full_name_hi && <span className="font-normal text-muted-foreground">({member.full_name_hi})</span>}</div>
+                            <div className="font-semibold">
+                                {member.full_name}
+                                {member.full_name_hi && <span className="font-normal text-muted-foreground ml-1">({member.full_name_hi})</span>}
+                            </div>
+                            {/* Vanshmala ID */}
+                            {vanshmalaId && (
+                                <button
+                                    onClick={() => { navigator.clipboard.writeText(vanshmalaId); toast.success('Vanshmala ID copied!'); }}
+                                    className="inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-full hover:bg-muted transition-colors"
+                                >
+                                    <span className="font-semibold text-foreground/70">{vanshmalaId}</span>
+                                    <Copy className="w-3 h-3" />
+                                </button>
+                            )}
                             {kinship && (
-                                <div className="text-saffron font-medium text-sm md:text-sm bg-saffron/10 inline-block px-3 py-1 rounded-full mt-1 mb-2">
+                                <div className="text-saffron font-medium text-sm bg-saffron/10 inline-block px-3 py-1 rounded-full mt-1 mb-1">
                                     {kinship.relationText === 'You' ? t("This is your profile", "यह आपकी प्रोफ़ाइल है") : `${t("Your", "आपके")} ${kinship.relationText}`}
                                 </div>
                             )}
@@ -170,37 +228,26 @@ const PublicProfile = () => {
                 </header>
 
                 {/* Content Tabs */}
-                <Tabs defaultValue="about" className="w-full">
-                    <TabsList className="w-full grid grid-cols-3 bg-transparent border-t rounded-none h-12 p-0">
-                        <TabsTrigger
-                            value="about"
-                            className="rounded-none border-t-2 border-transparent data-[state=active]:border-foreground data-[state=active]:shadow-none bg-transparent"
-                        >
-                            <span className="uppercase text-xs tracking-widest font-semibold flex items-center gap-2">
-                                <User className="w-3 h-3" /> <span className="hidden md:inline">{t('ABOUT', 'परिचय')}</span>
-                            </span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="journey"
-                            className="rounded-none border-t-2 border-transparent data-[state=active]:border-foreground data-[state=active]:shadow-none bg-transparent"
-                        >
-                            <span className="uppercase text-xs tracking-widest font-semibold flex items-center gap-2">
-                                <Sparkles className="w-3 h-3" /> <span className="hidden md:inline">{t('LIFE JOURNEY', 'जीवन यात्रा')}</span>
-                            </span>
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="family"
-                            className="rounded-none border-t-2 border-transparent data-[state=active]:border-foreground data-[state=active]:shadow-none bg-transparent"
-                        >
-                            <span className="uppercase text-xs tracking-widest font-semibold flex items-center gap-2">
-                                <Users className="w-3 h-3" /> <span className="hidden md:inline">{t('FAMILY', 'परिवार')}</span>
-                            </span>
-                        </TabsTrigger>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="w-full grid grid-cols-4 bg-transparent border-t rounded-none h-12 p-0">
+                        {['about', 'posts', 'journey', 'family'].map((tab) => (
+                            <TabsTrigger
+                                key={tab}
+                                value={tab}
+                                className="rounded-none border-t-2 border-transparent data-[state=active]:border-foreground data-[state=active]:shadow-none bg-transparent"
+                            >
+                                <span className="uppercase text-xs tracking-widest font-semibold flex items-center gap-1.5">
+                                    {tab === 'about' && <><User className="w-3 h-3" /> <span className="hidden md:inline">{t('ABOUT', 'परिचय')}</span></>}
+                                    {tab === 'posts' && <><MessageCircle className="w-3 h-3" /> <span className="hidden md:inline">{t('POSTS', 'पोस्ट')}</span></>}
+                                    {tab === 'journey' && <><Sparkles className="w-3 h-3" /> <span className="hidden md:inline">{t('JOURNEY', 'यात्रा')}</span></>}
+                                    {tab === 'family' && <><Heart className="w-3 h-3" /> <span className="hidden md:inline">{t('FAMILY', 'परिवार')}</span></>}
+                                </span>
+                            </TabsTrigger>
+                        ))}
                     </TabsList>
 
                     <div className="mt-8 min-h-[300px]">
                         <TabsContent value="about" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            {/* Basic Details Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {isFieldVisible('dob') && member.date_of_birth && (
                                     <div className="p-4 rounded-xl border bg-card text-card-foreground shadow-sm">
@@ -229,27 +276,62 @@ const PublicProfile = () => {
                             </div>
                         </TabsContent>
 
+                        <TabsContent value="posts" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            {feedPosts && feedPosts.length > 0 ? (
+                                <div className="space-y-4 max-w-2xl mx-auto">
+                                    {feedPosts.map((post: any) => (
+                                        <FeedItem key={post.id} post={{ ...post, profiles: { full_name: member.full_name, avatar_url: member.avatar_url } }} onPostChange={() => refetchPosts()} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12">
+                                    <MessageCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-20" />
+                                    <p className="text-muted-foreground">{t('No public posts yet.', 'अभी तक कोई सार्वजनिक पोस्ट नहीं।')}</p>
+                                </div>
+                            )}
+                        </TabsContent>
+
                         <TabsContent value="journey" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <LifeJourneyPublicView
-                                memberId={member.id}
-                                member={member}
-                                privacy={privacy}
-                            />
+                            <LifeJourneyPublicView memberId={member.id} member={member} privacy={privacy} />
                         </TabsContent>
 
                         <TabsContent value="family" className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            {/* This would require fetching relations. For now, placeholder or link to tree */}
-                            <div className="text-center py-12">
-                                <div className="max-w-sm mx-auto space-y-4">
-                                    <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-20" />
-                                    <p className="text-muted-foreground">
-                                        {t('View full family tree to see connections.', 'कनेक्शन देखने के लिए पूर्ण वंशवृक्ष देखें।')}
-                                    </p>
-                                    <Button variant="outline" onClick={() => window.location.href = `/tree/${member.tree_id}`}>
-                                        {t('View Family Tree', 'वंशवृक्ष देखें')}
+                            {treeData?.members && treeData.members.length > 1 ? (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                    {treeData.members
+                                        .filter((m: any) => m.id !== member.id)
+                                        .slice(0, 12)
+                                        .map((relative: any) => (
+                                            <Link
+                                                key={relative.id}
+                                                to={relative.username ? `/${relative.username}` : '#'}
+                                                className="flex flex-col items-center gap-2 p-4 rounded-xl border bg-card hover:shadow-md transition-shadow text-center"
+                                            >
+                                                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                                                    {relative.avatar_url ? (
+                                                        <img src={relative.avatar_url} alt={relative.full_name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <User className="w-8 h-8 text-muted-foreground" />
+                                                    )}
+                                                </div>
+                                                <span className="text-sm font-medium truncate w-full">{relative.full_name}</span>
+                                                {relative.full_name_hi && <span className="text-xs text-muted-foreground truncate w-full">{relative.full_name_hi}</span>}
+                                            </Link>
+                                        ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12">
+                                    <Heart className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-20" />
+                                    <p className="text-muted-foreground">{t('No family members visible.', 'कोई परिवार के सदस्य दिखाई नहीं दे रहे।')}</p>
+                                </div>
+                            )}
+                            {member.tree_id && (
+                                <div className="text-center mt-6">
+                                    <Button variant="outline" asChild>
+                                        <Link to={`/tree/${member.tree_id}`}>{t('View Full Family Tree', 'पूर्ण वंशवृक्ष देखें')}</Link>
                                     </Button>
                                 </div>
-                            </div>
+                            )}
                         </TabsContent>
                     </div>
                 </Tabs>
