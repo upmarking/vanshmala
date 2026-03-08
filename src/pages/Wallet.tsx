@@ -48,6 +48,8 @@ const WalletPage = () => {
   const [recipientProfile, setRecipientProfile] = useState<{ full_name: string; vanshmala_id: string; user_id: string } | null>(null);
   const [verifyingRecipient, setVerifyingRecipient] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [showMyQR, setShowMyQR] = useState(false);
+  const [showScanQR, setShowScanQR] = useState(false);
 
   // Smart VM-ID input helper
   const handleTransferTargetChange = (raw: string) => {
