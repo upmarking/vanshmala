@@ -221,9 +221,57 @@ export const useMemberByUsername = (username: string) => {
         .single();
 
       if (error) throw error;
-      return data as FamilyMember;
+
+      // Also fetch profile-level fields (is_verified, vanshmala_id) if user_id exists
+      let profileExtra: { is_verified?: boolean; vanshmala_id?: string; referral_code?: string } = {};
+      if (data?.user_id) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('is_verified, vanshmala_id, referral_code')
+          .eq('user_id', data.user_id)
+          .single();
+        if (profileData) {
+          profileExtra = profileData as any;
+        }
+      }
+
+      return { ...data, ...profileExtra } as FamilyMember & { is_verified?: boolean; vanshmala_id?: string };
     },
     enabled: !!username,
+  });
+};
+
+export const useUserFeedPosts = (userId: string | undefined) => {
+  return useQuery({
+    queryKey: ['user-feed-posts', userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      // Find profile id from user_id
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+      if (!profileData) return [];
+
+      const { data, error } = await supabase
+        .from('feed_posts')
+        .select('*')
+        .eq('user_id', profileData.id)
+        .eq('visibility', 'public')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+
+      // Parse JSONB fields
+      return (data || []).map((post: any) => ({
+        ...post,
+        likes: Array.isArray(post.likes) ? post.likes : [],
+        comments: Array.isArray(post.comments) ? post.comments : [],
+      }));
+    },
+    enabled: !!userId,
   });
 };
 
