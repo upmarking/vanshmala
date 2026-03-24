@@ -147,11 +147,17 @@ export const FeedPost = ({ event, member, onPostChange }: FeedPostProps) => {
     };
 
     const handleDeleteComment = async (commentId: string) => {
+        if (!profile?.id) {
+            toast.error("You must be logged in to delete a comment.");
+            return;
+        }
+
         try {
             const { error } = await supabase
                 .from('timeline_comments')
                 .delete()
-                .eq('id', commentId);
+                .eq('id', commentId)
+                .eq('profile_id', profile.id);
 
             if (error) {
                 toast.error("Failed to delete comment: " + error.message);
