@@ -1,0 +1,1 @@
+2024-06-25 - [Use Server-Side RPCs for Financial Operations], Learning: Client-side database updates for sensitive financial operations (like wallet deductions) are insecure and can be bypassed. Action: Always use secure server-side RPCs (e.g., `deduct_wallet_balance`) to handle financial transactions, ensuring business logic is enforced on the backend.
