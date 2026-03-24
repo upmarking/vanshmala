@@ -142,17 +142,19 @@ export const useAddMember = () => {
         // `after_parent_insert_link_siblings` then auto-creates sibling rows.
         if (relationType === 'sibling') {
           const parentIds = await getParentIds(relationToId, memberData.tree_id);
-          for (const parentId of parentIds) {
+          if (parentIds.length > 0) {
+            const parentLinks = parentIds.map((parentId) => ({
+              tree_id: memberData.tree_id,
+              from_member_id: parentId, // @ts-ignore
+              to_member_id: newMember.id,
+              relationship: 'parent' as Database['public']['Enums']['relationship_type']
+            }));
+
+            // Bulk insert parent links to avoid N+1 queries
             const { error: parentLinkError } = await supabase
               .from('family_relationships')
-              .insert({
-                tree_id: memberData.tree_id,
-                from_member_id: parentId, // @ts-ignore
-                to_member_id: newMember.id,
-                relationship: 'parent'
-              })
-              .select()
-              .maybeSingle();
+              .insert(parentLinks);
+
             // Ignore conflict — sibling may already be processed by trigger
             if (parentLinkError && !parentLinkError.message.includes('unique')) {
               console.warn('Parent link warning (sibling inherit):', parentLinkError.message);
