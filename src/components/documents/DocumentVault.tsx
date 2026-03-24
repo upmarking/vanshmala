@@ -72,10 +72,12 @@ const DocumentVault = () => {
             if (storageError) throw storageError;
 
             // Delete from database
+            // Adding uploader_id check for security to ensure only the owner can delete
             const { error: dbError } = await supabase
                 .from('documents')
                 .delete()
-                .eq('id', docId);
+                .eq('id', docId)
+                .eq('uploader_id', currentUser?.id || '');
 
             if (dbError) throw dbError;
 
