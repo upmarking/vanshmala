@@ -22,7 +22,7 @@ const REALTIME_WSS_URL = SUPABASE_RAW_URL.replace(/^https?:\/\//, (m) =>
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
+    storage: typeof window !== "undefined" ? window.localStorage : undefined,
     persistSession: true,
     autoRefreshToken: true,
   }
