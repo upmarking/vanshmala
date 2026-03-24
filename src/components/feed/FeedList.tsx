@@ -71,49 +71,58 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
                 }
             }
 
-            const formattedPosts: FeedPost[] = await Promise.all(
-                (data as any[]).map(async (post) => {
-                    const rawLikes: FeedLike[] = Array.isArray(post.likes) ? post.likes : [];
-                    const rawComments: FeedComment[] = Array.isArray(post.comments) ? post.comments : [];
-                    const rawRsvps: FeedRsvp[] = Array.isArray(post.rsvps) ? post.rsvps : [];
-
-                    // Sort comments oldest-first
-                    rawComments.sort((a, b) =>
-                        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-                    );
-
-                    // Collect unique profile_ids from comments to batch-fetch profile info
-                    const profileIds = [...new Set(rawComments.map(c => c.profile_id))];
-                    let profileMap: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
-
-                    if (profileIds.length > 0) {
-                        const { data: profileData } = await supabase
-                            .from('profiles')
-                            .select('id, full_name, avatar_url')
-                            .in('id', profileIds);
-
-                        if (profileData) {
-                            profileData.forEach((p: any) => {
-                                profileMap[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url };
-                            });
+            // Collect all unique profile_ids from all comments across all posts to batch-fetch profile info in one query
+            const allProfileIds = new Set<string>();
+            (data as any[]).forEach(post => {
+                if (Array.isArray(post.comments)) {
+                    post.comments.forEach((c: any) => {
+                        if (c.profile_id) {
+                            allProfileIds.add(c.profile_id);
                         }
-                    }
+                    });
+                }
+            });
 
-                    // Attach profile info to each comment
-                    const enrichedComments: FeedComment[] = rawComments.map(c => ({
-                        ...c,
-                        profiles: profileMap[c.profile_id] ?? { full_name: null, avatar_url: null },
-                    }));
+            const profileIdsArray = Array.from(allProfileIds);
+            const globalProfileMap: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
 
-                    return {
-                        ...post,
-                        likes: rawLikes,
-                        comments: enrichedComments,
-                        rsvps: rawRsvps,
-                        rewards: rewardMap[post.id] || undefined,
-                    } as FeedPost;
-                })
-            );
+            if (profileIdsArray.length > 0) {
+                const { data: profileData } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, avatar_url')
+                    .in('id', profileIdsArray);
+
+                if (profileData) {
+                    profileData.forEach((p: any) => {
+                        globalProfileMap[p.id] = { full_name: p.full_name, avatar_url: p.avatar_url };
+                    });
+                }
+            }
+
+            const formattedPosts: FeedPost[] = (data as any[]).map((post) => {
+                const rawLikes: FeedLike[] = Array.isArray(post.likes) ? post.likes : [];
+                const rawComments: FeedComment[] = Array.isArray(post.comments) ? post.comments : [];
+                const rawRsvps: FeedRsvp[] = Array.isArray(post.rsvps) ? post.rsvps : [];
+
+                // Sort comments oldest-first
+                rawComments.sort((a, b) =>
+                    new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                );
+
+                // Attach profile info to each comment
+                const enrichedComments: FeedComment[] = rawComments.map(c => ({
+                    ...c,
+                    profiles: globalProfileMap[c.profile_id] ?? { full_name: null, avatar_url: null },
+                }));
+
+                return {
+                    ...post,
+                    likes: rawLikes,
+                    comments: enrichedComments,
+                    rsvps: rawRsvps,
+                    rewards: rewardMap[post.id] || undefined,
+                } as FeedPost;
+            });
 
             setPosts(formattedPosts);
         } catch (error: any) {
