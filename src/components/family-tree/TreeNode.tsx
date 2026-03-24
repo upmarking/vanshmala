@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, ChevronDown, MoreHorizontal, UserPlus, Heart } from 'lucide-react';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FamilyTreeNode, getGenerationName } from '@/utils/familyTreeUtils';
 import {
     DropdownMenu,
@@ -421,8 +421,13 @@ const ChildConnectors = ({
 
 /* ────────────────────────────────────────────────────────────
    Main TreeNode — 3D stacked couple-unit based rendering
+   ⚡ Bolt Performance Optimization:
+   Wrapped in React.memo() to prevent deep re-renders of the entire tree
+   when the parent component updates. This improves performance significantly
+   for deep or wide family trees by skipping rendering for nodes whose props
+   (member, depth, callbacks) haven't changed.
 ──────────────────────────────────────────────────────────── */
-export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: TreeNodeProps) => {
+export const TreeNode = React.memo(({ member, depth = 0, onAddRelative, onViewProfile }: TreeNodeProps) => {
     const [expanded, setExpanded] = useState(true);
 
     const spouse = member.spouse as FamilyTreeNode | undefined;
@@ -542,4 +547,4 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
             </AnimatePresence>
         </div>
     );
-};
+});
