@@ -60,7 +60,7 @@ const WalletPage = () => {
     if (upper.startsWith('V')) {
       // Strip any dashes the user might have typed manually after VM
       // We'll re-insert the correct dash ourselves
-      let stripped = upper.replace(/-/g, ''); // e.g. 'VM0001' or 'VM'
+      const stripped = upper.replace(/-/g, ''); // e.g. 'VM0001' or 'VM'
 
       if (stripped.startsWith('VM')) {
         const digits = stripped.slice(2); // everything after 'VM'
@@ -334,37 +334,20 @@ const WalletPage = () => {
     // However, the backend `process_wallet_transfer` RPC now automatically creates 
     // a wallet for the recipient if it doesn't exist, making this transfer seamless.
 
-    // Debit sender
-    await supabase
-      .from('wallets')
-      .update({ balance: wallet.balance - amount })
-      .eq('id', wallet.id);
+    // Process the transfer securely using the backend RPC
+    // This will deduct from the sender's wallet and credit the recipient's wallet
+    const { error } = await supabase.rpc('process_wallet_transfer' as any, {
+      p_recipient_user_id: recipient.user_id,
+      p_amount: amount,
+      p_sender_name: profile?.full_name || 'User',
+      p_sender_vanshmala_id: profile?.vanshmala_id || '',
+    });
 
-    await supabase
-      .from('wallet_transactions')
-      .insert({
-        wallet_id: wallet.id,
-        user_id: user!.id,
-        type: 'debit',
-        amount,
-        description: `Transfer to ${recipient.full_name} (${recipient.vanshmala_id})`,
-        description_hi: `${recipient.full_name} (${recipient.vanshmala_id}) को भेजे`,
-        reference_type: 'transfer',
-        reference_id: recipient.user_id,
-      });
-
-    // Credit recipient — use RPC or service role in production
-    // For now, direct update (requires RLS to allow, which it does for own wallet)
-    // We'll use an edge function for proper transfer in production
-    try {
-      await supabase.rpc('process_wallet_transfer' as any, {
-        p_recipient_user_id: recipient.user_id,
-        p_amount: amount,
-        p_sender_name: profile?.full_name || 'User',
-        p_sender_vanshmala_id: profile?.vanshmala_id || '',
-      });
-    } catch {
-      // Edge function will handle this in production
+    if (error) {
+      console.error('Transfer failed:', error);
+      toast.error(t('Transfer failed. Please try again.', 'ट्रांसफर विफल रहा। कृपया पुनः प्रयास करें।'));
+      setProcessing(false);
+      return;
     }
 
     toast.success(t(`₹${amount} sent to ${recipient.full_name}!`, `₹${amount} ${recipient.full_name} को भेजे!`));
