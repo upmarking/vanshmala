@@ -28,7 +28,12 @@ const GiftCardDialog = ({ open, onOpenChange, walletBalance, onSuccess }: GiftCa
   const generateCode = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = 'GC-';
-    for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    const randomValues = new Uint8Array(8);
+    crypto.getRandomValues(randomValues);
+    for (let i = 0; i < 8; i++) {
+      // 32 chars, so taking modulo 32 provides perfectly uniform distribution from 0-255
+      code += chars[randomValues[i] % chars.length];
+    }
     return code;
   };
 
