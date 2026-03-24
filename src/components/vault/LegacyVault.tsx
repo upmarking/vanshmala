@@ -56,10 +56,17 @@ export const LegacyVault = () => {
         if (!window.confirm(t('Are you sure you want to delete this recording?', 'क्या आप इस रिकॉर्डिंग को हटाना चाहते हैं?'))) return;
 
         try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                toast.error(t('You must be logged in to delete a message', 'संदेश हटाने के लिए आपको लॉग इन होना चाहिए'));
+                return;
+            }
+
             const { error } = await supabase
                 .from('legacy_messages')
                 .delete()
-                .eq('id', id);
+                .eq('id', id)
+                .eq('creator_id', user.id);
 
             if (error) throw error;
             toast.success(t('Recording deleted', 'रिकॉर्डिंग हटा दी गई'));
