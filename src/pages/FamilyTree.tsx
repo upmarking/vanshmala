@@ -1,4 +1,5 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useGamification } from '@/contexts/GamificationContext';
 
 import { Plus, GitMerge, FileText, Tag as TagIcon, Gift, Copy, Check, Share2, Sparkles, UserPlus, Route } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
@@ -65,6 +66,7 @@ const createDummyMember = (id: string, name: string, nameHi: string, gen: number
 
 const FamilyTree = () => {
   const { t } = useLanguage();
+    const { awardPoints } = useGamification();
   const { treeId } = useParams<{ treeId: string }>();
   const navigate = useNavigate();
 
@@ -420,6 +422,7 @@ const FamilyTree = () => {
             isOpen={addDialogOpen}
             onClose={() => setAddDialogOpen(false)}
             onSuccess={(newMember) => {
+              awardPoints(50, t('Member Added!', 'सदस्य जोड़ा गया!'));
               setAddDialogOpen(false);
               setSelectedProfileMember(newMember as any);
               setProfileDialogOpen(true);

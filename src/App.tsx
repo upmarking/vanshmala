@@ -1,3 +1,4 @@
+import { GamificationProvider } from "@/contexts/GamificationContext";
 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -43,6 +44,7 @@ const App = () => (
     <AuthProvider>
       <LanguageProvider>
         <TooltipProvider>
+            <GamificationProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -155,7 +157,8 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </TooltipProvider>
+        </GamificationProvider>
+          </TooltipProvider>
       </LanguageProvider>
     </AuthProvider>
   </QueryClientProvider>
