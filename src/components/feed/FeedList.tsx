@@ -51,7 +51,7 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
             const postIds = (data as any[]).map(p => p.id);
 
             // Batch-fetch reward counts for all posts
-            let rewardMap: Record<string, RewardCounts> = {};
+            const rewardMap: Record<string, RewardCounts> = {};
             if (postIds.length > 0) {
                 const { data: contribs } = await supabase
                     .from('post_contributions')
@@ -84,7 +84,7 @@ export const FeedList = ({ refreshTrigger, filterType = "all" }: FeedListProps) 
 
                     // Collect unique profile_ids from comments to batch-fetch profile info
                     const profileIds = [...new Set(rawComments.map(c => c.profile_id))];
-                    let profileMap: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
+                    const profileMap: Record<string, { full_name: string | null; avatar_url: string | null }> = {};
 
                     if (profileIds.length > 0) {
                         const { data: profileData } = await supabase

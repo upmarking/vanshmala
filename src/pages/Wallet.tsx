@@ -60,7 +60,7 @@ const WalletPage = () => {
     if (upper.startsWith('V')) {
       // Strip any dashes the user might have typed manually after VM
       // We'll re-insert the correct dash ourselves
-      let stripped = upper.replace(/-/g, ''); // e.g. 'VM0001' or 'VM'
+      const stripped = upper.replace(/-/g, ''); // e.g. 'VM0001' or 'VM'
 
       if (stripped.startsWith('VM')) {
         const digits = stripped.slice(2); // everything after 'VM'
@@ -334,24 +334,21 @@ const WalletPage = () => {
     // However, the backend `process_wallet_transfer` RPC now automatically creates 
     // a wallet for the recipient if it doesn't exist, making this transfer seamless.
 
-    // Debit sender
-    await supabase
-      .from('wallets')
-      .update({ balance: wallet.balance - amount })
-      .eq('id', wallet.id);
+    // Debit sender securely using RPC
+    const { data: deductSuccess, error: deductError } = await supabase.rpc('deduct_wallet_balance' as any, {
+      p_user_id: user!.id,
+      p_amount: amount,
+      p_description: `Transfer to ${recipient.full_name} (${recipient.vanshmala_id})`,
+      p_description_hi: `${recipient.full_name} (${recipient.vanshmala_id}) को भेजे`,
+      p_reference_type: 'transfer',
+      p_reference_id: recipient.user_id,
+    });
 
-    await supabase
-      .from('wallet_transactions')
-      .insert({
-        wallet_id: wallet.id,
-        user_id: user!.id,
-        type: 'debit',
-        amount,
-        description: `Transfer to ${recipient.full_name} (${recipient.vanshmala_id})`,
-        description_hi: `${recipient.full_name} (${recipient.vanshmala_id}) को भेजे`,
-        reference_type: 'transfer',
-        reference_id: recipient.user_id,
-      });
+    if (deductError || !deductSuccess) {
+      toast.error(t('Transfer failed or insufficient balance', 'ट्रांसफर विफल या अपर्याप्त शेष राशि'));
+      setProcessing(false);
+      return;
+    }
 
     // Credit recipient — use RPC or service role in production
     // For now, direct update (requires RLS to allow, which it does for own wallet)
