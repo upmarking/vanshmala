@@ -77,9 +77,10 @@ export const UploadDocumentDialog = ({ isOpen, onClose, treeId, onUploadSuccess 
             toast.success(t("Document uploaded successfully", "दस्तावेज़ सफलतापूर्वक अपलोड किया गया"));
             onUploadSuccess?.();
             handleClose();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Upload error:', error);
-            toast.error(t("Failed to upload document", "दस्तावेज़ अपलोड करने में विफल") + ": " + error.message);
+            const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+            toast.error(t("Failed to upload document", "दस्तावेज़ अपलोड करने में विफल") + ": " + errorMessage);
         } finally {
             setIsUploading(false);
         }
