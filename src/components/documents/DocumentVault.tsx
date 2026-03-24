@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,9 +40,9 @@ const DocumentVault = () => {
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => setCurrentUser(data.user));
         fetchDocuments();
-    }, [treeId]);
+    }, [fetchDocuments]);
 
-    const fetchDocuments = async () => {
+    const fetchDocuments = useCallback(async () => {
         if (!treeId) return;
         setLoading(true);
         const { data, error } = await supabase
@@ -58,7 +58,7 @@ const DocumentVault = () => {
             setDocuments(data as DocumentInfo[]);
         }
         setLoading(false);
-    };
+    }, [treeId, t]);
 
     const handleDelete = async (docId: string, filePath: string) => {
         if (!confirm(t('Are you sure you want to delete this document?', 'क्या आप वाकई इस दस्तावेज़ को हटाना चाहते हैं?'))) return;
