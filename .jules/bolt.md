@@ -1,0 +1,3 @@
+## 2024-05-24 - [Avoid N+1 queries when populating Feed Comment Profiles]
+**Learning:** In the feed (`FeedList.tsx`), iterating over all posts in a feed and firing individual batched Supabase profile fetches per post still led to N (where N = number of posts) API calls.
+**Action:** When working with nested relational data (like comments on posts) in feeds, aggregate ALL foreign keys (e.g. `profile_id`s) into a global Set *across all posts* before firing a single batch-fetch `.in('id', uniqueIds)` API call. Map the results back to the original objects using a lookup map to guarantee O(1) queries instead of O(N) queries for feed composition.
