@@ -1,0 +1,3 @@
+## 2024-05-24 - N+1 Query Pattern in Nested Feed Data
+**Learning:** The feed logic in `src/components/feed/FeedList.tsx` previously used a `Promise.all` with nested database queries inside a `.map` to fetch comment user profiles for each post individually. This resulted in a classic N+1 query problem, creating unnecessary network overhead that scaled linearly with the number of posts.
+**Action:** When rendering lists of posts or entities with nested relationships (e.g. comments, users), always extract the related IDs globally across all items first. Use Supabase's `.in()` filter to batch fetch the related entities in a single query before attaching them, avoiding any database calls inside map loops.
