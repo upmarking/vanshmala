@@ -1,0 +1,3 @@
+## 2024-05-18 - [Add React.memo to TreeNode]
+**Learning:** Highly recursive components like `TreeNode` in the family tree view render heavily. Updates to the family tree context or deep nodes can cause a cascading re-render of the entire tree unnecessarily, freezing the browser.
+**Action:** Always use `React.memo()` on purely visual recursive components (and their sub-components like `SinglePersonCard`, `CoupleCard`, etc.) to intercept re-renders unless their specific `props` have changed.
