@@ -1,0 +1,3 @@
+## 2024-03-29 - [Feed Post Comments N+1 Query Fix]
+**Learning:** Found an N+1 query problem when fetching social feed posts where profile lookups for comments were made iteratively inside a `Promise.all()` map function (`.in('id', profileIds)`). This resulted in numerous distinct database calls sequentially fetching data for each post in the feed.
+**Action:** Replaced the loop-based queries with a globally batched query. First, extracted unique `profile_id`s from the comments of all posts using a Set, and then performed a single batched lookup `supabase.from('profiles').select(...).in('id', profileIdsArr)` for the entire feed. The resultant mapping is then attached synchronously to the posts data.
