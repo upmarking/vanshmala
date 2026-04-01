@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 
 import { Plus, GitMerge, FileText, Tag as TagIcon, Gift, Copy, Check, Share2, Sparkles, UserPlus, Route } from 'lucide-react';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTree, useTreeMembers, useIsTreeAdmin, useUserTrees } from '@/hooks/useFamilyTree';
 import { buildFamilyTree, FamilyTreeNode } from '@/utils/familyTreeUtils';
@@ -185,7 +185,7 @@ const FamilyTree = () => {
 
   const isLoading = treeId ? (treeLoading || membersLoading) : false;
 
-  const handleAddRelative = (memberId: string, type: RelationshipType, name: string) => {
+  const handleAddRelative = useCallback((memberId: string, type: RelationshipType, name: string) => {
     if (!treeId) {
       toast.info(t("This is a demo tree. Sign in to create your own!", "यह एक डेमो वंशवृक्ष है। अपना खुद का बनाने के लिए साइन इन करें!"));
       navigate('/login');
@@ -194,9 +194,9 @@ const FamilyTree = () => {
     setSelectedMember({ id: memberId, name });
     setRelationType(type);
     setAddDialogOpen(true);
-  };
+  }, [treeId, t, navigate]);
 
-  const handleViewProfile = (member: FamilyTreeNode) => {
+  const handleViewProfile = useCallback((member: FamilyTreeNode) => {
     if (!treeId) {
       // Optional: Allow viewing profile with dummy data? 
       // For now, let's treat it as read-only or show same toast
@@ -208,7 +208,7 @@ const FamilyTree = () => {
     }
     setSelectedProfileMember(member);
     setProfileDialogOpen(true);
-  };
+  }, [treeId, t]);
 
   const handleAddMemberGeneric = () => {
     if (!treeId) {
