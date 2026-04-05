@@ -1,0 +1,3 @@
+## 2025-04-05 - [TreeNode Re-renders]
+**Learning:** Highly recursive visual components like `TreeNode` can cause expensive cascading re-renders across the entire tree whenever parent component state (such as modals opening) changes.
+**Action:** Always wrap deep/recursive visual components in `React.memo()` and use `useCallback` for their passed event handlers in parent components to maintain referential stability.
