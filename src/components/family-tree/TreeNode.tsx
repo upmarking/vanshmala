@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, ChevronDown, MoreHorizontal, UserPlus, Heart } from 'lucide-react';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { FamilyTreeNode, getGenerationName } from '@/utils/familyTreeUtils';
 import {
     DropdownMenu,
@@ -25,7 +25,7 @@ interface TreeNodeProps {
 /* ────────────────────────────────────────────────────────────
    Action dropdown menu (shared between card types)
 ──────────────────────────────────────────────────────────── */
-const ActionsDropdown = ({
+const ActionsDropdown = memo(({
     member,
     onAddRelative,
 }: {
@@ -63,12 +63,12 @@ const ActionsDropdown = ({
             </DropdownMenuContent>
         </DropdownMenu>
     );
-};
+});
 
 /* ────────────────────────────────────────────────────────────
    Single person card (no spouse)
 ──────────────────────────────────────────────────────────── */
-const SinglePersonCard = ({
+const SinglePersonCard = memo(({
     member,
     onAddRelative,
     onViewProfile,
@@ -140,7 +140,7 @@ const SinglePersonCard = ({
             </div>
         </div>
     );
-};
+});
 
 
 /* ────────────────────────────────────────────────────────────
@@ -148,7 +148,7 @@ const SinglePersonCard = ({
    —  Primary member in front, spouse card "behind" with a
       3D stacking effect. Front card shows combined names.
 ──────────────────────────────────────────────────────────── */
-const CoupleCard = ({
+const CoupleCard = memo(({
     member,
     spouse,
     onAddRelative,
@@ -320,13 +320,13 @@ const CoupleCard = ({
             </div>
         </div>
     );
-};
+});
 
 
 /* ────────────────────────────────────────────────────────────
    SVG Connector Lines between couple and children
 ──────────────────────────────────────────────────────────── */
-const ChildConnectors = ({
+const ChildConnectors = memo(({
     childCount,
     containerRef,
     childRefs,
@@ -416,13 +416,13 @@ const ChildConnectors = ({
             </defs>
         </svg>
     );
-};
+});
 
 
 /* ────────────────────────────────────────────────────────────
    Main TreeNode — 3D stacked couple-unit based rendering
 ──────────────────────────────────────────────────────────── */
-export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: TreeNodeProps) => {
+export const TreeNode = memo(({ member, depth = 0, onAddRelative, onViewProfile }: TreeNodeProps) => {
     const [expanded, setExpanded] = useState(true);
 
     const spouse = member.spouse as FamilyTreeNode | undefined;
@@ -542,4 +542,4 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
             </AnimatePresence>
         </div>
     );
-};
+});
