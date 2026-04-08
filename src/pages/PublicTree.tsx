@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -98,13 +98,15 @@ const PublicTree = () => {
     setSubmitting(false);
   };
 
-  const handleViewProfile = (member: FamilyTreeNode) => {
+  // ⚡ Bolt: Wrapped in useCallback to provide a stable reference for memoized TreeNode
+  const handleViewProfile = useCallback((member: FamilyTreeNode) => {
     // Read-only, no action on public view
-  };
+  }, []);
 
-  const handleAddRelative = () => {
+  // ⚡ Bolt: Wrapped in useCallback to provide a stable reference for memoized TreeNode
+  const handleAddRelative = useCallback(() => {
     toast.info(t('This is a read-only view. Request to join this family tree!', 'यह केवल देखने के लिए है। इस वंशवृक्ष से जुड़ने का अनुरोध करें!'));
-  };
+  }, [t]);
 
   if (isLoading) {
     return (
