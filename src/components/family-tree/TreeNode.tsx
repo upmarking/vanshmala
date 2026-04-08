@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, ChevronDown, MoreHorizontal, UserPlus, Heart } from 'lucide-react';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { FamilyTreeNode, getGenerationName } from '@/utils/familyTreeUtils';
 import {
     DropdownMenu,
@@ -422,7 +422,8 @@ const ChildConnectors = ({
 /* ────────────────────────────────────────────────────────────
    Main TreeNode — 3D stacked couple-unit based rendering
 ──────────────────────────────────────────────────────────── */
-export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: TreeNodeProps) => {
+// ⚡ Bolt: Wrapped in memo() to prevent expensive cascading re-renders of the recursive tree structure
+export const TreeNode = memo(({ member, depth = 0, onAddRelative, onViewProfile }: TreeNodeProps) => {
     const [expanded, setExpanded] = useState(true);
 
     const spouse = member.spouse as FamilyTreeNode | undefined;
@@ -542,4 +543,4 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
             </AnimatePresence>
         </div>
     );
-};
+});
