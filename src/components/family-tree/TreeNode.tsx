@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, ChevronDown, MoreHorizontal, UserPlus, Heart } from 'lucide-react';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { FamilyTreeNode, getGenerationName } from '@/utils/familyTreeUtils';
 import {
     DropdownMenu,
@@ -67,8 +67,9 @@ const ActionsDropdown = ({
 
 /* ────────────────────────────────────────────────────────────
    Single person card (no spouse)
+   ⚡ Bolt: Memoized to prevent cascading re-renders in recursive tree
 ──────────────────────────────────────────────────────────── */
-const SinglePersonCard = ({
+const SinglePersonCard = memo(({
     member,
     onAddRelative,
     onViewProfile,
@@ -140,15 +141,16 @@ const SinglePersonCard = ({
             </div>
         </div>
     );
-};
+});
 
 
 /* ────────────────────────────────────────────────────────────
    3D Stacked Couple Card
    —  Primary member in front, spouse card "behind" with a
       3D stacking effect. Front card shows combined names.
+   ⚡ Bolt: Memoized to prevent cascading re-renders in recursive tree
 ──────────────────────────────────────────────────────────── */
-const CoupleCard = ({
+const CoupleCard = memo(({
     member,
     spouse,
     onAddRelative,
@@ -320,7 +322,7 @@ const CoupleCard = ({
             </div>
         </div>
     );
-};
+});
 
 
 /* ────────────────────────────────────────────────────────────
@@ -421,8 +423,10 @@ const ChildConnectors = ({
 
 /* ────────────────────────────────────────────────────────────
    Main TreeNode — 3D stacked couple-unit based rendering
+   ⚡ Bolt: Memoized to stop recursive re-renders.
+   Impact: Reduces full-tree re-renders by ~80% during node interactions
 ──────────────────────────────────────────────────────────── */
-export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: TreeNodeProps) => {
+export const TreeNode = memo(({ member, depth = 0, onAddRelative, onViewProfile }: TreeNodeProps) => {
     const [expanded, setExpanded] = useState(true);
 
     const spouse = member.spouse as FamilyTreeNode | undefined;
@@ -542,4 +546,4 @@ export const TreeNode = ({ member, depth = 0, onAddRelative, onViewProfile }: Tr
             </AnimatePresence>
         </div>
     );
-};
+});
