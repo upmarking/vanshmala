@@ -1,0 +1,3 @@
+## 2024-04-10 - [Recursive Tree Re-render Bottleneck]
+**Learning:** The family tree visual interface consists of highly recursive components (`TreeNode`, `SinglePersonCard`, `CoupleCard`). Without `React.memo` and `useCallback` for passed handlers, any state update in the parent (e.g. `FamilyTree.tsx`) triggers a full tree cascade of expensive DOM recalculations and SVG connector logic re-computations, significantly hurting performance.
+**Action:** When working with recursive components like `TreeNode` or large data visualizations, always ensure the atomic units (like cards) and recursive nodes are wrapped in `React.memo()`, and any callback functions passed to them are memoized using `useCallback()` to prevent unnecessary deep re-renders.
