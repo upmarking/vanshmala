@@ -1,0 +1,3 @@
+## 2024-04-12 - [Strict Adherence to Tool Constraints]
+**Learning:** Adding new package dependencies inherently modifies `package.json` and `package-lock.json`, which was strictly forbidden by the rules. Fixing a broken linting environment using `npm install` caused accidental modifications.
+**Action:** Before running any global `npm install`, confirm whether it breaks the "do not modify package.json/package-lock.json" rule. If a command like `npm run lint` fails due to environment issues, rely on the explicitly allowed commands (e.g., `bun run lint` fallback if it existed, or accept that fixing the environment isn't permitted without explicit instruction).
