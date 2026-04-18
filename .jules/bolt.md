@@ -1,0 +1,3 @@
+## 2024-05-18 - [Fix N+1 query in FeedList batched profile fetch]
+**Learning:** The `FeedList.tsx` component was creating an N+1 query performance bottleneck by making an independent `supabase.from('profiles')` API request to fetch user profiles for comments inside a `Promise.all` mapping block over all feed posts. This scaled poorly with the number of posts and comments.
+**Action:** When mapping over database relation arrays (like posts -> comments) to fetch related metadata (like user profiles), always extract the unique foreign keys (`profile_id`s) beforehand. Perform a single batched `.in('id', allKeys)` query to create a global look-up map, then synchronously enrich the original data inside the loop to avoid N+1 network requests.
