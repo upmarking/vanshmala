@@ -1,0 +1,3 @@
+## 2024-05-18 - [FeedList N+1 Optimization]
+**Learning:** The Feed system in `src/components/feed/FeedList.tsx` initially mapped over all fetched posts and executed a separate Supabase `.in()` query *for each post* to fetch profile metadata for its comments using `Promise.all`. This causes an N+1 query problem that scales with the number of posts fetched.
+**Action:** When fetching nested relational data (like comments, likes, or RSVPs on posts), extract the unique user/profile IDs from all nested items across the *entire batch* of parents, execute a single batched `.in()` Supabase query, and then map the data synchronously.
