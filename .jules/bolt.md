@@ -1,0 +1,3 @@
+## 2024-05-18 - [Fix N+1 Array Mapping in Feed Component]
+**Learning:** React components containing `.map()` iterations that execute separate Supabase queries inside `Promise.all` can quickly become huge performance bottlenecks as user engagement increases (e.g. `await supabase.from('profiles').select().in('id', profileIds)` executing 20 times for 20 posts with comments).
+**Action:** Always batch related data retrieval outside of `.map()` loops. Extract all unique IDs across the entire dataset, execute a single batched `.in()` query, map the response to a fast lookup dictionary (like `Record<string, T>`), and process the actual `.map()` synchronously without network overhead.
