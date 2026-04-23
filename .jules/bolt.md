@@ -1,0 +1,3 @@
+## 2024-05-18 - [Fix N+1 Query in FeedList profile fetching]
+**Learning:** The application includes a social Feed system located in `src/components/feed/`. Data fetching for relational posts (like comments, likes, and RSVPs) mapped inside React components creates an N+1 performance bottleneck if they execute individual queries.
+**Action:** When mapping over database arrays, avoid executing individual Supabase queries inside `.map()` loops. Instead, extract unique IDs from the dataset, execute a single batched `.in()` query outside the loop, and use a lookup dictionary to process the `.map()` synchronously.
