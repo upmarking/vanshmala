@@ -1,0 +1,3 @@
+## 2024-05-14 - [TreeNode React.memo Optimization]
+**Learning:** The family tree renders recursively using the `TreeNode` component, which includes heavy UI components like `SinglePersonCard` and `CoupleCard`. By missing `React.memo` and `useCallback` for `onAddRelative` and `onViewProfile` handlers in `FamilyTree.tsx` and `PublicTree.tsx`, any state change causes a massive re-render cascade across the entire visual tree.
+**Action:** Wrap `TreeNode`, `SinglePersonCard`, `CoupleCard`, and `ChildConnectors` in `React.memo`. Wrap `handleAddRelative` and `handleViewProfile` in `useCallback` in parent components to prevent prop mutation and stop unnecessary re-renders.
