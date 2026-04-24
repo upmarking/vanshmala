@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Gift, Copy, Check } from 'lucide-react';
+import { generateCode } from '@/utils/crypto';
 
 interface GiftCardDialogProps {
   open: boolean;
@@ -24,13 +25,6 @@ const GiftCardDialog = ({ open, onOpenChange, walletBalance, onSuccess }: GiftCa
   const [processing, setProcessing] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
   const [copied, setCopied] = useState(false);
-
-  const generateCode = () => {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = 'GC-';
-    for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
-    return code;
-  };
 
   const handleCreateGiftCard = async () => {
     const amount = parseFloat(giftAmount);
