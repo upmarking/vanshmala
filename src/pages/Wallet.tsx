@@ -213,7 +213,8 @@ const WalletPage = () => {
                 action: 'verify_payment',
                 payment_id: response.razorpay_payment_id,
                 order_id: response.razorpay_order_id,
-                bonus_amount: discountInfo?.amount || 0,
+                discount_code: discountInfo?.code || null,
+                requested_amount: amount,
               }),
             }
           );
