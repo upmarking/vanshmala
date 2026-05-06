@@ -31,7 +31,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { action, amount, payment_id, order_id, bonus_amount } = body;
+    const { action, amount, payment_id, order_id, discount_code, requested_amount } = body;
 
     if (action === 'create_order') {
       // Create Razorpay order
@@ -74,7 +74,25 @@ serve(async (req) => {
 
       if (payment.status === 'captured' || payment.status === 'authorized') {
         const paidAmount = payment.amount / 100;
-        const bonusAmt = typeof bonus_amount === 'number' && bonus_amount > 0 ? bonus_amount : 0;
+
+        // Server-side bonus calculation: revalidate discount code against the verified paid amount.
+        // Never trust a client-supplied bonus value.
+        let bonusAmt = 0;
+        if (typeof discount_code === 'string' && discount_code.trim().length > 0) {
+          const baseAmount = typeof requested_amount === 'number' && requested_amount > 0
+            ? requested_amount
+            : paidAmount;
+          const { data: validation } = await supabase.rpc('validate_discount_code', {
+            p_code: discount_code.trim(),
+            p_amount: baseAmount,
+            p_user_id: user.id,
+          });
+          if (validation && (validation as any).valid) {
+            const candidate = Number((validation as any).discount_amount) || 0;
+            // Cap bonus to a sane multiple of paid amount as a defense-in-depth limit
+            bonusAmt = Math.max(0, Math.min(candidate, paidAmount * 5));
+          }
+        }
         const totalCredit = paidAmount + bonusAmt;
 
         // Get or create wallet

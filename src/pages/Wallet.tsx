@@ -213,7 +213,8 @@ const WalletPage = () => {
                 action: 'verify_payment',
                 payment_id: response.razorpay_payment_id,
                 order_id: response.razorpay_order_id,
-                bonus_amount: discountInfo?.amount || 0,
+                discount_code: discountInfo?.code || null,
+                requested_amount: amount,
               }),
             }
           );
@@ -330,41 +331,16 @@ const WalletPage = () => {
       return;
     }
 
-    // Note: We used to check if the recipient has an active wallet here.
-    // However, the backend `process_wallet_transfer` RPC now automatically creates 
-    // a wallet for the recipient if it doesn't exist, making this transfer seamless.
+    // Atomic, server-validated transfer (sender == auth.uid(), deducts + credits)
+    const { error: transferError } = await supabase.rpc('transfer_wallet_funds' as any, {
+      p_recipient_user_id: recipient.user_id,
+      p_amount: amount,
+    });
 
-    // Debit sender
-    await supabase
-      .from('wallets')
-      .update({ balance: wallet.balance - amount })
-      .eq('id', wallet.id);
-
-    await supabase
-      .from('wallet_transactions')
-      .insert({
-        wallet_id: wallet.id,
-        user_id: user!.id,
-        type: 'debit',
-        amount,
-        description: `Transfer to ${recipient.full_name} (${recipient.vanshmala_id})`,
-        description_hi: `${recipient.full_name} (${recipient.vanshmala_id}) को भेजे`,
-        reference_type: 'transfer',
-        reference_id: recipient.user_id,
-      });
-
-    // Credit recipient — use RPC or service role in production
-    // For now, direct update (requires RLS to allow, which it does for own wallet)
-    // We'll use an edge function for proper transfer in production
-    try {
-      await supabase.rpc('process_wallet_transfer' as any, {
-        p_recipient_user_id: recipient.user_id,
-        p_amount: amount,
-        p_sender_name: profile?.full_name || 'User',
-        p_sender_vanshmala_id: profile?.vanshmala_id || '',
-      });
-    } catch {
-      // Edge function will handle this in production
+    if (transferError) {
+      toast.error(transferError.message || t('Transfer failed', 'ट्रांसफर विफल'));
+      setProcessing(false);
+      return;
     }
 
     toast.success(t(`₹${amount} sent to ${recipient.full_name}!`, `₹${amount} ${recipient.full_name} को भेजे!`));
