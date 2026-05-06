@@ -31,7 +31,7 @@ serve(async (req) => {
     }
 
     const body = await req.json();
-    const { action, amount, payment_id, order_id, bonus_amount } = body;
+    const { action, amount, payment_id, order_id, discount_code, requested_amount } = body;
 
     if (action === 'create_order') {
       // Create Razorpay order
