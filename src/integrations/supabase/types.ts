@@ -46,6 +46,62 @@ export type Database = {
           },
         ]
       }
+      blogs: {
+        Row: {
+          author_id: string | null
+          content: string
+          created_at: string | null
+          excerpt: string | null
+          featured_image_url: string | null
+          id: string
+          is_published: boolean | null
+          meta_description: string | null
+          meta_title: string | null
+          published_at: string | null
+          slug: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id?: string | null
+          content: string
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          slug: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string | null
+          content?: string
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image_url?: string | null
+          id?: string
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blogs_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discount_code_usage: {
         Row: {
           amount_added: number
@@ -480,6 +536,89 @@ export type Database = {
           redeemed_by?: string | null
         }
         Relationships: []
+      }
+      kundali_inputs: {
+        Row: {
+          ayanamsa: string
+          birth_date: string
+          birth_time: string
+          created_at: string
+          id: string
+          language: string
+          latitude: number
+          longitude: number
+          name: string
+          place_name: string | null
+          timezone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ayanamsa?: string
+          birth_date: string
+          birth_time: string
+          created_at?: string
+          id?: string
+          language?: string
+          latitude: number
+          longitude: number
+          name?: string
+          place_name?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ayanamsa?: string
+          birth_date?: string
+          birth_time?: string
+          created_at?: string
+          id?: string
+          language?: string
+          latitude?: number
+          longitude?: number
+          name?: string
+          place_name?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kundali_results: {
+        Row: {
+          calc_type: string
+          created_at: string
+          id: string
+          input_id: string
+          result_data: Json
+          user_id: string
+        }
+        Insert: {
+          calc_type: string
+          created_at?: string
+          id?: string
+          input_id: string
+          result_data?: Json
+          user_id: string
+        }
+        Update: {
+          calc_type?: string
+          created_at?: string
+          id?: string
+          input_id?: string
+          result_data?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kundali_results_input_id_fkey"
+            columns: ["input_id"]
+            isOneToOne: false
+            referencedRelation: "kundali_inputs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       legacy_messages: {
         Row: {
@@ -1114,6 +1253,36 @@ export type Database = {
         Update: {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vanshmitra_chat_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          language: string
+          messages: Json
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language?: string
+          messages?: Json
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language?: string
+          messages?: Json
+          title?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
