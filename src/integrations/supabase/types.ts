@@ -1459,6 +1459,10 @@ export type Database = {
         Args: { p_post_id: string; p_profile_id: string; p_status: string }
         Returns: undefined
       }
+      transfer_wallet_funds: {
+        Args: { p_amount: number; p_recipient_user_id: string }
+        Returns: Json
+      }
       validate_discount_code: {
         Args: { p_amount: number; p_code: string; p_user_id: string }
         Returns: Json
