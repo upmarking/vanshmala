@@ -60,7 +60,7 @@ const WalletPage = () => {
     if (upper.startsWith('V')) {
       // Strip any dashes the user might have typed manually after VM
       // We'll re-insert the correct dash ourselves
-      let stripped = upper.replace(/-/g, ''); // e.g. 'VM0001' or 'VM'
+      const stripped = upper.replace(/-/g, ''); // e.g. 'VM0001' or 'VM'
 
       if (stripped.startsWith('VM')) {
         const digits = stripped.slice(2); // everything after 'VM'
