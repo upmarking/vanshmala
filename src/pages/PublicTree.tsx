@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -98,13 +98,20 @@ const PublicTree = () => {
     setSubmitting(false);
   };
 
-  const handleViewProfile = (member: FamilyTreeNode) => {
+  // PERFORMANCE OPTIMIZATION:
+  // We MUST wrap handleViewProfile and handleAddRelative in useCallback.
+  // Although they look simple, they are passed as props to the <TreeNode> component.
+  // <TreeNode> is highly recursive and wrapped in React.memo().
+  // Recreating these functions on every render (e.g. when opening link dialog)
+  // would break memoization and trigger a catastrophic cascading re-render
+  // of the entire tree.
+  const handleViewProfile = useCallback((member: FamilyTreeNode) => {
     // Read-only, no action on public view
-  };
+  }, []);
 
-  const handleAddRelative = () => {
+  const handleAddRelative = useCallback(() => {
     toast.info(t('This is a read-only view. Request to join this family tree!', 'यह केवल देखने के लिए है। इस वंशवृक्ष से जुड़ने का अनुरोध करें!'));
-  };
+  }, [t]);
 
   if (isLoading) {
     return (
