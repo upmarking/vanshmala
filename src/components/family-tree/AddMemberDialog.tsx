@@ -1,4 +1,5 @@
 import { useLanguage } from '@/contexts/LanguageContext';
+import confetti from 'canvas-confetti';
 import { transliterateToHindi } from '@/utils/transliterate';
 import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -6,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAddMember, useSearchProfiles, useTreeMembers } from '@/hooks/useFamilyTree';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,6 +37,8 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
     const { mutate: addMember, isPending } = useAddMember();
 
     const [activeTab, setActiveTab] = useState("new");
+    const [wizardStep, setWizardStep] = useState(1);
+    const totalSteps = activeTab === 'new' ? 2 : 1;
     // Guardrail state
     const [validationError, setValidationError] = useState<string | null>(null);
     const [isValidating, setIsValidating] = useState(false);
@@ -62,6 +66,9 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
     const treeMembers = treeData?.members || [];
 
     // Check for existing user by email/phone
+
+    const [relationTo, setRelationTo] = useState<string>('');
+    const [relation, setRelation] = useState<RelationshipType>('child');
     const [checkQuery, setCheckQuery] = useState('');
     const { data: checkResults } = useSearchProfiles(checkQuery);
 
@@ -395,113 +402,158 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
                     </TabsList>
 
                     <TabsContent value="new">
-                        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('Full Name (English)', 'पूरा नाम (अंग्रेजी)')} *</label>
-                                    <Input
-                                        value={formData.fullName}
-                                        onChange={(e) => {
-                                            const newName = e.target.value;
-                                            setFormData(prev => ({
-                                                ...prev,
-                                                fullName: newName,
-                                                ...(hindiManuallyEdited ? {} : { fullNameHi: transliterateToHindi(newName) }),
-                                            }));
-                                        }}
-                                        placeholder="Ramesh Sharma"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('Full Name (Hindi)', 'पूरा नाम (हिंदी)')}</label>
-                                    <Input
-                                        value={formData.fullNameHi}
-                                        onChange={(e) => {
-                                            setHindiManuallyEdited(true);
-                                            setFormData({ ...formData, fullNameHi: e.target.value });
-                                        }}
-                                        placeholder="रमेश शर्मा"
-                                    />
-                                </div>
-                            </div>
+                        <form onSubmit={handleSubmit} className="py-4">
+                        <AnimatePresence mode="wait">
+                            {wizardStep === 1 && (
+                                <motion.div
+                                    key="step1"
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="space-y-4 pt-2"
+                                >
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2 col-span-2 md:col-span-1">
+                                            <label className="text-sm font-medium">{t('Full Name', 'पूरा नाम')} *</label>
+                                            <Input
+                                                value={formData.fullName}
+                                                onChange={(e) => {
+                                                    const newName = e.target.value;
+                                                    setFormData(prev => ({
+                                                        ...prev,
+                                                        fullName: newName,
+                                                        ...(hindiManuallyEdited ? {} : { fullNameHi: transliterateToHindi(newName) }),
+                                                    }));
+                                                }}
+                                                placeholder={t('Enter full name', 'पूरा नाम दर्ज करें')}
+                                                autoFocus
+                                                className="h-12 text-lg"
+                                            />
+                                        </div>
+                                        <div className="space-y-2 col-span-2 md:col-span-1">
+                                            <label className="text-sm font-medium">{t('Name in Hindi', 'हिंदी में नाम')} *</label>
+                                            <Input
+                                                value={formData.fullNameHi}
+                                                onChange={(e) => {
+                                                    setFormData(prev => ({ ...prev, fullNameHi: e.target.value }));
+                                                    setHindiManuallyEdited(true);
+                                                }}
+                                                placeholder={t('हिंदी में नाम', 'हिंदी में नाम')}
+                                                className="h-12 text-lg"
+                                            />
+                                        </div>
+                                    </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('Email', 'ईमेल')}</label>
-                                    <Input
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        onBlur={handleCheckUser}
-                                        placeholder="user@example.com"
-                                        type="email"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('Phone', 'फ़ोन')}</label>
-                                    <Input
-                                        value={formData.phone}
-                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                        onBlur={handleCheckUser}
-                                        placeholder="+91 9876543210"
-                                        type="tel"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('Gender', 'लिंग')}</label>
-                                    <Select
-                                        value={formData.gender}
-                                        onValueChange={(v: GenderType) => setFormData({ ...formData, gender: v })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="male">{t('Male', 'पुरुष')}</SelectItem>
-                                            <SelectItem value="female">{t('Female', 'महिला')}</SelectItem>
-                                            <SelectItem value="other">{t('Other', 'अन्य')}</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('Status', 'स्थिति')}</label>
-                                    <Select
-                                        value={formData.isAlive ? "alive" : "deceased"}
-                                        onValueChange={(v) => setFormData({ ...formData, isAlive: v === "alive" })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="alive">{t('Alive', 'जीवित')}</SelectItem>
-                                            <SelectItem value="deceased">{t('Deceased', 'स्वर्गीय')}</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">{t('Date of Birth', 'जन्म तिथि')}</label>
-                                    <Input
-                                        type="date"
-                                        value={formData.birthDate}
-                                        onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-                                    />
-                                </div>
-                                {!formData.isAlive && (
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium">{t('Date of Death', 'मृत्यु तिथि')}</label>
+                                        <label className="text-sm font-medium">{t('Gender', 'लिंग')} *</label>
+                                        <Select value={formData.gender} onValueChange={(v: GenderType) => setFormData(prev => ({ ...prev, gender: v }))}>
+                                            <SelectTrigger className="h-12 text-lg">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="male">{t('Male', 'पुरुष')}</SelectItem>
+                                                <SelectItem value="female">{t('Female', 'महिला')}</SelectItem>
+                                                <SelectItem value="other">{t('Other', 'अन्य')}</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {!relativeId && (
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium">{t('Status', 'स्थिति')}</label>
+                                            <div className="flex items-center space-x-2 border rounded-xl p-3">
+                                                <input
+                                                    type="checkbox"
+                                                    id="isAlive"
+                                                    checked={formData.isAlive}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, isAlive: e.target.checked }))}
+                                                    className="w-5 h-5 rounded border-gray-300 text-saffron focus:ring-saffron"
+                                                />
+                                                <label htmlFor="isAlive" className="text-sm font-medium cursor-pointer flex-1">
+                                                    {t('Living', 'जीवित')}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            )}
+
+                            {wizardStep === 2 && (
+                                <motion.div
+                                    key="step2"
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="space-y-4 pt-2"
+                                >
+                                    <div className="p-4 bg-muted/30 rounded-xl space-y-4 border border-border">
+                                        {relativeName ? (
+                                            <>
+                                                <div className="text-sm text-muted-foreground mb-4 bg-muted p-3 rounded-lg flex items-center gap-2">
+                                                    <Info className="w-4 h-4 text-saffron" />
+                                                    {t('Adding relative for', 'के लिए रिश्तेदार जोड़ रहे हैं')}: <strong className="text-foreground">{relativeName}</strong>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-medium">{t('Relationship', 'रिश्ता')} *</label>
+                                                    <Select value={relationType} disabled>
+                                                        <SelectTrigger className="h-12 bg-muted">
+                                                            <SelectValue placeholder={t('Relationship', 'रिश्ता')} />
+                                                        </SelectTrigger>
+                                                    </Select>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2 col-span-2 md:col-span-1">
+                                                    <label className="text-sm font-medium">{t('Related To', 'संबंधित')}</label>
+                                                    <Select value={relationTo} onValueChange={setRelationTo}>
+                                                        <SelectTrigger className="h-12">
+                                                            <SelectValue placeholder={t('Select Member', 'सदस्य चुनें')} />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="root">{t('Start of Tree (Root)', 'पेड़ की शुरुआत (रूट)')}</SelectItem>
+                                                            {treeMembers.map((member) => (
+                                                                <SelectItem key={member.id} value={member.id}>
+                                                                    {member.full_name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                {relationTo && relationTo !== 'root' && (
+                                                    <div className="space-y-2 col-span-2 md:col-span-1">
+                                                        <label className="text-sm font-medium">{t('Relationship', 'रिश्ता')} *</label>
+                                                        <Select value={relation} onValueChange={(v: RelationshipType) => setRelation(v)}>
+                                                            <SelectTrigger className="h-12">
+                                                                <SelectValue placeholder={t('Select relationship', 'रिश्ता चुनें')} />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="parent">{t('Parent', 'माता-पिता')}</SelectItem>
+                                                                <SelectItem value="child">{t('Child', 'बच्चा')}</SelectItem>
+                                                                <SelectItem value="spouse">{t('Spouse', 'जीवनसाथी')}</SelectItem>
+                                                                <SelectItem value="sibling">{t('Sibling', 'भाई-बहन')}</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium">{t('Birth Date (Optional)', 'जन्म तिथि (वैकल्पिक)')}</label>
                                         <Input
                                             type="date"
-                                            value={formData.deathDate}
-                                            onChange={(e) => setFormData({ ...formData, deathDate: e.target.value })}
+                                            value={formData.birthDate}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
+                                            className="h-12"
                                         />
                                     </div>
-                                )}
-                            </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                         </form>
                     </TabsContent>
 
@@ -624,31 +676,56 @@ export const AddMemberDialog = ({ isOpen, onClose, treeId, relativeId, relationT
                 </Tabs>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>{t('Cancel', 'रद्द करें')}</Button>
-                    {activeTab === 'new' ? (
-                        <Button
-                            onClick={handleSubmit}
-                            disabled={isPending || isValidating || !!validationError}
-                        >
-                            {isValidating
-                                ? t('Checking...', 'जाँच रहे हैं...')
-                                : isPending
-                                    ? t('Adding...', 'जोड़ रहे हैं...')
-                                    : t('Add Member', 'सदस्य जोड़ें')}
-                        </Button>
-                    ) : (
-                        <Button
-                            onClick={handleLink}
-                            disabled={isPending || isValidating || !selectedProfile || !linkRelationTo || !linkRelationType}
-                        >
-                            {isValidating
-                                ? t('Checking...', 'जाँच रहे हैं...')
-                                : isPending
-                                    ? t('Linking...', 'लिंक हो रहा है...')
-                                    : t('Link Selected', 'चयनित को लिंक करें')}
-                        </Button>
-                    )}
-                </DialogFooter>
+                    <div className="flex w-full justify-between items-center gap-2 sm:gap-4 mt-6">
+                        {activeTab === 'new' && wizardStep > 1 ? (
+                            <Button type="button" variant="outline" onClick={() => setWizardStep(step => step - 1)} className="flex-1 sm:flex-none">
+                                {t('Back', 'पीछे')}
+                            </Button>
+                        ) : (
+                            <Button type="button" variant="outline" onClick={onClose} className="flex-1 sm:flex-none">
+                                {t('Cancel', 'रद्द करें')}
+                            </Button>
+                        )}
+
+                        <div className="flex flex-1 sm:flex-none gap-2">
+                            {activeTab === 'new' ? (
+                                wizardStep < totalSteps ? (
+                                    <Button
+                                        onClick={() => setWizardStep(step => step + 1)}
+                                        disabled={!formData.fullName || !formData.fullNameHi}
+                                        className="w-full sm:w-auto flex-1"
+                                    >
+                                        {t('Next', 'अगला')}
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={handleSubmit}
+                                        disabled={isPending || isValidating || !!validationError || !formData.fullName || !formData.fullNameHi}
+                                        className="w-full sm:w-auto flex-1 bg-saffron hover:bg-saffron/90"
+                                    >
+                                        {isValidating
+                                            ? t('Checking...', 'जाँच रहे हैं...')
+                                            : isPending
+                                                ? t('Adding...', 'जोड़ रहे हैं...')
+                                                : t('Add Member', 'सदस्य जोड़ें')}
+                                    </Button>
+                                )
+                            ) : (
+                                <Button
+                                    onClick={handleLink}
+                                    disabled={isPending || isValidating || !selectedProfile || !linkRelationTo || !linkRelationType}
+                                    className="w-full sm:w-auto flex-1 bg-saffron hover:bg-saffron/90"
+                                >
+                                    {isValidating
+                                        ? t('Checking...', 'जाँच रहे हैं...')
+                                        : isPending
+                                            ? t('Linking...', 'लिंक हो रहा है...')
+                                            : t('Link Selected', 'चयनित को लिंक करें')}
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+        </DialogFooter>
             </DialogContent>
         </Dialog>
     );
