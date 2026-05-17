@@ -1,3 +1,5 @@
 ## 2024-05-16 - [React.memo in Recursive Tree Components]
 **Learning:** Highly recursive components like `TreeNode` in family tree visualizations suffer from catastrophic cascading re-renders if parent state changes (e.g., opening a dialog).
-**Action:** Always wrap recursive visual components in `React.memo()` and ensure handlers passed down to them are wrapped in `useCallback` to prevent deep reconciliation cycles.
+**Action:** Always wrap recursive visual components in `React.memo()` and ensure handlers passed down to them are wrapped in `useCallback` to prevent deep reconciliation cycles.## 2024-05-18 - [Batched Profile Fetching in Feed]
+**Learning:** The feed feature relies heavily on JSONB arrays for relations (like comments) rather than normalized join tables. This necessitates client/application-level batching. Placing Supabase queries inside map loops mapping over an array of records leads to severe N+1 bottlenecks.
+**Action:** When extracting nested relations like comments from JSONB fields, extract all unique IDs across all parent records first, execute a single global `.in()` query to build a lookup dictionary, and then synchronously attach the related entities.
