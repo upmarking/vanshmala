@@ -99,6 +99,14 @@ const Navbar = () => {
           >
             {user ? t('Dashboard', 'डैशबोर्ड') : t('Home', 'होम')}
           </Link>
+          {!user && (
+            <Link
+              to="/dharma"
+              className={`hover:text-accent transition-colors ${isActive("/dharma") ? "text-saffron font-bold" : ""}`}
+            >
+              {t('Dharma', 'धर्म')}
+            </Link>
+          )}
           {user && (
             <>
               <Link

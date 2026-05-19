@@ -1,0 +1,772 @@
+[
+  {
+    "id": "1",
+    "slug": "sanatan-dharma-parichay",
+    "title": "सनातन धर्म का परिचय: उत्पत्ति, सिद्धांत और आधुनिक प्रासंगिकता",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/sanatan-dharma-parichay.svg"
+  },
+  {
+    "id": "2",
+    "slug": "bhagavad-gita-updesh",
+    "title": "भगवद गीता के 5 प्रमुख उपदेश जो आपका जीवन बदल सकते हैं",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/bhagavad-gita-updesh.svg"
+  },
+  {
+    "id": "3",
+    "slug": "char-veda-guide",
+    "title": "चार वेद: सनातन ज्ञान का मूल स्रोत और उनका महत्व",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/char-veda-guide.svg"
+  },
+  {
+    "id": "4",
+    "slug": "karma-yoga-meaning",
+    "title": "कर्म योग क्या है? निष्काम कर्म का व्यावहारिक रहस्य",
+    "theme": "yoga",
+    "imageUrl": "/dharma-images/karma-yoga-meaning.svg"
+  },
+  {
+    "id": "5",
+    "slug": "hindu-festivals-significance",
+    "title": "हिंदू धर्म में प्रमुख त्योहारों का वैज्ञानिक और आध्यात्मिक महत्व",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/hindu-festivals-significance.svg"
+  },
+  {
+    "id": "6",
+    "slug": "dhyan-aur-yoga",
+    "title": "ध्यान और योग: हिंदू दर्शन का विश्व को सबसे बड़ा उपहार",
+    "theme": "yoga",
+    "imageUrl": "/dharma-images/dhyan-aur-yoga.svg"
+  },
+  {
+    "id": "7",
+    "slug": "upanishad-ka-gyan",
+    "title": "उपनिषदों का ज्ञान: भारतीय दर्शन का सर्वोच्च शिखर और दर्शन",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/upanishad-ka-gyan.svg"
+  },
+  {
+    "id": "8",
+    "slug": "mandir-darshan-science",
+    "title": "मंदिर दर्शन का वैज्ञानिक और आध्यात्मिक महत्व",
+    "theme": "temple",
+    "imageUrl": "/dharma-images/mandir-darshan-science.svg"
+  },
+  {
+    "id": "9",
+    "slug": "puja-aur-aarti-vidhi",
+    "title": "पूजा और आरती: ईश्वर से जुड़ने का सुंदर और वैज्ञानिक माध्यम",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/puja-aur-aarti-vidhi.svg"
+  },
+  {
+    "id": "10",
+    "slug": "hindu-lifestyle-sanskars",
+    "title": "हिंदू जीवन शैली और 16 संस्कार: जीवन को संवारने की कला",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/hindu-lifestyle-sanskars.svg"
+  },
+  {
+    "id": "11",
+    "slug": "12-jyotirlinga-significance",
+    "title": "भगवान शिव के 12 ज्योतिर्लिंग: उत्पत्ति, पौराणिक कथाएँ और दर्शन का महत्व",
+    "theme": "shiva",
+    "imageUrl": "/dharma-images/12-jyotirlinga-significance.svg"
+  },
+  {
+    "id": "12",
+    "slug": "dashavatar-10-avatars-vishnu",
+    "title": "भगवान विष्णु के 10 अवतार (दशावतार): पौराणिक कथाएँ और डार्विन का विकासवाद",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/dashavatar-10-avatars-vishnu.svg"
+  },
+  {
+    "id": "13",
+    "slug": "navdurga-9-forms-spiritual-meaning",
+    "title": "नवदुर्गा: मां दुर्गा के 9 रूपों का नाम, आध्यात्मिक रहस्य और पूजन का वैज्ञानिक महत्व",
+    "theme": "devi",
+    "imageUrl": "/dharma-images/navdurga-9-forms-spiritual-meaning.svg"
+  },
+  {
+    "id": "14",
+    "slug": "ganesha-first-worshipped-reason",
+    "title": "श्री गणेश की प्रथम पूजा क्यों होती है? पौराणिक कथाएँ और आध्यात्मिक रहस्य",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/ganesha-first-worshipped-reason.svg"
+  },
+  {
+    "id": "15",
+    "slug": "hanuman-ashtasiddhi-powers",
+    "title": "हनुमान जी की अष्टसिद्धि और नौ निधियाँ: अर्थ, पौराणिक कथाएँ और वैज्ञानिक विश्लेषण",
+    "theme": "rama",
+    "imageUrl": "/dharma-images/hanuman-ashtasiddhi-powers.svg"
+  },
+  {
+    "id": "16",
+    "slug": "krishna-16-kalas-secrets",
+    "title": "श्री कृष्ण की 16 कलाएँ: अर्थ, रहस्य और सोलह कलाओं का आध्यात्मिक व व्यावहारिक महत्व",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/krishna-16-kalas-secrets.svg"
+  },
+  {
+    "id": "17",
+    "slug": "swastika-sign-science-spirituality",
+    "title": "स्वास्तिक चिह्न का वैज्ञानिक और आध्यात्मिक रहस्य: अर्थ, महत्व और सकारात्मक ऊर्जा का स्रोत",
+    "theme": "ritual",
+    "imageUrl": "/dharma-images/swastika-sign-science-spirituality.svg"
+  },
+  {
+    "id": "18",
+    "slug": "blowing-shankh-health-benefits",
+    "title": "शंख बजाने के स्वास्थ्य और आध्यात्मिक लाभ: वैज्ञानिक विश्लेषण और महत्व",
+    "theme": "ritual",
+    "imageUrl": "/dharma-images/blowing-shankh-health-benefits.svg"
+  },
+  {
+    "id": "19",
+    "slug": "tulsi-plant-importance-ayurveda",
+    "title": "तुलसी का आध्यात्मिक महत्व और आयुर्वेद में उपयोग: वैज्ञानिक कारण और स्वास्थ्य लाभ",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/tulsi-plant-importance-ayurveda.svg"
+  },
+  {
+    "id": "20",
+    "slug": "om-sound-meditation-effects",
+    "title": "ॐ (ओम) ध्वनि का उच्चारण और ध्यान: वैज्ञानिक रहस्य, महत्व और शारीरिक व मानसिक लाभ",
+    "theme": "yoga",
+    "imageUrl": "/dharma-images/om-sound-meditation-effects.svg"
+  },
+  {
+    "id": "21",
+    "slug": "surya-dev-arghya-science",
+    "title": "सूर्य देव को अर्घ्य देने का वैज्ञानिक और आध्यात्मिक महत्व: सही विधि और स्वास्थ्य लाभ",
+    "theme": "ritual",
+    "imageUrl": "/dharma-images/surya-dev-arghya-science.svg"
+  },
+  {
+    "id": "22",
+    "slug": "gayatri-mantra-meaning-benefits",
+    "title": "गायत्री मंत्र का अर्थ, वैज्ञानिक रहस्य और अद्भुत लाभ: मानसिक और शारीरिक विकास की कुंजी",
+    "theme": "ritual",
+    "imageUrl": "/dharma-images/gayatri-mantra-meaning-benefits.svg"
+  },
+  {
+    "id": "23",
+    "slug": "ganga-river-history-sacredness",
+    "title": "गंगा नदी का इतिहास, पौराणिक कथाएँ और वैज्ञानिक रहस्य: क्यों कभी सड़ता नहीं गंगाजल?",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/ganga-river-history-sacredness.svg"
+  },
+  {
+    "id": "24",
+    "slug": "kartikeya-murugan-worship-south",
+    "title": "भगवान कार्तिकेय (मुरुगन) की पूजा और महत्व: कथाएँ, रहस्य और दक्षिण भारत में आस्था",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/kartikeya-murugan-worship-south.svg"
+  },
+  {
+    "id": "25",
+    "slug": "laxmi-krupa-wealth-remedies",
+    "title": "लक्ष्मी कृपा और धन प्राप्ति के शास्त्रोक्त उपाय: धार्मिक नियम, वास्तु शास्त्र और वैज्ञानिक दृष्टिकोण",
+    "theme": "devi",
+    "imageUrl": "/dharma-images/laxmi-krupa-wealth-remedies.svg"
+  },
+  {
+    "id": "26",
+    "slug": "saraswati-education-wisdom-importance",
+    "title": "मां सरस्वती और विद्या का महत्व: स्वरूप का आध्यात्मिक रहस्य, मंत्र और बुद्धि विकास के वैज्ञानिक उपाय",
+    "theme": "devi",
+    "imageUrl": "/dharma-images/saraswati-education-wisdom-importance.svg"
+  },
+  {
+    "id": "27",
+    "slug": "kaal-bhairav-sadhan-importance",
+    "title": "काल भैरव साधना और महत्व: रहस्य, पौराणिक कथाएँ और भय-संकट मुक्ति के अचूक उपाय",
+    "theme": "shiva",
+    "imageUrl": "/dharma-images/kaal-bhairav-sadhan-importance.svg"
+  },
+  {
+    "id": "28",
+    "slug": "ardhanarishvara-concept-philosophy",
+    "title": "अर्धनारीश्वर: शिव-शक्ति की अवधारणा, दार्शनिक महत्व और स्त्री-पुरुष समानता का प्राचीन संदेश",
+    "theme": "shiva",
+    "imageUrl": "/dharma-images/ardhanarishvara-concept-philosophy.svg"
+  },
+  {
+    "id": "29",
+    "slug": "sheshnag-kshir-sagar-secrets",
+    "title": "शेषनाग और क्षीर सागर का आध्यात्मिक रहस्य: पौराणिक कथाएँ, महत्व और दार्शनिक संकेत",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/sheshnag-kshir-sagar-secrets.svg"
+  },
+  {
+    "id": "30",
+    "slug": "tridev-brahma-vishnu-mahesh-roles",
+    "title": "त्रिदेव (ब्रह्मा, विष्णु और महेश) की भूमिकाएँ: पौराणिक कथाएँ, दार्शनिक आधार और ब्रह्मांडीय नियम",
+    "theme": "shiva",
+    "imageUrl": "/dharma-images/tridev-brahma-vishnu-mahesh-roles.svg"
+  },
+  {
+    "id": "31",
+    "slug": "ramayana-10-life-lessons",
+    "title": "रामायण से सीखे जाने वाले 10 प्रमुख जीवन मूल्य: आधुनिक युग के लिए मार्गदर्शक और दार्शनिक सूत्र",
+    "theme": "rama",
+    "imageUrl": "/dharma-images/ramayana-10-life-lessons.svg"
+  },
+  {
+    "id": "32",
+    "slug": "mahabharata-war-untold-lessons",
+    "title": "महाभारत के युद्ध के अनसुने पहलू और आधुनिक जीवन के लिए 10 सबक: कूटनीति, संबंध प्रबंधन और धर्म-अधर्म का विश्लेषण",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/mahabharata-war-untold-lessons.svg"
+  },
+  {
+    "id": "33",
+    "slug": "shrimad-bhagavata-purana-intro",
+    "title": "श्रीमद्भागवत महापुराण: भक्ति का महासागर, श्री कृष्ण की लीलाएँ और मोक्ष प्राप्ति का सरल मार्ग",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/shrimad-bhagavata-purana-intro.svg"
+  },
+  {
+    "id": "34",
+    "slug": "shiva-purana-life-secrets",
+    "title": "शिव पुराण से जानें जीवन के 5 गहरे और कल्याणकारी रहस्य: पंचाक्षरी मंत्र, भस्म और रुद्राक्ष का विज्ञान",
+    "theme": "shiva",
+    "imageUrl": "/dharma-images/shiva-purana-life-secrets.svg"
+  },
+  {
+    "id": "35",
+    "slug": "garuda-purana-death-afterlife",
+    "title": "गरुड़ पुराण: मृत्यु का रहस्य, यमलोक की यात्रा, कर्मफल और उसके बाद का शाश्वत सत्य",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/garuda-purana-death-afterlife.svg"
+  },
+  {
+    "id": "36",
+    "slug": "yoga-vasistha-ram-vasistha-dialogue",
+    "title": "योग वासिष्ठ: श्री राम और महर्षि वशिष्ठ का अद्भुत ज्ञान संवाद, अद्वैत दर्शन और मन की शक्ति का रहस्य",
+    "theme": "devi",
+    "imageUrl": "/dharma-images/yoga-vasistha-ram-vasistha-dialogue.svg"
+  },
+  {
+    "id": "37",
+    "slug": "manusmriti-ancient-rules-society",
+    "title": "मनुस्मृति: प्राचीन भारतीय सामाजिक व्यवस्था, राजधर्म, न्याय संहिता और नैतिक सिद्धांतों का यथार्थ विश्लेषण",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/manusmriti-ancient-rules-society.svg"
+  },
+  {
+    "id": "38",
+    "slug": "chanakya-neeti-15-key-rules",
+    "title": "चाणक्य नीति: जीवन, करियर और सफलता के 15 अचूक मार्गदर्शक सूत्र: व्यावहारिक नीति और कूटनीति का सार",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/chanakya-neeti-15-key-rules.svg"
+  },
+  {
+    "id": "39",
+    "slug": "ashtavakra-gita-advaita-wisdom",
+    "title": "अष्टावक्र गीता: परम ज्ञान, अद्वैत दर्शन और मानसिक मुक्ति की क्रांतिकारी कुंजी: राजा जनक और अष्टावक्र मुनि का संवाद",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/ashtavakra-gita-advaita-wisdom.svg"
+  },
+  {
+    "id": "40",
+    "slug": "vishnu-sahasranama-chanting-benefits",
+    "title": "विष्णु सहस्रनाम: भगवान विष्णु के 1000 पवित्र नामों का पाठ करने के चमत्कारी लाभ और वैज्ञानिक महत्व",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/vishnu-sahasranama-chanting-benefits.svg"
+  },
+  {
+    "id": "41",
+    "slug": "lalitha-sahasranama-shri-vidya-sadhana",
+    "title": "ललिता सहस्रनाम: त्रिपुर सुंदरी की महिमा, श्री विद्या साधना का रहस्य और चमत्कारी लाभ",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/lalitha-sahasranama-shri-vidya-sadhana.svg"
+  },
+  {
+    "id": "42",
+    "slug": "durga-saptashati-devi-mahatmya-importance",
+    "title": "दुर्गा सप्तशती: देवी महात्म्य का आध्यात्मिक रहस्य, 700 श्लोकों का वैज्ञानिक महत्व और नवरात्रि पाठ विधि",
+    "theme": "devi",
+    "imageUrl": "/dharma-images/durga-saptashati-devi-mahatmya-importance.svg"
+  },
+  {
+    "id": "43",
+    "slug": "valmiki-ramayana-vs-ramcharitmanas",
+    "title": "वाल्मीकि रामायण और रामचरितमानस में अंतर: भाषा, पात्रों का चित्रण, लक्ष्मण रेखा और सीता हरण के 5 मुख्य रहस्यों का तुलनात्मक विश्लेषण",
+    "theme": "rama",
+    "imageUrl": "/dharma-images/valmiki-ramayana-vs-ramcharitmanas.svg"
+  },
+  {
+    "id": "44",
+    "slug": "narada-bhakti-sutra-divine-love",
+    "title": "नारद भक्ति सूत्र: देवर्षि नारद के 84 सूत्रों का रहस्य, भक्ति की परिभाषा और परम प्रेम का व्यावहारिक मार्ग",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/narada-bhakti-sutra-divine-love.svg"
+  },
+  {
+    "id": "45",
+    "slug": "brahma-sutras-upanishads-essence",
+    "title": "ब्रह्म सूत्र: उपनिषदों के ज्ञान का तार्किक और दार्शनिक सार: प्रस्थानत्रयी, ब्रह्म जिज्ञासा और वेदान्त दर्शन का रहस्य",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/brahma-sutras-upanishads-essence.svg"
+  },
+  {
+    "id": "46",
+    "slug": "patanjali-yoga-sutras-introduction",
+    "title": "पातंजल योग सूत्र: अष्टांग योग, चित्त वृत्ति निरोध और मन पर विजय पाने का वैज्ञानिक मार्ग",
+    "theme": "yoga",
+    "imageUrl": "/dharma-images/patanjali-yoga-sutras-introduction.svg"
+  },
+  {
+    "id": "47",
+    "slug": "agni-purana-encyclopedia-knowledge",
+    "title": "अग्नि पुराण: प्राचीन भारत का ज्ञानकोश (Encyclopedia): आयुर्वेद, धनुर्वेद, वास्तुशास्त्र और खगोल विज्ञान का खजाना",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/agni-purana-encyclopedia-knowledge.svg"
+  },
+  {
+    "id": "48",
+    "slug": "markandeya-purana-mahamrityunjaya-story",
+    "title": "मार्कंडेय पुराण: महामृत्युंजय मंत्र की चमत्कारी कथा, ऋषि मार्कंडेय की यमराज पर विजय और अकाल मृत्यु निवारण का रहस्य",
+    "theme": "shiva",
+    "imageUrl": "/dharma-images/markandeya-purana-mahamrityunjaya-story.svg"
+  },
+  {
+    "id": "49",
+    "slug": "skanda-purana-pilgrimage-sites",
+    "title": "स्कंद पुराण: सबसे विशाल पुराण, भारत के पवित्र तीर्थ स्थल, काशी, केदारनाथ और पुरी की महिमा",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/skanda-purana-pilgrimage-sites.svg"
+  },
+  {
+    "id": "50",
+    "slug": "smriti-granthas-sages-importance",
+    "title": "स्मृति ग्रंथ क्या हैं? श्रुति (वेद) और स्मृति में मुख्य अंतर, कलयुग के नियम और सनातन धर्म की लचीली व्यवस्था",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/smriti-granthas-sages-importance.svg"
+  },
+  {
+    "id": "51",
+    "slug": "four-purusharthas-dharma-artha-kama-moksha",
+    "title": "जीवन के चार पुरुषार्थ: धर्म, अर्थ, काम और मोक्ष का संतुलन, जीवन का वास्तविक उद्देश्य और प्राचीन सनातन मार्ग",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/four-purusharthas-dharma-artha-kama-moksha.svg"
+  },
+  {
+    "id": "52",
+    "slug": "four-ashramas-brahmacharya-grihastha",
+    "title": "चार आश्रम व्यवस्था: ब्रह्मचर्य, गृहस्थ, वानप्रस्थ और संन्यास का वैज्ञानिक विभाजन, जीवन का अनुशासन और महत्व",
+    "theme": "rama",
+    "imageUrl": "/dharma-images/four-ashramas-brahmacharya-grihastha.svg"
+  },
+  {
+    "id": "53",
+    "slug": "reincarnation-karma-soul-journey",
+    "title": "पुनर्जन्म का सिद्धांत: आत्मा का सनातन सफर, कर्म बंधन और पिछले जन्म की यादों का वैज्ञानिक दृष्टिकोण",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/reincarnation-karma-soul-journey.svg"
+  },
+  {
+    "id": "54",
+    "slug": "what-is-maya-adi-shankara-philosophy",
+    "title": "माया क्या है? आदि शंकराचार्य का अद्वैत वेदांत, भ्रम का सिद्धांत और रस्सी-साँप का प्रसिद्ध दार्शनिक उदाहरण",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/what-is-maya-adi-shankara-philosophy.svg"
+  },
+  {
+    "id": "55",
+    "slug": "advaita-vs-dvaita-vedanta-difference",
+    "title": "अद्वैत और द्वैत वेदांत में मुख्य अंतर: आत्मा, परमात्मा और प्रकृति का संबंध, शंकराचार्य बनाम मध्वाचार्य दर्शन की समीक्षा",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/advaita-vs-dvaita-vedanta-difference.svg"
+  },
+  {
+    "id": "56",
+    "slug": "kundalini-awakening-seven-chakras-secrets",
+    "title": "कुंडलिनी जागरण: सात चक्र, नाड़ी तंत्र और रीढ़ की हड्डी में छिपी अलौकिक शक्ति का यौगिक विज्ञान",
+    "theme": "devi",
+    "imageUrl": "/dharma-images/kundalini-awakening-seven-chakras-secrets.svg"
+  },
+  {
+    "id": "57",
+    "slug": "seven-chakras-activation-yoga-meditation",
+    "title": "शरीर के 7 चक्र: उनके नाम, स्थिति, बीज मंत्र, सक्रिय करने के यौगिक तरीके और मानसिक व शारीरिक लाभ",
+    "theme": "yoga",
+    "imageUrl": "/dharma-images/seven-chakras-activation-yoga-meditation.svg"
+  },
+  {
+    "id": "58",
+    "slug": "bhakity-yoga-navadha-bhakti-meaning",
+    "title": "नवधा भक्ति: श्री राम द्वारा शबरी को दिए गए भक्ति के 9 सोपान, रामचरितमानस का दिव्य उपदेश और व्यावहारिक अर्थ",
+    "theme": "rama",
+    "imageUrl": "/dharma-images/bhakity-yoga-navadha-bhakti-meaning.svg"
+  },
+  {
+    "id": "59",
+    "slug": "gyan-yoga-attainment-of-god",
+    "title": "ज्ञान योग क्या है? विवेक और बुद्धि से सत्य की खोज, साधन चतुष्टय, श्रवण-मनन-निदिध्यासन और मोक्ष का वेदांतिक मार्ग",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/gyan-yoga-attainment-of-god.svg"
+  },
+  {
+    "id": "60",
+    "slug": "ancient-hindu-meditation-techniques",
+    "title": "प्राचीन हिंदू ध्यान विधियाँ: प्राणायाम, त्राटक, मंत्र जप और निराकार ध्यान का व्यावहारिक व वैज्ञानिक मार्गदर्शक",
+    "theme": "yoga",
+    "imageUrl": "/dharma-images/ancient-hindu-meditation-techniques.svg"
+  },
+  {
+    "id": "61",
+    "slug": "panch-mahabhuta-five-elements-body",
+    "title": "पंचमहाभूत क्या हैं? सृष्टि के पांच तत्व, आयुर्वेद के त्रिदोष (वात, पित्त, कफ) और मानव शरीर का दार्शनिक संबंध",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/panch-mahabhuta-five-elements-body.svg"
+  },
+  {
+    "id": "62",
+    "slug": "three-gunas-sattva-rajas-tamas-mind",
+    "title": "त्रिगुण विज्ञान: सत्त्व, रजस और तमस गुण, मनुष्य का स्वभाव, आहार-व्यवहार और गुणातीत बनने का भगवद गीता का मार्ग",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/three-gunas-sattva-rajas-tamas-mind.svg"
+  },
+  {
+    "id": "63",
+    "slug": "concept-of-brahman-hindu-philosophy",
+    "title": "ब्रह्म (Brahman) क्या है? हिंदू दर्शन में निराकार ईश्वर, सच्चिदानंद स्वरूप, और उपनिषदों की गूढ़ दार्शनिक व्याख्या",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/concept-of-brahman-hindu-philosophy.svg"
+  },
+  {
+    "id": "64",
+    "slug": "jivatma-paramatma-relationship-soul",
+    "title": "जीवात्मा और परमात्मा का संबंध: मुंडक उपनिषद के दो पक्षियों का प्रसिद्ध रूपक और हमारी चेतना के दो स्तर",
+    "theme": "rama",
+    "imageUrl": "/dharma-images/jivatma-paramatma-relationship-soul.svg"
+  },
+  {
+    "id": "65",
+    "slug": "prarabdha-sanchita-kriyaman-karma-types",
+    "title": "कर्म के तीन प्रकार: संचित, प्रारब्ध और क्रियमाण कर्म, भाग्य बनाम पुरुषार्थ का वैज्ञानिक व यौगिक विवेचन",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/prarabdha-sanchita-kriyaman-karma-types.svg"
+  },
+  {
+    "id": "66",
+    "slug": "vairagya-detachment-spiritual-growth",
+    "title": "वैराग्य क्या है? अनासक्त भाव से संसार में जीने की कला, राजा जनक का उदाहरण और आधुनिक जीवन में वैराग्य का महत्व",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/vairagya-detachment-spiritual-growth.svg"
+  },
+  {
+    "id": "67",
+    "slug": "importance-of-guru-spiritual-path",
+    "title": "गुरु का महत्व: अज्ञान के अंधकार से आत्मज्ञान के प्रकाश की ओर, गुरु-शिष्य परंपरा और कबीर व आदि शंकराचार्य का दृष्टिकोण",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/importance-of-guru-spiritual-path.svg"
+  },
+  {
+    "id": "68",
+    "slug": "satsang-benefits-spiritual-company",
+    "title": "सत्संग का महत्व: जीवन बदलने वाली अच्छी संगति की शक्ति, विचारों का शुद्धिकरण और रामचरितमानस में सत्संग की महिमा",
+    "theme": "devi",
+    "imageUrl": "/dharma-images/satsang-benefits-spiritual-company.svg"
+  },
+  {
+    "id": "69",
+    "slug": "mauna-silence-meditation-benefits",
+    "title": "मौन साधना: शांत रहने का वैज्ञानिक व आध्यात्मिक महत्व, वाणी का तप, प्राण ऊर्जा का संरक्षण और व्यावहारिक मौन व्रत विधि",
+    "theme": "yoga",
+    "imageUrl": "/dharma-images/mauna-silence-meditation-benefits.svg"
+  },
+  {
+    "id": "70",
+    "slug": "saguna-nirguna-brahman-forms",
+    "title": "सगुण और निर्गुण ईश्वर: साकार बनाम निराकार भक्ति, हिंदू पूजा पद्धतियों का दार्शनिक आधार और रामचरितमानस में समन्वय",
+    "theme": "rama",
+    "imageUrl": "/dharma-images/saguna-nirguna-brahman-forms.svg"
+  },
+  {
+    "id": "71",
+    "slug": "char-dham-yatra-four-holy-shrines",
+    "title": "चार धाम यात्रा: सनातन धर्म के चार सबसे पवित्र धामों का इतिहास और महत्व",
+    "theme": "temple",
+    "imageUrl": "/dharma-images/char-dham-yatra-four-holy-shrines.svg"
+  },
+  {
+    "id": "72",
+    "slug": "chota-char-dham-uttarakhand-yatra",
+    "title": "छोटा चार धाम यात्रा (उत्तराखंड): केदारनाथ, बद्रीनाथ, गंगोत्री और यमुनोत्री का गाइड",
+    "theme": "temple",
+    "imageUrl": "/dharma-images/chota-char-dham-uttarakhand-yatra.svg"
+  },
+  {
+    "id": "73",
+    "slug": "kumbh-mela-spiritual-gathering-science",
+    "title": "कुंभ मेला: दुनिया का सबसे बड़ा शांतिपूर्ण जन-आंदोलन और खगोलीय विज्ञान",
+    "theme": "temple",
+    "imageUrl": "/dharma-images/kumbh-mela-spiritual-gathering-science.svg"
+  },
+  {
+    "id": "74",
+    "slug": "sapta-puri-seven-sacred-cities-moksha",
+    "title": "सप्त पुरियाँ: मोक्ष प्रदान करने वाली भारत की सात सबसे पवित्र नगरियाँ",
+    "theme": "temple",
+    "imageUrl": "/dharma-images/sapta-puri-seven-sacred-cities-moksha.svg"
+  },
+  {
+    "id": "75",
+    "slug": "51-shaktipeethas-origin-story-shakti",
+    "title": "51 शक्तिपीठ: माता सती के अंगों के गिरने की पौराणिक कथा और महत्व",
+    "theme": "devi",
+    "imageUrl": "/dharma-images/51-shaktipeethas-origin-story-shakti.svg"
+  },
+  {
+    "id": "76",
+    "slug": "kashi-varanasi-spiritual-history-mysteries",
+    "title": "काशी (वाराणसी) का रहस्य: भगवान शिव के त्रिशूल पर बसी पावन नगरी",
+    "theme": "shiva",
+    "imageUrl": "/dharma-images/kashi-varanasi-spiritual-history-mysteries.svg"
+  },
+  {
+    "id": "77",
+    "slug": "kailash-mansarovar-yatra-secrets",
+    "title": "कैलाश मानसरोवर यात्रा: भगवान शिव के निवास स्थान के अनसुलझे रहस्य",
+    "theme": "shiva",
+    "imageUrl": "/dharma-images/kailash-mansarovar-yatra-secrets.svg"
+  },
+  {
+    "id": "78",
+    "slug": "vaishno-devi-temple-history-story",
+    "title": "वैष्णो देवी मंदिर: त्रिकुटा पर्वत पर बसी माता वैष्णवी की अमर गाथा",
+    "theme": "devi",
+    "imageUrl": "/dharma-images/vaishno-devi-temple-history-story.svg"
+  },
+  {
+    "id": "79",
+    "slug": "tirupati-balaji-temple-history-miracles",
+    "title": "तिरुपति बालाजी मंदिर: भगवान वेंकटेश्वर के चमत्कार और बालों के दान का रहस्य",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/tirupati-balaji-temple-history-miracles.svg"
+  },
+  {
+    "id": "80",
+    "slug": "jagannath-puri-rath-yatra-mysteries",
+    "title": "जगन्नाथ पुरी: रथ यात्रा और इस भव्य मंदिर के 5 अनसुलझे चमत्कार",
+    "theme": "temple",
+    "imageUrl": "/dharma-images/jagannath-puri-rath-yatra-mysteries.svg"
+  },
+  {
+    "id": "81",
+    "slug": "amarnath-cave-ice-lingam-secrets",
+    "title": "अमरनाथ गुफा: प्राकृतिक हिमलिंग की कथा और कबूतरों का रहस्य",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/amarnath-cave-ice-lingam-secrets.svg"
+  },
+  {
+    "id": "82",
+    "slug": "somnath-temple-history-reconstruction",
+    "title": "सोमनाथ मंदिर: 17 बार टूटने और पुनः उठ खड़े होने की गौरवशाली गाथा",
+    "theme": "yoga",
+    "imageUrl": "/dharma-images/somnath-temple-history-reconstruction.svg"
+  },
+  {
+    "id": "83",
+    "slug": "narmada-parikrama-yatra-rules-benefits",
+    "title": "नर्मदा परिक्रमा: भारत की एकमात्र नदी जिसकी की जाती है पूरी परिक्रमा",
+    "theme": "rama",
+    "imageUrl": "/dharma-images/narmada-parikrama-yatra-rules-benefits.svg"
+  },
+  {
+    "id": "84",
+    "slug": "prayagraj-triveni-sangam-kumbh-importance",
+    "title": "प्रयागराज त्रिवेणी संगम: गंगा, यमुना और अदृश्य सरस्वती का पावन मिलन",
+    "theme": "devi",
+    "imageUrl": "/dharma-images/prayagraj-triveni-sangam-kumbh-importance.svg"
+  },
+  {
+    "id": "85",
+    "slug": "vrindavan-mathura-krishna-lila-places",
+    "title": "वृंदावन और मथुरा: भगवान कृष्ण की बाल-लीलाओं और प्रेम की पावन भूमि",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/vrindavan-mathura-krishna-lila-places.svg"
+  },
+  {
+    "id": "86",
+    "slug": "kurukshetra-mahabharata-warplace-history",
+    "title": "कुरुक्षेत्र: महाभारत की युद्धभूमि और श्रीमद्भगवद गीता के प्राकट्य का स्थान",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/kurukshetra-mahabharata-warplace-history.svg"
+  },
+  {
+    "id": "87",
+    "slug": "south-indian-temples-dravidian-architecture",
+    "title": "दक्षिण भारत के मंदिर और द्रविड़ वास्तुकला (Dravidian Architecture) का विज्ञान",
+    "theme": "temple",
+    "imageUrl": "/dharma-images/south-indian-temples-dravidian-architecture.svg"
+  },
+  {
+    "id": "88",
+    "slug": "sacred-rivers-india-dharma-significance",
+    "title": "भारत की नदियाँ: सनातन संस्कृति में नदियों को माता का दर्जा क्यों?",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/sacred-rivers-india-dharma-significance.svg"
+  },
+  {
+    "id": "89",
+    "slug": "kanwar-yatra-tradition-spiritual-science",
+    "title": "कांवड़ यात्रा: सावन मास में जल लाने की परंपरा और इसका शारीरिक विज्ञान",
+    "theme": "temple",
+    "imageUrl": "/dharma-images/kanwar-yatra-tradition-spiritual-science.svg"
+  },
+  {
+    "id": "90",
+    "slug": "navagraha-temples-astrology-planetary-effects",
+    "title": "नवग्रह मंदिर और ज्योतिष विज्ञान: ग्रहों की ऊर्जा का हमारे जीवन पर प्रभाव",
+    "theme": "temple",
+    "imageUrl": "/dharma-images/navagraha-temples-astrology-planetary-effects.svg"
+  },
+  {
+    "id": "91",
+    "slug": "science-behind-hindu-rituals-practices",
+    "title": "हिंदू रीति-रिवाजों के पीछे का विज्ञान: नमस्ते करने से लेकर तिलक लगाने तक",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/science-behind-hindu-rituals-practices.svg"
+  },
+  {
+    "id": "92",
+    "slug": "ayurveda-ancient-indian-medical-science",
+    "title": "आयुर्वेद: जीवन का विज्ञान और संपूर्ण स्वास्थ्य की प्राचीन भारतीय पद्धति",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/ayurveda-ancient-indian-medical-science.svg"
+  },
+  {
+    "id": "93",
+    "slug": "vastu-shastra-tips-home-prosperity",
+    "title": "वास्तु शास्त्र: दिशाओं का विज्ञान और घर में सुख-समृद्धि बढ़ाने के सरल नियम",
+    "theme": "yoga",
+    "imageUrl": "/dharma-images/vastu-shastra-tips-home-prosperity.svg"
+  },
+  {
+    "id": "94",
+    "slug": "yajna-havan-scientific-environmental-effects",
+    "title": "यज्ञ और हवन का विज्ञान: पर्यावरण शुद्धि और मानसिक स्वास्थ्य पर प्रभाव",
+    "theme": "ritual",
+    "imageUrl": "/dharma-images/yajna-havan-scientific-environmental-effects.svg"
+  },
+  {
+    "id": "95",
+    "slug": "scientific-benefits-of-fasting-vrat",
+    "title": "उपवास (व्रत): श्रद्धा और शारीरिक शुद्धिकरण (Autophagy) का विज्ञान",
+    "theme": "ritual",
+    "imageUrl": "/dharma-images/scientific-benefits-of-fasting-vrat.svg"
+  },
+  {
+    "id": "96",
+    "slug": "science-of-keeping-shikha-hair-tuft",
+    "title": "शिखा (चोटी) रखने का वैज्ञानिक महत्व: बुद्धि और ऊर्जा का नियंत्रण केंद्र",
+    "theme": "ritual",
+    "imageUrl": "/dharma-images/science-of-keeping-shikha-hair-tuft.svg"
+  },
+  {
+    "id": "97",
+    "slug": "janeu-yagnopaveet-scientific-health-reasons",
+    "title": "जनेऊ (यज्ञोपवीत) धारण करने का वैज्ञानिक कारण और स्वास्थ्य लाभ",
+    "theme": "ritual",
+    "imageUrl": "/dharma-images/janeu-yagnopaveet-scientific-health-reasons.svg"
+  },
+  {
+    "id": "98",
+    "slug": "charan-sparsh-feet-touching-science-energy",
+    "title": "चरण स्पर्श (पैर छूना): बड़ों के पैर छूने का वैज्ञानिक और ऊर्जा प्रवाह विज्ञान",
+    "theme": "ritual",
+    "imageUrl": "/dharma-images/charan-sparsh-feet-touching-science-energy.svg"
+  },
+  {
+    "id": "99",
+    "slug": "adi-shankaracharya-life-advaita-revival",
+    "title": "आदि शंकराचार्य: सनातन धर्म के महान पुनरुद्धारक और अद्वैत वेदांत के प्रणेता",
+    "theme": "veda",
+    "imageUrl": "/dharma-images/adi-shankaracharya-life-advaita-revival.svg"
+  },
+  {
+    "id": "100",
+    "slug": "swami-vivekananda-chicago-speech-impact",
+    "title": "स्वामी विवेकानंद का शिकागो भाषण: जब हिंदू दर्शन ने पूरी दुनिया को मंत्रमुग्ध कर दिया",
+    "theme": "temple",
+    "imageUrl": "/dharma-images/swami-vivekananda-chicago-speech-impact.svg"
+  },
+  {
+    "id": "101",
+    "slug": "dayanand-saraswati-arya-samaj-contribution",
+    "title": "महर्षि दयानंद सरस्वती: 'वेदों की ओर लौटो' का नारा और आर्य समाज की स्थापना",
+    "theme": "devi",
+    "imageUrl": "/dharma-images/dayanand-saraswati-arya-samaj-contribution.svg"
+  },
+  {
+    "id": "102",
+    "slug": "kabir-das-couplets-social-reform-dharma",
+    "title": "कबीरदास के दोहे: सामाजिक पाखंड पर प्रहार और निराकार भक्ति का संदेश",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/kabir-das-couplets-social-reform-dharma.svg"
+  },
+  {
+    "id": "103",
+    "slug": "goswami-tulsidas-life-rambhakti-literature",
+    "title": "गोस्वामी तुलसीदास: रामचरितमानस की रचना और भक्ति काल का स्वर्ण युग",
+    "theme": "rama",
+    "imageUrl": "/dharma-images/goswami-tulsidas-life-rambhakti-literature.svg"
+  },
+  {
+    "id": "104",
+    "slug": "mirabai-krishna-bhakti-songs-devotion",
+    "title": "मीराबाई: प्रेम और समर्पण की प्रतिमूर्ति तथा उनकी अनन्य कृष्ण भक्ति",
+    "theme": "vishnu",
+    "imageUrl": "/dharma-images/mirabai-krishna-bhakti-songs-devotion.svg"
+  },
+  {
+    "id": "105",
+    "slug": "chaitanya-mahaprabhu-sankirtan-movement-love",
+    "title": "चैतन्य महाप्रभु: संकीर्तन आंदोलन के जनक और गौड़ीय वैष्णव संप्रदाय",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/chaitanya-mahaprabhu-sankirtan-movement-love.svg"
+  },
+  {
+    "id": "106",
+    "slug": "paramahansa-yogananda-autobiography-yogi",
+    "title": "स्वामी परमहंस योगानंद: पश्चिम में क्रिया योग का प्रसार और उनकी प्रसिद्ध पुस्तक",
+    "theme": "rama",
+    "imageUrl": "/dharma-images/paramahansa-yogananda-autobiography-yogi.svg"
+  },
+  {
+    "id": "107",
+    "slug": "ramana-maharshi-self-inquiry-who-am-i",
+    "title": "रमण महर्षि: 'मैं कौन हूँ?' (Self-Inquiry) आत्म-खोज की सरल और गहन विधि",
+    "theme": "rama",
+    "imageUrl": "/dharma-images/ramana-maharshi-self-inquiry-who-am-i.svg"
+  },
+  {
+    "id": "108",
+    "slug": "hindu-lifestyle-environmental-protection-nature",
+    "title": "हिंदू जीवन शैली और पर्यावरण संरक्षण: प्रकृति को पूजने का विज्ञान",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/hindu-lifestyle-environmental-protection-nature.svg"
+  },
+  {
+    "id": "109",
+    "slug": "vegetarianism-spiritual-health-benefits-science",
+    "title": "शाकाहार: आध्यात्मिक उन्नति और उत्तम स्वास्थ्य का वैज्ञानिक मार्ग",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/vegetarianism-spiritual-health-benefits-science.svg"
+  },
+  {
+    "id": "110",
+    "slug": "global-appeal-sanatan-dharma-modern-world",
+    "title": "आधुनिक युग में सनातन धर्म का वैश्विक आकर्षण: क्यों बदल रही है दुनिया की सोच?",
+    "theme": "philosophy",
+    "imageUrl": "/dharma-images/global-appeal-sanatan-dharma-modern-world.svg"
+  }
+]

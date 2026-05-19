@@ -35,6 +35,8 @@ import BlogListing from "./pages/BlogListing";
 import BlogDetail from "./pages/BlogDetail";
 import AppDownload from "./pages/AppDownload";
 import PublicTree from "./pages/PublicTree";
+import DharmaListing from "./pages/DharmaListing";
+import DharmaDetail from "./pages/DharmaDetail";
 import Messages from "./pages/Messages";
 import Kundali from "./pages/Kundali";
 import VanshMitra from "./pages/VanshMitra";
@@ -63,6 +65,8 @@ const App = () => (
               <Route path="/update/:id" element={<SingleUpdate />} />
               <Route path="/blog" element={<BlogListing />} />
               <Route path="/blog/:slug" element={<BlogDetail />} />
+              <Route path="/dharma" element={<DharmaListing />} />
+              <Route path="/dharma/:slug" element={<DharmaDetail />} />
               <Route path="/app" element={<AppDownload />} />
               <Route path="/shared-tree/:token" element={<PublicTree />} />
 
