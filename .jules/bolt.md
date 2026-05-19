@@ -1,3 +1,5 @@
 ## 2024-05-16 - [React.memo in Recursive Tree Components]
 **Learning:** Highly recursive components like `TreeNode` in family tree visualizations suffer from catastrophic cascading re-renders if parent state changes (e.g., opening a dialog).
-**Action:** Always wrap recursive visual components in `React.memo()` and ensure handlers passed down to them are wrapped in `useCallback` to prevent deep reconciliation cycles.
+**Action:** Always wrap recursive visual components in `React.memo()` and ensure handlers passed down to them are wrapped in `useCallback` to prevent deep reconciliation cycles.## 2024-05-19 - [Batched Profile Info Lookups in Feed Lists to fix N+1 Issues]
+**Learning:** In the feed parsing logic, when resolving profiles for comments stored in JSONB arrays across multiple posts, putting individual batched `.in()` queries inside a `Promise.all` `data.map()` loop creates an N+1 scaling problem (one network query per post fetched, scaled by feed volume).
+**Action:** Always extract distinct relational ID lookups (like comment `profile_id`s) across *all* root data entries into a top-level `Set`, execute a single global `.in()` lookup, and map the lookup synchronously to the underlying data tree.
