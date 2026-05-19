@@ -512,6 +512,33 @@ const Dashboard = () => {
           />
         )}
 
+        <Card className="bg-gradient-to-br from-amber-50/80 via-orange-50/40 to-yellow-50/60 dark:from-amber-950/30 dark:via-orange-950/20 dark:to-yellow-950/30 border-gold/20 shadow-gold overflow-hidden">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-saffron to-gold flex items-center justify-center text-xl shadow-gold">
+                🪷
+              </div>
+              <div>
+                <h4 className="font-display font-bold text-foreground/90">{t('VanshMitra', 'वंशमित्र')}</h4>
+                <p className="text-[10px] text-muted-foreground">{t('AI Vedic Astrologer', 'AI वैदिक ज्योतिषी')}</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+              {t(
+                'Get personalized Vedic predictions, Dasha analysis, and spiritual guidance based on your birth chart.',
+                'अपनी जन्म कुंडली के आधार पर व्यक्तिगत वैदिक भविष्यवाणी, दशा विश्लेषण और आध्यात्मिक मार्गदर्शन प्राप्त करें।',
+              )}
+            </p>
+            <Button
+              size="sm"
+              className="w-full bg-gradient-saffron text-white hover:opacity-90 font-bold shadow-saffron"
+              onClick={() => navigate('/vanshmitra')}
+            >
+              {t('Consult VanshMitra', 'वंशमित्र से परामर्श करें')} ✨
+            </Button>
+          </CardContent>
+        </Card>
+
         <Card className="bg-gradient-to-br from-saffron/10 to-transparent border-none">
           <CardContent className="pt-6">
             <h4 className="font-display font-bold text-saffron-900 mb-2">{t(' Invite Family', 'परिवार को आमंत्रित करें')}</h4>

@@ -36,6 +36,8 @@ import BlogDetail from "./pages/BlogDetail";
 import AppDownload from "./pages/AppDownload";
 import PublicTree from "./pages/PublicTree";
 import Messages from "./pages/Messages";
+import Kundali from "./pages/Kundali";
+import VanshMitra from "./pages/VanshMitra";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -125,6 +127,22 @@ const App = () => (
                     <div className="container mx-auto py-8">
                       <TagManagerWrapper />
                     </div>
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+
+              <Route path="/kundali" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Kundali />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+
+              <Route path="/vanshmitra" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <VanshMitra />
                   </MainLayout>
                 </ProtectedRoute>
               } />

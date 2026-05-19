@@ -11,6 +11,13 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      '/astro-proxy': {
+        target: 'https://vedicpanchanga.com/api',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/astro-proxy/, ''),
+      },
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

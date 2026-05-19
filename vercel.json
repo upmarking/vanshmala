@@ -22,6 +22,10 @@
             "destination": "https://qngfdcbccnguftxzecwq.supabase.co/realtime/v1/:path*"
         },
         {
+            "source": "/astro-proxy/:path*",
+            "destination": "https://vedicpanchanga.com/api/:path*"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }

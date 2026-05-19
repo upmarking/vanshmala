@@ -5,3 +5,10 @@ verify_jwt = false
 
 [functions.ai-tree-optimize]
 verify_jwt = false
+
+[functions.vanshmitra-chat]
+verify_jwt = false
+
+[functions.vanshmitra-live]
+verify_jwt = false
+

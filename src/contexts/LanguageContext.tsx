@@ -3,7 +3,8 @@ import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-type Language = 'en' | 'hi';
+type Language = 
+  | 'en' | 'hi' | 'ta' | 'te' | 'bn' | 'mr' | 'gu' | 'kn' | 'ml' | 'pa' | 'or' | 'as' | 'ur' | 'ar' | 'fa';
 
 interface LanguageContextType {
   language: Language;
@@ -17,8 +18,9 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const { profile, user, refreshProfile } = useAuth();
   const [language, setLanguageState] = useState<Language>(() => {
     // Try to get from localStorage first for immediate results
-    const saved = localStorage.getItem('language');
-    return (saved === 'en' || saved === 'hi') ? saved : 'en';
+    const saved = localStorage.getItem('language') as Language;
+    const validLanguages: Language[] = ['en', 'hi', 'ta', 'te', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa', 'or', 'as', 'ur', 'ar', 'fa'];
+    return validLanguages.includes(saved) ? saved : 'en';
   });
 
   // Sync language with profile when it loads
@@ -56,7 +58,17 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const t = (en: string, hi: string) => (language === 'en' ? en : hi);
+  const t = (en: string, hi: string) => {
+    if (language === 'en') return en;
+    if (language === 'hi') return hi;
+    
+    // For other Indian languages, default to Hindi as it's more likely to be understood
+    const indianLangs: Language[] = ['ta', 'te', 'bn', 'mr', 'gu', 'kn', 'ml', 'pa', 'or', 'as', 'ur'];
+    if (indianLangs.includes(language)) return hi;
+    
+    // Default to English for others (ar, fa)
+    return en;
+  };
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>

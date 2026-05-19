@@ -2,7 +2,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import LanguageToggle from './LanguageToggle';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { User, LogOut, Settings, TreePine, Archive, ChevronDown, Gift, MessageSquare, Wallet, IdCard, Copy } from 'lucide-react';
+import { User, LogOut, Settings, TreePine, Archive, ChevronDown, Gift, MessageSquare, Wallet, IdCard, Copy, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
@@ -120,6 +120,18 @@ const Navbar = () => {
                 {t('Legacy Vault', 'विरासत तिजोरी')}
               </Link>
               <Link
+                to="/vanshmitra"
+                className={`hover:text-accent transition-colors ${isActive('/vanshmitra') ? "text-saffron font-bold" : ""}`}
+              >
+                {t('VanshMitra', 'वंशमित्र')}
+              </Link>
+              <Link
+                to="/kundali"
+                className={`hover:text-accent transition-colors ${isActive('/kundali') ? "text-saffron font-bold" : ""}`}
+              >
+                {t('Kundali', 'कुंडली')}
+              </Link>
+              <Link
                 to="/refer"
                 className={`hover:text-accent transition-colors ${isActive('/refer') ? "text-saffron font-bold" : ""}`}
               >
@@ -207,6 +219,14 @@ const Navbar = () => {
                 <DropdownMenuItem onClick={() => navigate('/refer')} className={isActive('/refer') ? "text-saffron font-bold" : ""}>
                   <Gift className="mr-2 h-4 w-4" />
                   <span>{t('Refer & Earn', 'रेफर करें')}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/vanshmitra')} className={isActive('/vanshmitra') ? "text-saffron font-bold" : ""}>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  <span>{t('VanshMitra', 'वंशमित्र')}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/kundali')} className={isActive('/kundali') ? "text-saffron font-bold" : ""}>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  <span>{t('Kundali', 'कुंडली')}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/settings/profile')} className={isActive('/settings/profile') ? "text-saffron font-bold" : ""}>
                   <Settings className="mr-2 h-4 w-4" />
