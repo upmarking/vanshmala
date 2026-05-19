@@ -13,6 +13,8 @@ interface SEOProps {
     twitterSite?: string;
     twitterImage?: string;
     canonical?: string;
+    noindex?: boolean;
+    schemaData?: Record<string, any> | Record<string, any>[];
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -27,6 +29,8 @@ const SEO: React.FC<SEOProps> = ({
     twitterSite = "@Vanshmala",
     twitterImage,
     canonical,
+    noindex = false,
+    schemaData,
 }) => {
     const siteTitle = title.includes("Vanshmala") ? title : `${title} | Vanshmala`;
 
@@ -37,6 +41,13 @@ const SEO: React.FC<SEOProps> = ({
             <meta name="description" content={description} />
             <meta name="keywords" content={keywords} />
             {canonical && <link rel="canonical" href={canonical} />}
+
+            {/* Robots controls */}
+            {noindex ? (
+                <meta name="robots" content="noindex, nofollow" />
+            ) : (
+                <meta name="robots" content="index, follow" />
+            )}
 
             {/* Open Graph / Facebook */}
             <meta property="og:type" content={ogType} />
@@ -50,6 +61,13 @@ const SEO: React.FC<SEOProps> = ({
             <meta name="twitter:title" content={ogTitle || siteTitle} />
             <meta name="twitter:description" content={ogDescription || description} />
             <meta name="twitter:image" content={twitterImage || ogImage} />
+
+            {/* JSON-LD Structured Data */}
+            {schemaData && (
+                <script type="application/ld+json">
+                    {JSON.stringify(schemaData)}
+                </script>
+            )}
         </Helmet>
     );
 };

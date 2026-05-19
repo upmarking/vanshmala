@@ -123,11 +123,32 @@ const DataDeletionRequest = () => {
         }
     };
 
+    const dataDeletionBreadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://vanshmala.in/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Data Deletion Request",
+                "item": "https://vanshmala.in/data-deletion-request"
+            }
+        ]
+    };
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <SEO
                 title="Data Deletion Request | Manage Your Account - Vanshmala"
                 description="Request the deletion of your account and personal data from Vanshmala. We respect your right to be forgotten."
+                schemaData={dataDeletionBreadcrumbSchema}
+                canonical="https://vanshmala.in/data-deletion-request"
             />
             <Navbar />
 

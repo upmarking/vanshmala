@@ -3,11 +3,32 @@ import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 
 const TermsOfUse = () => {
+    const termsBreadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://vanshmala.in/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Terms of Use",
+                "item": "https://vanshmala.in/terms"
+            }
+        ]
+    };
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <SEO
                 title="Terms of Use | Vanshmala Service Agreement"
                 description="Review the Terms of Use for using Vanshmala's services, documenting your family tree, and interacting with our platform."
+                schemaData={termsBreadcrumbSchema}
+                canonical="https://vanshmala.in/terms"
             />
             <Navbar />
             <main className="flex-1 container mx-auto px-4 pt-32 pb-24 max-w-4xl prose prose-neutral dark:prose-invert prose-headings:font-display prose-p:font-body md:pt-40">

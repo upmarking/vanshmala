@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import { motion } from "framer-motion";
 import { Lock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import SEO from "@/components/SEO";
 
 const UpdatePassword = () => {
     const { t } = useLanguage();
@@ -45,6 +46,7 @@ const UpdatePassword = () => {
 
     return (
         <div className="min-h-screen bg-background relative overflow-hidden">
+            <SEO noindex />
             <Navbar />
             <div className="absolute top-32 right-10 w-64 h-64 rounded-full bg-saffron/5 blur-3xl" />
             <div className="absolute bottom-20 left-10 w-80 h-80 rounded-full bg-gold/4 blur-3xl" />

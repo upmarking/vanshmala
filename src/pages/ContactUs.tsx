@@ -57,11 +57,62 @@ const ContactCard = ({
 const ContactUs = () => {
     const { t } = useLanguage();
 
+    const contactSchemas = [
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "https://vanshmala.in/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": "Contact Us",
+                    "item": "https://vanshmala.in/contact-us"
+                }
+            ]
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "ContactPage",
+            "name": "Contact Vanshmala",
+            "description": "Get in touch with Vanshmala for support, partnership proposals, or media inquiries.",
+            "url": "https://vanshmala.in/contact-us",
+            "mainEntity": {
+                "@type": "Organization",
+                "name": "Vanshmala",
+                "contactPoint": [
+                    {
+                        "@type": "ContactPoint",
+                        "email": "support@vanshmala.in",
+                        "contactType": "customer support"
+                    },
+                    {
+                        "@type": "ContactPoint",
+                        "email": "partnership@vanshmala.in",
+                        "contactType": "business development"
+                    },
+                    {
+                        "@type": "ContactPoint",
+                        "email": "media@vanshmala.in",
+                        "contactType": "media relations"
+                    }
+                ]
+            }
+        }
+    ];
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <SEO
                 title="Contact Us | Vanshmala Support & Partnerships"
                 description="Get in touch with Vanshmala for support, partnership proposals, or media inquiries. We are here to help you preserve your family legacy."
+                schemaData={contactSchemas}
+                canonical="https://vanshmala.in/contact-us"
             />
             <Navbar />
 

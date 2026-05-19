@@ -5,6 +5,7 @@ import { FeedList } from "@/components/feed/FeedList";
 import { Plus, RefreshCw, Filter } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import SEO from "@/components/SEO";
 
 const Feed = () => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -48,6 +49,7 @@ const Feed = () => {
 
     return (
         <>
+            <SEO noindex />
             <div
                 className="animate-fade-in-up"
                 onTouchStart={handleTouchStart}

@@ -1,6 +1,7 @@
 
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import SEO from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Copy, Gift, Share2, Users, CheckCircle, Clock, MessageSquare } from 'lucide-react';
@@ -105,6 +106,7 @@ const ReferAndEarn = () => {
 
     return (
         <div className="min-h-screen bg-background pb-12">
+            <SEO noindex />
             {/* Hero Header */}
             <div className="relative overflow-hidden bg-gradient-to-b from-saffron/10 to-background pt-8 pb-12 px-4">
                 <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-saffron/10 rounded-full blur-3xl" />

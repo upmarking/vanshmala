@@ -4,11 +4,32 @@ import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
 
 const PrivacyPolicy = () => {
+    const privacyBreadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://vanshmala.in/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Privacy Policy",
+                "item": "https://vanshmala.in/privacy"
+            }
+        ]
+    };
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <SEO
                 title="Privacy Policy | Vanshmala Data Security"
                 description="Read our Privacy Policy to understand how Vanshmala collects, uses, and protects your personal and family data."
+                schemaData={privacyBreadcrumbSchema}
+                canonical="https://vanshmala.in/privacy"
             />
             <Navbar />
             <main className="flex-1 container mx-auto px-4 pt-32 pb-24 max-w-4xl prose prose-neutral dark:prose-invert prose-headings:font-display prose-p:font-body md:pt-40">

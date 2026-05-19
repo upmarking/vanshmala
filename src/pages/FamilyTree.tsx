@@ -1,6 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
-
 import { Plus, GitMerge, FileText, Tag as TagIcon, Gift, Copy, Check, Share2, Sparkles, UserPlus, Route } from 'lucide-react';
+import SEO from '@/components/SEO';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTree, useTreeMembers, useIsTreeAdmin, useUserTrees } from '@/hooks/useFamilyTree';
@@ -223,6 +223,7 @@ const FamilyTree = () => {
 
   return (
     <div className="bg-background">
+      <SEO noindex />
       <div className="py-8 pb-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 relative">

@@ -9,11 +9,33 @@ export default function VanshMitra() {
   const { user } = useAuth();
   const { data: gateData, isLoading } = useKundaliGate(user?.id);
 
+  const vanshmitraBreadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://vanshmala.in/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "VanshMitra AI",
+        "item": "https://vanshmala.in/vanshmitra"
+      }
+    ]
+  };
+
   return (
     <>
       <SEO
-        title="VanshMitra — AI Vedic Astrologer | VanshMala"
+        title="VanshMitra — AI Vedic Astrologer | Vanshmala"
         description="Speak with VanshMitra, your personal AI Vedic astrologer. Get chart-aware predictions, Dasha analysis, and spiritual guidance through live voice consultation."
+        schemaData={vanshmitraBreadcrumbSchema}
+        canonical="https://vanshmala.in/vanshmitra"
+        noindex
       />
 
       <div className="container max-w-4xl mx-auto py-4 md:py-6 px-3 md:px-4">

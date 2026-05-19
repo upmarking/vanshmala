@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import SEO from '@/components/SEO';
 import { useMemberByUserId, useUpdateMember } from '@/hooks/useFamilyTree';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -234,6 +235,7 @@ const ProfileSettings = () => {
 
     return (
         <div className="container max-w-4xl mx-auto py-8 px-4">
+            <SEO noindex />
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-display font-bold">{t('Edit Profile', 'प्रोफ़ाइल संपादित करें')}</h1>
                 <Button onClick={handleSave} disabled={isPending} className="gap-2 bg-gradient-saffron text-white shadow-saffron">

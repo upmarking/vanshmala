@@ -1,7 +1,7 @@
 
 async function test() {
   const headers = {
-    'User-Agent': 'VanshMala/1.0 (contact@vanshmala.com)'
+    'User-Agent': 'VanshMala/1.0 (contact@vanshmala.in)'
   };
 
   try {

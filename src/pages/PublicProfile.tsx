@@ -104,12 +104,58 @@ const PublicProfile = () => {
         return true;
     };
 
+    const gotra = isFieldVisible('gotra') ? member.gotra : '';
+    const moolNiwas = isFieldVisible('mool_niwas') ? member.mool_niwas : '';
+    const birthPlace = isFieldVisible('place_of_birth') ? member.place_of_birth : '';
+
+    const profileDescription = `Explore ${member.full_name}'s family lineage${gotra ? `, Gotra (${gotra})` : ''}${moolNiwas ? `, Mool Niwas (${moolNiwas})` : ''}, and life journey on Vanshmala. Create and connect family trees digitally.`;
+    const profileKeywords = `family tree, lineage, vanshmala, ${member.full_name}${gotra ? `, ${gotra}` : ''}${moolNiwas ? `, ${moolNiwas}` : ''}`;
+
+    const profileSchema = {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "dateCreated": member.created_at,
+        "mainEntity": {
+            "@type": "Person",
+            "name": member.full_name,
+            "alternateName": member.username,
+            "image": member.avatar_url || "https://vanshmala.in/placeholder.svg",
+            "description": member.bio || `Family lineage profile of ${member.full_name} on Vanshmala.`,
+            ...(birthPlace ? {
+                "birthPlace": {
+                    "@type": "Place",
+                    "name": birthPlace
+                }
+            } : {})
+        },
+        "breadcrumb": {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": "Home",
+                    "item": "https://vanshmala.in/"
+                },
+                {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": member.full_name,
+                    "item": `https://vanshmala.in/${member.username}`
+                }
+            ]
+        }
+    };
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <SEO
-                title={`${member?.full_name || 'User Profile'} | Vanshmala`}
-                description={`View ${member?.full_name || 'this user'}'s family lineage and life journey on Vanshmala.`}
-                ogImage={member?.avatar_url}
+                title={`${member.full_name}${member.full_name_hi ? ` (${member.full_name_hi})` : ''} | Vanshmala`}
+                description={profileDescription}
+                keywords={profileKeywords}
+                ogImage={member.avatar_url}
+                schemaData={profileSchema}
+                canonical={`https://vanshmala.in/${member.username}`}
             />
             <Navbar />
             <div className="flex-1 container max-w-4xl mx-auto pt-24 pb-16 px-4">

@@ -67,6 +67,33 @@ const BlogDetail = () => {
     const wordCount = blog.content.split(/\s+/).length;
     const readingTime = Math.ceil(wordCount / wordsPerMinute);
 
+    const articleSchema = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": blog.title,
+        "description": blog.meta_description || blog.excerpt || "",
+        "image": blog.featured_image_url || "https://vanshmala.in/placeholder.svg",
+        "datePublished": blog.published_at || blog.created_at,
+        "dateModified": blog.published_at || blog.created_at,
+        "author": {
+            "@type": "Organization",
+            "name": "Vanshmala Research Team",
+            "url": "https://vanshmala.in/"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Vanshmala",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://vanshmala.in/favicon.svg"
+            }
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": `https://vanshmala.in/blog/${blog.slug}`
+        }
+    };
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <SEO
@@ -76,6 +103,8 @@ const BlogDetail = () => {
                 ogDescription={blog.excerpt || ""}
                 ogImage={blog.featured_image_url || undefined}
                 ogType="article"
+                schemaData={articleSchema}
+                canonical={`https://vanshmala.in/blog/${blog.slug}`}
             />
             <Navbar />
 

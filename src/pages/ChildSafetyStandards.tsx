@@ -6,11 +6,32 @@ import SEO from '@/components/SEO';
 const ChildSafetyStandards = () => {
     const { t } = useLanguage();
 
+    const safetyBreadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://vanshmala.in/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Child Safety Standards",
+                "item": "https://vanshmala.in/child-safety-standards"
+            }
+        ]
+    };
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <SEO
                 title="Child Safety Standards | Our CSAE Policy - Vanshmala"
                 description="Learn about Vanshmala's zero-tolerance policy against child sexual abuse and exploitation (CSAE) and our commitment to child safety."
+                schemaData={safetyBreadcrumbSchema}
+                canonical="https://vanshmala.in/child-safety-standards"
             />
             <Navbar />
             <main className="flex-1 container mx-auto px-4 pt-32 pb-24 max-w-4xl prose prose-neutral dark:prose-invert prose-headings:font-display prose-p:font-body md:pt-40">

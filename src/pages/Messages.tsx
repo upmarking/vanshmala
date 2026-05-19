@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Search, Send, Check, CheckCheck } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams } from 'react-router-dom';
+import SEO from '@/components/SEO';
 
 interface Conversation {
   user_id: string;
@@ -215,6 +216,7 @@ const Messages = () => {
   if (activeUserId) {
     return (
       <div className="flex flex-col h-[calc(100vh-56px-64px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] md:h-[calc(100vh-64px)] max-w-2xl mx-auto">
+        <SEO noindex />
         {/* Chat header */}
         <div className="flex items-center gap-3 p-3 border-b border-border bg-background/80 backdrop-blur-sm">
           <Button variant="ghost" size="icon" onClick={() => setSearchParams({})}>
@@ -286,6 +288,7 @@ const Messages = () => {
   // Conversation list view
   return (
     <div className="max-w-2xl mx-auto">
+      <SEO noindex />
       <div className="p-4 space-y-4">
         <h1 className="text-xl font-bold">{t('Messages', 'संदेश')}</h1>
 

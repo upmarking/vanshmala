@@ -82,7 +82,7 @@ export async function searchLocation(query: string): Promise<any[]> {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1&accept-language=en,hi`;
   const res = await fetch(url, {
     headers: {
-      'User-Agent': 'VanshMala/1.0 (contact@vanshmala.com)',
+      'User-Agent': 'VanshMala/1.0 (contact@vanshmala.in)',
     },
   });
   if (!res.ok) throw new Error('Location search failed');

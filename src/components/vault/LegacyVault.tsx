@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
+import SEO from '@/components/SEO';
 import { LegacyMessage } from '@/types/schema';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -76,6 +77,7 @@ export const LegacyVault = () => {
 
     return (
         <div className="container max-w-6xl mx-auto p-4 md:p-8 space-y-8">
+            <SEO noindex />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-display font-bold text-saffron-800">{t('Legacy Vault', 'विरासत तिजोरी')}</h1>

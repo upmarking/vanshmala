@@ -36,11 +36,32 @@ const BlogListing = () => {
         fetchBlogs();
     }, []);
 
+    const blogBreadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://vanshmala.in/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Blog",
+                "item": "https://vanshmala.in/blog"
+            }
+        ]
+    };
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <SEO
                 title="Vanshmala Blog - Discover Your Heritage"
                 description="Explore stories, histories, and guides on family heritage, surnames, and genealogy. Connect with your roots through our expert-curated blogs."
+                schemaData={blogBreadcrumbSchema}
+                canonical="https://vanshmala.in/blog"
             />
             <Navbar />
 

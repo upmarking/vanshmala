@@ -1,5 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import SEO from '@/components/SEO';
 
 import { motion } from 'framer-motion';
 import { Wallet, Plus, Send, ArrowDownLeft, ArrowUpRight, Gift, History, Tag, QrCode, ScanLine } from 'lucide-react';
@@ -361,6 +362,7 @@ const WalletPage = () => {
 
   return (
     <div className="animate-fade-in-up">
+      <SEO noindex />
       {/* Hero Balance Card — full bleed on mobile */}
       <div className="mx-0 md:container md:mx-auto md:max-w-2xl md:pt-8 md:px-4">
         <motion.div

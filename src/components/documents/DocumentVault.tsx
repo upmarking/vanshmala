@@ -1,7 +1,7 @@
-
 import { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useParams } from 'react-router-dom';
+import SEO from '@/components/SEO';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -129,6 +129,7 @@ const DocumentVault = () => {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            <SEO noindex />
             <Navbar />
             <div className="flex-1 container mx-auto px-4 py-8">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">

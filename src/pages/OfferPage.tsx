@@ -108,9 +108,52 @@ export default function OfferPage() {
         }
     };
 
+    const offerBreadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://vanshmala.in/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Special Offer",
+                "item": "https://vanshmala.in/offer-page"
+            }
+        ]
+    };
+
+    const offerProductSchema = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "Vanshmala App Review Offer",
+        "image": "https://vanshmala.in/og-image.jpg",
+        "description": "Give a 5-star rating to our Vanshmala app on the Google Play Store, write a review, and claim ₹500 in your Vanshmala wallet.",
+        "offers": {
+            "@type": "Offer",
+            "price": "500",
+            "priceCurrency": "INR",
+            "availability": "https://schema.org/InStock",
+            "validThrough": "2026-03-30",
+            "url": "https://vanshmala.in/offer-page"
+        }
+    };
+
+    const offerSchemas = [offerBreadcrumbSchema, offerProductSchema];
+
     if (!user) {
         return (
             <div className="container max-w-2xl mx-auto py-8 px-4">
+                <SEO
+                    title="Special Offer | Claim your ₹500 Reward - Vanshmala"
+                    description="Participate in our special offer! Rate our app and claim ₹500 in your Vanshmala wallet."
+                    schemaData={offerSchemas}
+                    canonical="https://vanshmala.in/offer-page"
+                />
                 <Card className="border-primary/20 shadow-lg text-center py-12">
                     <CardHeader>
                         <div className="mx-auto bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
@@ -149,6 +192,8 @@ export default function OfferPage() {
             <SEO
                 title="Special Offer | Claim your ₹500 Reward - Vanshmala"
                 description="Participate in our special offer! Rate our app and claim ₹500 in your Vanshmala wallet."
+                schemaData={offerSchemas}
+                canonical="https://vanshmala.in/offer-page"
             />
             <Card className="border-primary/20 shadow-lg">
                 <CardHeader className="bg-primary/5 pb-8">

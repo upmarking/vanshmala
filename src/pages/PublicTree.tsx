@@ -130,11 +130,32 @@ const PublicTree = () => {
     );
   }
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://vanshmala.in/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": `${tree.family_name} - Family Tree`,
+        "item": `https://vanshmala.in/shared-tree/${token}`
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
-        title={`${tree.family_name} - Family Tree | VanshMala`}
-        description={`View the ${tree.family_name} family tree on VanshMala`}
+        title={`${tree.family_name} - Family Tree | Vanshmala`}
+        description={`View the ${tree.family_name} family tree on Vanshmala. Explore connections, members, and lineages.`}
+        schemaData={breadcrumbSchema}
+        canonical={`https://vanshmala.in/shared-tree/${token}`}
       />
 
       <div className="py-8 pb-16">

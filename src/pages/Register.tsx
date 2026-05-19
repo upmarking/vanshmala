@@ -6,6 +6,7 @@ import { ArrowRight, Gift } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import SEO from '@/components/SEO';
 
 import { supabase } from '@/integrations/supabase/client';
 
@@ -91,8 +92,33 @@ const Register = () => {
     }
   };
 
+  const registerBreadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://vanshmala.in/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Register",
+        "item": "https://vanshmala.in/register"
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
+      <SEO
+        title="Register | Vanshmala"
+        description="Sign up for a free Vanshmala account to map your lineage, build your family tree, and connect with relatives."
+        schemaData={registerBreadcrumbSchema}
+        canonical="https://vanshmala.in/register"
+      />
       <Navbar />
       <div className="absolute top-32 right-10 w-64 h-64 rounded-full bg-saffron/5 blur-3xl" />
       <div className="absolute bottom-20 left-10 w-80 h-80 rounded-full bg-gold/4 blur-3xl" />

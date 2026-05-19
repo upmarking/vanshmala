@@ -27,7 +27,7 @@ import type { KundaliResult, PanchangResult, KundaliCalculateRequest, KundaliInp
 type ChartStyle = 'north' | 'south';
 
 export default function Kundali() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
   const calcMutation = useCalculateKundali();
   const panchangMutation = useCalculatePanchang();
@@ -124,11 +124,33 @@ export default function Kundali() {
 
   const ascSignId = kundaliResult?.ascendant?.sign_id || (kundaliResult?.planets?.[0]?.sign_id) || 1;
 
+  const kundaliBreadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://vanshmala.in/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Kundali & Astro",
+        "item": "https://vanshmala.in/kundali"
+      }
+    ]
+  };
+
   return (
     <>
       <SEO
-        title="Vedic Kundali — VanshMala"
-        description="Generate accurate Vedic birth charts, daily Panchang, and find auspicious Muhurtas."
+        title="Vedic Kundali & Astro Chart | Vanshmala"
+        description="Generate accurate Vedic birth charts, daily Panchang, check compatibility matching, and find auspicious Muhurtas with Vanshmala."
+        schemaData={kundaliBreadcrumbSchema}
+        canonical="https://vanshmala.in/kundali"
+        noindex
       />
 
       <div className="animate-fade-in-up container max-w-6xl mx-auto py-4 md:py-8 px-3 md:px-4">

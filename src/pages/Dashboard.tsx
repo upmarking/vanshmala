@@ -13,6 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { FeedPost } from '@/components/dashboard/FeedPost';
 import { ProfileCompletion } from '@/components/profile/ProfileCompletion';
 import { useMemberByUserId } from '@/hooks/useFamilyTree';
+import SEO from '@/components/SEO';
 
 interface FamilyTreeRecord {
   id: string;
@@ -304,6 +305,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="animate-fade-in-up container max-w-4xl mx-auto py-6 px-4 space-y-4">
+        <SEO noindex />
         {/* Mobile skeleton loaders */}
         <div className="skeleton h-6 w-48 mb-2" />
         <div className="skeleton h-4 w-64 mb-6" />
@@ -331,6 +333,7 @@ const Dashboard = () => {
   if (!hasFamily) {
     return (
       <div className="animate-fade-in-up container max-w-4xl mx-auto py-8 md:py-12 px-4">
+        <SEO noindex />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -432,9 +435,11 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="animate-fade-in-up container max-w-4xl mx-auto py-4 md:py-8 px-3 md:px-4 flex gap-8">
-      {/* Main Feed Column */}
-      <div className="flex-1 w-full md:max-w-xl md:mx-auto">
+    <>
+      <SEO noindex />
+      <div className="animate-fade-in-up container max-w-4xl mx-auto py-4 md:py-8 px-3 md:px-4 flex gap-8">
+        {/* Main Feed Column */}
+        <div className="flex-1 w-full md:max-w-xl md:mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold font-display">{t('Recent Update', 'हाल के अपडेट')}</h1>
           <p className="text-muted-foreground text-sm">{t('Latest updates from your family timeline.', 'आपके परिवार की समयरेखा से नवीनतम अपडेट।')}</p>
@@ -556,6 +561,7 @@ const Dashboard = () => {
         </Card>
       </div>
     </div>
+   </>
   );
 };
 

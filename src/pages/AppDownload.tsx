@@ -9,11 +9,32 @@ const AppDownload = () => {
         window.location.href = 'https://play.google.com/store/apps/details?id=vanshmala.in';
     }, []);
 
+    const appBreadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://vanshmala.in/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Download App",
+                "item": "https://vanshmala.in/app"
+            }
+        ]
+    };
+
     return (
         <div className="flex items-center justify-center min-h-screen p-8">
             <SEO
                 title="Download Vanshmala App | Your Family Tree on Mobile"
                 description="Download the Vanshmala app to access your digital family tree anytime, anywhere. Connect with relatives and explore your lineage on the go."
+                schemaData={appBreadcrumbSchema}
+                canonical="https://vanshmala.in/app"
             />
             <div className="text-center">
                 <h1 className="text-2xl font-bold mb-4">
