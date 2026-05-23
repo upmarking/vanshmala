@@ -1,3 +1,3 @@
-## 2024-05-16 - [React.memo in Recursive Tree Components]
-**Learning:** Highly recursive components like `TreeNode` in family tree visualizations suffer from catastrophic cascading re-renders if parent state changes (e.g., opening a dialog).
-**Action:** Always wrap recursive visual components in `React.memo()` and ensure handlers passed down to them are wrapped in `useCallback` to prevent deep reconciliation cycles.
+## 2024-05-23 - N+1 Profile Lookups in FeedList
+**Learning:** Supabase queries inside `Promise.all` over `.map()` on a dataset creates N+1 performance bottlenecks. Even if the inner query batches IDs per iteration, it still fires an HTTP request for every post.
+**Action:** Extract unique IDs from all records in the dataset beforehand, execute a single batched `.in()` query, and use a lookup dictionary to process the `.map()` synchronously.
